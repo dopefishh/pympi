@@ -89,7 +89,7 @@ class TextGrid:
 						f.write('%stext = "%s"\n' % (' '*12, ints[it][2]))
 
 class Tier:
-	"""Class to represent a TextGrid tier, IntervalTier or TextTier"""
+	"""Class to represent a TextGrid tier: IntervalTier or TextTier"""
 
 	def __init__(self, name, number, tierType, lines=None):
 		"""Constructor, if no lines are given a empty tier is created"""

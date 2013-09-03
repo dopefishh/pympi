@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 from time import localtime as now
-import pdb
 
 class Eaf:
 	"""Class to work with elan files"""
@@ -8,7 +7,7 @@ class Eaf:
 	html_escape_table = {'&':'&amp;', '"': 'quot;', '\'':'&apos;', '<':'&gt;', '>':'%lt;'}
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
 
-	#Root data
+	#Document root data
 	annotationDocument = {'AUTHOR':'Eaf.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now()[0], now()[1], now()[2], now()[3], now()[4], now()[5], now()[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
 	#File header
 	fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -458,10 +457,6 @@ class Eaf:
 				del(self.timeslots[an[0]])
 				del(self.timeslots[an[1]])
 	
-	def extract(self, begin, end, file_name, margin=0):
-		"""TODO"""
-		pass
-
 ###GAP AND OVERLAP FUNCTIONS
 	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None):
 		"""Creates a tier out of the gaps and overlap between two tiers"""
