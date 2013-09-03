@@ -518,21 +518,48 @@ class Eaf:
 		return gando
 
 ###LINGUISTIC TYPE FUNCTIONS
-	def createControlledVocabulary(self, cvEntries, cvID, description=''):
-		pass
+	def createControlledVocabulary(self, cvEntries, cvId, description=''):
+		"""Adds a controlled vocabulary with the given cvEntiries{value->description}, id and optional description"""
+		self.controlledvocabularies[cvId] = (description, cvEntries)
+
 	def getTierIdsForLinguisticType(self, lingType, parent=None):
-		pass
+		"""Returns all the tier id's with the given linguistic type"""
+		return [t for t in self.tiers.iterkeys() if self.tiers[t][2]['LINGUISTIC_TYPE_REF']==lingType and (parent is None or self.tiers[t][2]['PARENT_REF']==parent)]
+
 	def removeLinguisticType(self, lingType):
-		pass
+		"""Removes a linguistic type, if the lingtype doesn't exist nothing happens"""
+		try:
+			del(self.linguistic_types[lingType])
+		except KeyError:
+			pass
+
 	def addLinguisticType(self, lingtype, constraints, timealignable=False, graphicreferences=False, extref=None):
-		pass
+		"""Adds a linguistic type"""
+		self.linguistic_types[lingtype] = {'LINGUISTIC_TYPE_ID':lingtype, 'TIME_ALIGNABLE':str(timealignable).lower(), 'GRAPHIC_REFERENCES':str(graphicreferences).lower(), 'CONSTRAINTS':constraints}
+		if extref is not None:
+			self.linguistic_types[lingtype]['EXT_REF'] = extref
+
 	def getConstraintForLinguisticType(self, lingid):
-		pass
-	def getIndexOfLastLinguisticType(self):
-		pass
+		"""Returns the constraints for the linguistic type. None if the type doesn't exist"""
+		try:
+			return self.linguistic_types[lingid]['CONSTRAINTS']
+		except KeyError:
+			return None
+
 	def getParameterDictForLinguisticType(self, lingid):
-		pass
+		"""Returns all the info of a lingtype in a dictionary, None if type doesn't exist"""
+		try:
+			return self.linguistic_types[lingid]
+		except KeyError:
+			return None
+
 	def hasLinguisticType(self, lingtype):
-		pass
+		"""Returns if the given type is in the linguistic types"""
+		return lingtype in self.linguistic_types
+
 	def linguisticTypeIsTimeAlignable(self, lingid):
-		pass
+		"""Returns if the given type is time alignable, None if the type doesn't exist"""
+		try:
+			return self.linguistic_types[lingid]['TIME_ALIGNABLE']
+		except KeyError:
+			return None
