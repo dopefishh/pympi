@@ -40,9 +40,7 @@ class Eaf:
 
 ###IO OPERATIONS
 	def __init__(self, filePath=None):
-		if filePath is None:
-			header = {}
-		else:	
+		if filePath is not None:
 			with open(filePath, 'r') as f:
 				self.fileheader = f.readlines()[0]
 			treeRoot = ET.parse(filePath).getroot()
@@ -87,7 +85,6 @@ class Eaf:
 										self.new_ann = int(annotID[1:])
 									svg_ref = None if 'SVG_REF' not in elem2.attrib else elem2.attrib['SVG_REF']
 									ref[annotId] = (annotRef, '' if list(elem2)[0].text is None else self.html_escape(list(elem2)[0].text.encode('utf-8')), previous, svg_ref) 
-									pass
 					self.tiers[tierId] = (align, ref, elem.attrib, tierNumber)
 					tierNumber += 1
 				elif elem.tag == 'LINGUISTIC_TYPE':
@@ -214,16 +211,17 @@ class Eaf:
 		return [0 if 'TIME_ORIGIN' not in m else m['TIME_ORIGIN'] for m in self.getMediaForMimeType('audio')]
 
 ###TIER OPERATIONS
-	def addTier(self, idTier, tierType, parent=None, defaultLocale=None, participant=None, annotator=None):
+	def addTier(self, idTier, tierType='default-lt', parent=None, defaultLocale=None, participant=None, annotator=None):
 		"""Adds a tier giving a id and type and optional extra data"""
-		data = {'TIER_ID':idTier, 'TIER_LINGUISTIC_TYPE':tierType, 'PARENT_REF':parent, 'PARTICIPANT':participant,
+		data = {'TIER_ID':idTier, 'LINGUISTIC_TYPE_REF':tierType, 'PARENT_REF':parent, 'PARTICIPANT':participant,
 				'DEFAULT_LOCALE':defaultLocale, 'ANNOTATOR':annotator}
-		self.tiers[idTier] = ({}, {}, data, len(tiers))
+		self.tiers[idTier] = ({}, {}, data, len(self.tiers))
 	
 	def removeTier(self, idTier):
 		"""Removes a tier by id, if it doesn't exist nothing happens"""
 		if idTier in self.tiers:
 			del(self.tiers[idTier])
+			self.cleanTimeSlots()
 	
 	def getIndexOfTier(self, idTier):
 		"""Returns the index of a given tier, -1 if tier doesn't exist"""
@@ -237,6 +235,7 @@ class Eaf:
 			return None
 
 	def getIndexOfLastTier(self):
+		"""Gives the index of the last tier"""
 		return len(self.tiers)-1
 
 	def appendRefAnnotationToTier(self, idTier, idAnn, strAnn, annRef, prevAnn=None, svg_ref=None):
@@ -272,7 +271,7 @@ class Eaf:
 			return None
 
 	def getParticipantForTier(self, idTier):
-		"""Retursn the participant for the given tier, '' if none and None if tier doesn't exist"""
+		"""Returns the participant for the given tier, '' if none and None if tier doesn't exist"""
 		try:
 			tier = self.tiers[idTier]
 			try:
@@ -360,6 +359,7 @@ class Eaf:
 		try:
 			self.tiers[idTier][0] = {}
 			self.tiers[idTier][1] = {}
+			self.cleanTimeSlots()
 		except KeyError:
 			pass
 
@@ -373,6 +373,7 @@ class Eaf:
 			del(self.tiers[idTier][1][idAnn])
 		except KeyError:
 			pass
+		self.cleanTimeSlots()
 
 	def removeAnnotationsWithRef(self, idTier, idRefAnn):
 		"""Removes all the annotations are reffed by the annotation given, when they don't exist nothing happens"""
@@ -403,53 +404,125 @@ class Eaf:
 	def insertAnnotation(self, idTier, start, end, value='', svg_ref=None):
 		"""Add an annotation in the given tier, if the tiers doesn't exist nothing happens"""
 		if idTier in self.tiers:
-			startTs = generateTsId()
-			endTs = generateTsId()
-			timeslots[startTs] = start
-			timeslots[endTs] = end
-			self.tiers[idTier][0][generateAnnotationId()] = (startTs, endTs, value, svg_ref)
-
-###CONTROLLED VOCABULARY OPERATIONS
-###HELPER FUNCTIONS
-	def generateAnnotationId(self):
-		new_ann += 1
-		return 'a%d' % (new_ann-1) 
-
-	def generateTsId(self):
-		new_time += 1
-		return 'ts%d' % (new_time-1)
-
-
-###GAP AND OVERLAP FUNCTIONS
-###LINGUISTIC TYPE FUNCTIONS
-	def addControlledVocabularyToLinguisticType(self, linguisticType, cvId):
-		pass
-	def cleanTimeSlots(self):
-		pass
-	def createControlledVocabulary(self, cvEntries, cvID, description=''):
-		pass
-	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None):
-		pass
-	def extract(self, begin, end, file_name, margin=0):
-		pass
-	def getGapsAndOverlapsDuration(self, tier1, tier2):
-		pass
-
+			startTs = self.generateTsId()
+			endTs = self.generateTsId()
+			self.timeslots[startTs] = start
+			self.timeslots[endTs] = end
+			self.tiers[idTier][0][self.generateAnnotationId()] = (startTs, endTs, value, svg_ref)
 
 	def getRefAnnotationIdForAnnotation(self, idTier, idAnn):
-		pass
+		"""Returns all the ref annotations pointing to the given annotation in the given tier, None if the tier or annotation doesn't exist"""
+		try:
+			return [i for i in self.tiers[idTier][1].keys() if self.tiers[idTier][1][i][0]==idAnn]
+		except KeyError:
+			return None
+		
 	def getRefAnnotationIdsForTier(self, idTier):
+		"""Returns all the ref annotation for a given tier in the form: (id->(ref, value, prev, svg_ref), None if the tier doesn't exist"""
+		try:
+			return self.tiers[idTier][1]
+		except KeyError:
+			return None
+
+###CONTROLLED VOCABULARY OPERATIONS
+	def addControlledVocabularyToLinguisticType(self, linguisticType, cvId):
+		"""Adds a controlled vocabulary to a linguistic type, when the lingtype doesn't exist nothing happens"""
+		try:
+			self.linguistic_types[linguisticType]['CONTROLLED_VOCABULARY_REF'] = cvId
+		except KeyError:
+			pass
+
+	def removeControlledVocabulary(self, cv):
+		"""Removes a controlled vocabulary, when the cv doesn't exist nothing happens"""
+		try:
+			del(self.controlled_vocabularies[cv])
+		except KeyError:
+			pass
+
+###HELPER FUNCTIONS
+	def generateAnnotationId(self):
+		"""Helper function to generate the newest annotation id"""
+		self.new_ann += 1
+		return 'a%d' % (self.new_ann) 
+
+	def generateTsId(self):
+		"""Helper function te generate the newest timeslot id"""
+		self.new_time += 1
+		return 'ts%d' % (self.new_time)
+
+	def cleanTimeSlots(self):
+		"""Removes all the unused timeslots"""
+		tsInTier = []
+		for t in self.tiers.itervalues():
+			for an in t.itervalues():
+				del(self.timeslots[an[0]])
+				del(self.timeslots[an[1]])
+	
+	def extract(self, begin, end, file_name, margin=0):
+		"""TODO"""
 		pass
-	def getSubAnnotationIdsForAnnotationInTier(self, idAnn, idTier, idSubTier):
+
+###GAP AND OVERLAP FUNCTIONS
+	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None):
+		"""Creates a tier out of the gaps and overlap between two tiers"""
+		if tierName is None:
+			tierName = '%s_%s_go' % (tier1, tier2)
+		if tierType is None:
+			tierType = self.linguistic_types.keys()[0]
+		self.removeTier(tierName)
+		self.addTier(tierName, tierType)
+		for go in self.getGapsAndOverlapsDuration(tier1, tier2):
+			self.insertAnnotation(tierName, go[1], go[2], go[0])
+
+	def getGapsAndOverlapsDuration(self, tier1, tier2, withinOnly=False):
+		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist. If the withinOnly flag is true the pauses and betweenspeaker overlaps are not included"""
+		if tier1 not in self.tiers or tier2 not in self.tiers:
+			return None
+		spkr1anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier1][0].values())
+		spkr2anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier2][0].values())
+		line1 = []
+		isin = lambda x, lst: False if len([i for i in lst if i[0]<=x and i[1]>=x])==0 else True
+		minmax = (min(spkr1anns[0][0], spkr2anns[0][0]), max(spkr1anns[-1][1], spkr2anns[-1][1]))
+		last = (1, minmax[0])
+		for ts in xrange(*minmax):
+			in1, in2 = isin(ts, spkr1anns), isin(ts, spkr2anns)
+			if in1 and in2:		#Both speaking
+				if last[0] == 'B': continue
+				line1.append((last[0], last[1], ts))
+				last = ('B', ts)
+			elif in1:			#Only 1 speaking
+				if last[0] == '1': continue
+				line1.append((last[0], last[1], ts))
+				last = ('1', ts)
+			elif in2:			#Only 2 speaking
+				if last[0] == '2': continue
+				line1.append((last[0], last[1], ts))
+				last = ('2', ts)
+			else:				#None speaking
+				if last[0] == 'N': continue
+				line1.append((last[0], last[1], ts))
+				last = ('N', ts)
+		line1.append((last[0], last[1], minmax[1]))
+		gando = []
+		for i in xrange(len(line1)):
+			if line1[i][0] == 'N':
+				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
+					gando.append(('Gap', line1[i][1], line1[i][2]))
+				elif not withinOnly:
+					gando.append(('Pause', line1[i][1], line1[i][2]))
+			elif line1[i][0] == 'B':
+				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
+					gando.append(('Overlap_W', line1[i][1], line1[i][2]))
+				elif not withinOnly:
+					gando.append(('Overlap_B', line1[i][1], line1[i][2]))
+		return gando
+
+###LINGUISTIC TYPE FUNCTIONS
+	def createControlledVocabulary(self, cvEntries, cvID, description=''):
 		pass
 	def getTierIdsForLinguisticType(self, lingType, parent=None):
 		pass
-
-	def removeControlledVocabulary(self, cv):
-		pass
 	def removeLinguisticType(self, lingType):
-		pass
-	def updateAnontationId(self):
 		pass
 	def addLinguisticType(self, lingtype, constraints, timealignable=False, graphicreferences=False, extref=None):
 		pass
@@ -457,16 +530,9 @@ class Eaf:
 		pass
 	def getIndexOfLastLinguisticType(self):
 		pass
-	def getLastUsedAnnotationId(self):
-		pass
 	def getParameterDictForLinguisticType(self, lingid):
 		pass
 	def hasLinguisticType(self, lingtype):
 		pass
 	def linguisticTypeIsTimeAlignable(self, lingid):
 		pass
-	
-
-eafObj = Eaf('./data/01_07-03-2008_mono_mart_aligned.eaf.bak')
-pdb.set_trace()
-eafObj.tofile('./data/01.eaf')
