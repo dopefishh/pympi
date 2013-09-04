@@ -281,10 +281,24 @@ class Eaf:
 			return None
 
 ###ANNOTATION OPERATIONS
+	def getAnnotationForId(self, idTier, idAnn):
+		try:
+			return self.tiers[idTier][0][idAnn]
+		except KeyError:
+			return None
+
 	def getRefAnnotationIdsForTier(self, idTier):
 		"""Returns a list of ref annotation ids within a tier, None if tier doesn't exist"""
 		try:
 			return [m for m in self.tiers[idTier][1].keys()]
+		except KeyError:
+			return None
+
+	def getAnnotationDataForTier(self, idTier):
+		"""Returns the annotation data for the given tier in the format: (start, end, value, svgref)  None if the tier doesn't exist"""
+		try:
+			a = self.tiers[idTier][0]
+			return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2]) for b in a.iterkeys()]
 		except KeyError:
 			return None
 
@@ -314,7 +328,10 @@ class Eaf:
 	def getAnnotationValueAtTime(self, idTier, time):
 		"""Returns the annotation value at the given time in the given tier, None if tier or annotation doesn't exist"""
 		try:
-			return self.tiers[idTier][0][self.getAnnotationIdAtTime(idTier, time, False)]		
+			c = self.getAnnotationIdAtTime(idTier, time)
+			if c == []:
+				return []
+			return self.tiers[idTier][0][c[0]]		
 		except KeyError:
 			return None
 
@@ -328,7 +345,7 @@ class Eaf:
 	def getEndTimeForAnnotation(self, idTier, idAnn):
 		"""Returns end time for annotation id, None if the annotation and tier don't exist"""
 		try:
-			return timeslots[self.getEndTsForAnnotation(idTier, idAnn)]
+			return self.timeslots[self.getEndTsForAnnotation(idTier, idAnn)]
 		except KeyError:
 			return None
 
@@ -342,7 +359,7 @@ class Eaf:
 	def getStartTimeForAnnotation(self, idTier, idAnn):
 		"""Returns the start time for annotation id, None if the annotation or tier don't exist"""
 		try:
-			return timeslots[self.getStartTsForAnnotation(idTier, idAnn)]
+			return self.timeslots[self.getStartTsForAnnotation(idTier, idAnn)]
 		except KeyError:
 			return None
 
@@ -453,7 +470,7 @@ class Eaf:
 		"""Removes all the unused timeslots"""
 		tsInTier = []
 		for t in self.tiers.itervalues():
-			for an in t.itervalues():
+			for an in t[0].itervalues():
 				del(self.timeslots[an[0]])
 				del(self.timeslots[an[1]])
 	
