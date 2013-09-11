@@ -295,7 +295,7 @@ class Eaf:
 			return None
 
 	def getAnnotationDataForTier(self, idTier):
-		"""Returns the annotation data for the given tier in the format: (start, end, value, svgref)  None if the tier doesn't exist"""
+		"""Returns the annotation data for the given tier in the format: (start, end, value)  None if the tier doesn't exist"""
 		try:
 			a = self.tiers[idTier][0]
 			return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2]) for b in a.iterkeys()]
@@ -308,7 +308,22 @@ class Eaf:
 			return [m for m in self.tiers[idTier][0]]
 		except KeyError:
 			return None
-	
+
+	def getAnnotationDataAtTime(self, idTier, time):
+		"""Returns an annotation at time in the given tier, None if the tier doesn't exist"""
+		try:
+			anns = self.tiers[idTier][0]
+			return [(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[0]]<=time and self.timeslots[m[1]]>=time]
+		except KeyError:
+			return None
+
+	def getAnnotationDatasBetweenTimes(self, idTier, start, end):
+		try:
+			anns = self.tiers[idTier][0]
+			return [(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and end>=self.timeslots[m[0]]]
+		except KeyError:
+			return None
+
 	def getAnnotationIdAtTime(self, idTier, time):
 		"""Returns a list of annotation ids that match the given time, returns None if tier doesn't exist"""
 		try:
@@ -519,14 +534,14 @@ class Eaf:
 		for i in xrange(len(line1)):
 			if line1[i][0] == 'N':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					gando.append(('Gap', line1[i][1], line1[i][2]))
+					gando.append(('G12' if line1[i-1][0]=='1' else 'G21', line1[i][1], line1[i][2]))
 				elif not withinOnly:
-					gando.append(('Pause', line1[i][1], line1[i][2]))
+					gando.append(('P', line1[i][1], line1[i][2]))
 			elif line1[i][0] == 'B':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					gando.append(('Overlap_W', line1[i][1], line1[i][2]))
+					gando.append(('O12' if line1[i-1][0] else 'O21', line1[i][1], line1[i][2]))
 				elif not withinOnly:
-					gando.append(('Overlap_B', line1[i][1], line1[i][2]))
+					gando.append(('O', line1[i][1], line1[i][2]))
 		return gando
 
 ###LINGUISTIC TYPE FUNCTIONS
