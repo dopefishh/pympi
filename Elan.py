@@ -490,7 +490,29 @@ class Eaf:
 				del(self.timeslots[an[1]])
 	
 ###GAP AND OVERLAP FUNCTIONS
-	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None):
+	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=30):
+		"""Glues all the continues annotations together"""
+		if tierName is None: tierName = '%s_glued' % tier
+		self.removeTier(tierName)
+		self.addTier(tierName)
+
+		tierData = sorted(self.getAnnotationDataForTier(tier), key=lambda a: a[0])
+		currentAnn = None
+		for i in xrange(0, len(tierData)):
+			if currentAnn is None:
+				currentAnn = (tierData[i][0], tierData[i][1], tierData[i][2])
+			elif tierData[i][0]-currentAnn[1]<treshhold:
+				currentAnn = (currentAnn[0], tierData[i][1], '%s_%s' % (currentAnn[2], tierData[i][2]))
+			else:
+				self.insertAnnotation(tierName, currentAnn[0], currentAnn[1], currentAnn[2])
+				currentAnn = None
+		print self.getAnnotationDataForTier(tierName)
+
+	def getFullTimeInterval(self):
+		"""Returns a tuple (start, end) of the full time frame. optional tier"""
+		return (min(self.timeslots.itervalues()), max(self.timeslots.itervalues()))
+
+	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None, withinOnly=False):
 		"""Creates a tier out of the gaps and overlap between two tiers"""
 		if tierName is None:
 			tierName = '%s_%s_go' % (tier1, tier2)
@@ -498,7 +520,7 @@ class Eaf:
 			tierType = self.linguistic_types.keys()[0]
 		self.removeTier(tierName)
 		self.addTier(tierName, tierType)
-		for go in self.getGapsAndOverlapsDuration(tier1, tier2):
+		for go in self.getGapsAndOverlapsDuration(tier1, tier2, withinOnly):
 			self.insertAnnotation(tierName, go[1], go[2], go[0])
 
 	def getGapsAndOverlapsDuration(self, tier1, tier2, withinOnly=False):
