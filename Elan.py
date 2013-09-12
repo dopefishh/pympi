@@ -39,6 +39,12 @@ class Eaf:
 
 ###IO OPERATIONS
 	def __init__(self, filePath=None):
+		self.annotationDocument = {'AUTHOR':'Eaf.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now()[0], now()[1], now()[2], now()[3], now()[4], now()[5], now()[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
+		self.fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
+		self.controlled_vocabularies, self.constraints, self.tiers, self.linguistic_types, self.header, self.timeslots = {}, {}, {}, {}, {}, {}
+		self.external_refs, self.lexicon_refs, self.locales, self.media_descriptors, self.properties, self.linked_file_descriptors = [], [], [], [], [], []
+		self.new_time, self.new_ann = 0, 0
+
 		if filePath is not None:
 			with open(filePath, 'r') as f:
 				self.fileheader = f.readlines()[0]
@@ -313,7 +319,7 @@ class Eaf:
 		"""Returns an annotation at time in the given tier, None if the tier doesn't exist"""
 		try:
 			anns = self.tiers[idTier][0]
-			return [(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[0]]<=time and self.timeslots[m[1]]>=time]
+			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[0]]<=time and self.timeslots[m[1]]>=time], key=lambda a:a[0])
 		except KeyError:
 			return None
 
@@ -506,7 +512,9 @@ class Eaf:
 			else:
 				self.insertAnnotation(tierName, currentAnn[0], currentAnn[1], currentAnn[2])
 				currentAnn = None
-		print self.getAnnotationDataForTier(tierName)
+		if currentAnn is not None:
+			self.insertAnnotation(tierName, currentAnn[0], tierData[len(tierData)-1][1], '%s_%s' % (currentAnn[2], tierData[len(tierData)-1][2]))
+
 
 	def getFullTimeInterval(self):
 		"""Returns a tuple (start, end) of the full time frame. optional tier"""
