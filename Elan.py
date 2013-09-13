@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# 
 import xml.etree.ElementTree as ET
 from time import localtime as now
 
@@ -326,7 +328,7 @@ class Eaf:
 	def getAnnotationDatasBetweenTimes(self, idTier, start, end):
 		try:
 			anns = self.tiers[idTier][0]
-			return [(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and end>=self.timeslots[m[0]]]
+			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and end>=self.timeslots[m[0]]], key=lambda x:x[0])
 		except KeyError:
 			return None
 
@@ -511,9 +513,9 @@ class Eaf:
 				currentAnn = (currentAnn[0], tierData[i][1], '%s_%s' % (currentAnn[2], tierData[i][2]))
 			else:
 				self.insertAnnotation(tierName, currentAnn[0], currentAnn[1], currentAnn[2])
-				currentAnn = None
+				currentAnn = tierData[i]
 		if currentAnn is not None:
-			self.insertAnnotation(tierName, currentAnn[0], tierData[len(tierData)-1][1], '%s_%s' % (currentAnn[2], tierData[len(tierData)-1][2]))
+			self.insertAnnotation(tierName, currentAnn[0], tierData[len(tierData)-1][1], currentAnn[2])
 
 
 	def getFullTimeInterval(self):
