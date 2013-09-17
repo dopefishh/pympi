@@ -47,7 +47,9 @@ class Eaf:
 		self.external_refs, self.lexicon_refs, self.locales, self.media_descriptors, self.properties, self.linked_file_descriptors = [], [], [], [], [], []
 		self.new_time, self.new_ann = 0, 0
 
-		if filePath is not None:
+		if filePath is None:
+			self.addLinguisticType('default-lt', None)
+		else:
 			with open(filePath, 'r') as f:
 				self.fileheader = f.readlines()[0]
 			treeRoot = ET.parse(filePath).getroot()
@@ -195,6 +197,17 @@ class Eaf:
 			for m in self.lexicon_refs:
 				f.write('%s%s\n' % ('    '*tabs, xmlPrint('LEXICON_REF', m, '/')))
 			f.write('</ANNOTATION_DOCUMENT>')
+
+	def toTextGrid(self, filePath):
+		"""Converts the object to praat's TextGrid format(warning some data is lost)"""
+		from TextGrid import TextGrid
+		tgout = TextGrid()
+		for tier in self.tiers.iterkeys():
+			tgout.addTier(tier)
+			currentTier = tgout.getTier(tier)
+			for interval in self.getAnnotationDataForTier(tier):
+				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
+		tgout.tofile(filePath)
 
 ###MEDIA OPERATIONS
 	def getMediaForMimeType(self, mime):
@@ -411,7 +424,7 @@ class Eaf:
 			tierType = self.linguistic_types.keys()[0]
 		self.removeTier(tierName)
 		self.addTier(tierName, tierType)
-		ftos = self.getGapsAndOverlapsDuration(tier1, tier2):
+		ftos = self.getGapsAndOverlapsDuration(tier1, tier2)
 		for go in ftos:
 			self.insertAnnotation(tierName, go[1], go[2], go[0])
 		return ftos
@@ -450,7 +463,7 @@ class Eaf:
 			if line1[i][0] == 'N':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
 					gando.append(('G12' if line1[i-1][0]=='1' else 'G21', line1[i][1], line1[i][2]))
-				else
+				else:
 					gando.append(('P', line1[i][1], line1[i][2]))
 			elif line1[i][0] == 'B':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:

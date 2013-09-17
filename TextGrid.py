@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 class TextGrid:
-	"""Class to read and write in TextGrid files"""
+	"""Class to read and write in TextGrid files, note all the times are in seconds"""
 
 	def __init__(self, filePath=None):
 		"""Constructor, if the filepath is not given an empty grid is created"""
@@ -87,6 +87,16 @@ class TextGrid:
 						f.write('%sxmin = %f\n' % (' '*12, ints[it][0]))
 						f.write('%sxmax = %f\n' % (' '*12, ints[it][1]))
 						f.write('%stext = "%s"\n' % (' '*12, ints[it][2]))
+
+	def toEaf(self, filepath):
+		"""Converts the object to elan's eaf format, pointtiers not converted"""
+		from Elan import Eaf
+		eafOut = Eaf()
+		for tier in self.tiers:
+			eafOut.addTier(tier)
+			for annotation in self.tiers[tier].intervals:
+				eafOut.insertAnnotation(tier, int(annotation[0]*1000), int(annotation[1]*1000), annotation[2])
+		eafOut.tofile(filepath)
 
 class Tier:
 	"""Class to represent a TextGrid tier: IntervalTier or TextTier"""
