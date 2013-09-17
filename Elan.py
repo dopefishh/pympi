@@ -289,31 +289,11 @@ class Eaf:
 			return None
 
 ###ANNOTATION OPERATIONS
-	def getAnnotationForId(self, idTier, idAnn):
-		try:
-			return self.tiers[idTier][0][idAnn]
-		except KeyError:
-			return None
-
-	def getRefAnnotationIdsForTier(self, idTier):
-		"""Returns a list of ref annotation ids within a tier, None if tier doesn't exist"""
-		try:
-			return [m for m in self.tiers[idTier][1].keys()]
-		except KeyError:
-			return None
-
 	def getAnnotationDataForTier(self, idTier):
 		"""Returns the annotation data for the given tier in the format: (start, end, value)  None if the tier doesn't exist"""
 		try:
 			a = self.tiers[idTier][0]
 			return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2]) for b in a.iterkeys()]
-		except KeyError:
-			return None
-
-	def getAnnotationIdsForTier(self, idTier, startTime=None, endTime=None):
-		"""Returns a list of annotation ids within a tier, None if tier doesn't exist"""
-		try:
-			return [m for m in self.tiers[idTier][0]]
 		except KeyError:
 			return None
 
@@ -326,70 +306,10 @@ class Eaf:
 			return None
 
 	def getAnnotationDatasBetweenTimes(self, idTier, start, end):
+		"""Returns all the annotations overlapping with the given interval in the given tier, None if the tier doesn't exist"""
 		try:
 			anns = self.tiers[idTier][0]
 			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and self.timeslots[m[0]]<=end], key=lambda x:x[0])
-		except KeyError:
-			return None
-
-	def getAnnotationIdAtTime(self, idTier, time):
-		"""Returns a list of annotation ids that match the given time, returns None if tier doesn't exist"""
-		try:
-			anns = self.tiers[idTier][0]
-			return [m for m in anns.keys() if self.timeslots[anns[m][0]]<=time and self.timeslots[anns[m][1]]>=time]
-		except KeyError:
-			return None
-	
-	def getAnnotationIdsInOverlap(self, idTier, begin, end):
-		"""Returns all the annotation ids with overlap with the given interval, None if tier doesn't exist"""
-		try:
-			anns = self.tiers[idTier][0]
-			return [m for m in anns.keys() if begin<=self.timeslots[anns[m][1]] and self.timeslots[anns[m][0]]<=end]
-		except KeyError:
-			return None
-
-	def getAnnotationValueAtTime(self, idTier, time):
-		"""Returns the annotation value at the given time in the given tier, None if tier or annotation doesn't exist"""
-		try:
-			c = self.getAnnotationIdAtTime(idTier, time)
-			if c == []:
-				return []
-			return self.tiers[idTier][0][c[0]]		
-		except KeyError:
-			return None
-
-	def getAnnotationValueForAnnotation(self, idTier, idAnn):
-		"""Returns the value for the annotation id, None if the annotation and tier don't exist"""
-		try:
-			return self.tiers[idTier][0][idAnn][2]
-		except KeyError:
-			return None
-
-	def getEndTimeForAnnotation(self, idTier, idAnn):
-		"""Returns end time for annotation id, None if the annotation and tier don't exist"""
-		try:
-			return self.timeslots[self.getEndTsForAnnotation(idTier, idAnn)]
-		except KeyError:
-			return None
-
-	def getEndTsForAnnotation(self, idTier, idAnn):
-		"""Returns the end timeslot for annotation id, None if the annotation and tier don't exist"""
-		try:
-			return self.tiers[idTier][0][idAnn][1]
-		except KeyError:
-			return None
-
-	def getStartTimeForAnnotation(self, idTier, idAnn):
-		"""Returns the start time for annotation id, None if the annotation or tier don't exist"""
-		try:
-			return self.timeslots[self.getStartTsForAnnotation(idTier, idAnn)]
-		except KeyError:
-			return None
-
-	def getStartTsForAnnotation(self, idTier, idAnn):
-		"""Returns the start timeslot for annotation id, None if the annotation or tier don't exist"""
-		try:
-			return self.tiers[idTier][0][idAnn][0]
 		except KeyError:
 			return None
 
@@ -401,38 +321,7 @@ class Eaf:
 			self.cleanTimeSlots()
 		except KeyError:
 			pass
-
-	def removeAnnotationWithId(self, idTier, idAnn):
-		"""Removes the annotation with the id from the tier, when they don't exist nothing happens"""
-		try:
-			del(self.tiers[idTier][0][idAnn])
-		except KeyError:
-			pass
-		try:
-			del(self.tiers[idTier][1][idAnn])
-		except KeyError:
-			pass
-		self.cleanTimeSlots()
-
-	def removeAnnotationsWithRef(self, idTier, idRefAnn):
-		"""Removes all the annotations are reffed by the annotation given, when they don't exist nothing happens"""
-		try:
-			for a in [an for an in self.tiers[idTier][1].keys() if self.tiers[idTier][1][an] == idRefAnn]:
-				del(self.tiers[idTier][1][a])
-		except KeyError:
-			pass
-
-	def setAnnotationValueForAnnotation(self, idTier, idAnn, strAnn):
-		"""Set the annotation value for an annotation in a given tier, if the they don't exist nothing happens"""
-		try:
-			self.tiers[idTier][0][idAnn][2] = strAnn
-		except KeyError:
-			pass
-		try:
-			self.tiers[idTier][1][idAnn][1] = strAnn
-		except KeyError:
-			pass
-
+	
 	def updatePrevAnnotationForAnnotation(self, idTier, idAnn, idPrevAnn=None):
 		"""Updates the previous annotation value in an annotation in the given tier, nothing happens if they don't exist"""
 		try:
@@ -449,14 +338,7 @@ class Eaf:
 			self.timeslots[endTs] = end
 			self.tiers[idTier][0][self.generateAnnotationId()] = (startTs, endTs, value, svg_ref)
 
-	def getRefAnnotationIdForAnnotation(self, idTier, idAnn):
-		"""Returns all the ref annotations pointing to the given annotation in the given tier, None if the tier or annotation doesn't exist"""
-		try:
-			return [i for i in self.tiers[idTier][1].keys() if self.tiers[idTier][1][i][0]==idAnn]
-		except KeyError:
-			return None
-		
-	def getRefAnnotationIdsForTier(self, idTier):
+	def getRefAnnotationDataForTier(self, idTier):
 		"""Returns all the ref annotation for a given tier in the form: (id->(ref, value, prev, svg_ref), None if the tier doesn't exist"""
 		try:
 			return self.tiers[idTier][1]
@@ -517,23 +399,24 @@ class Eaf:
 		if currentAnn is not None:
 			self.insertAnnotation(tierName, currentAnn[0], tierData[len(tierData)-1][1], currentAnn[2])
 
-
 	def getFullTimeInterval(self):
 		"""Returns a tuple (start, end) of the full time frame. optional tier"""
 		return (min(self.timeslots.itervalues()), max(self.timeslots.itervalues()))
 
-	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None, withinOnly=False):
-		"""Creates a tier out of the gaps and overlap between two tiers"""
+	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None):
+		"""Creates a tier out of the gaps and overlap between two tiers, returns the fto data"""
 		if tierName is None:
 			tierName = '%s_%s_go' % (tier1, tier2)
 		if tierType is None:
 			tierType = self.linguistic_types.keys()[0]
 		self.removeTier(tierName)
 		self.addTier(tierName, tierType)
-		for go in self.getGapsAndOverlapsDuration(tier1, tier2, withinOnly):
+		ftos = self.getGapsAndOverlapsDuration(tier1, tier2):
+		for go in ftos:
 			self.insertAnnotation(tierName, go[1], go[2], go[0])
+		return ftos
 
-	def getGapsAndOverlapsDuration(self, tier1, tier2, withinOnly=False):
+	def getGapsAndOverlapsDuration(self, tier1, tier2):
 		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist. If the withinOnly flag is true the pauses and betweenspeaker overlaps are not included"""
 		if tier1 not in self.tiers or tier2 not in self.tiers:
 			return None
@@ -567,12 +450,12 @@ class Eaf:
 			if line1[i][0] == 'N':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
 					gando.append(('G12' if line1[i-1][0]=='1' else 'G21', line1[i][1], line1[i][2]))
-				elif not withinOnly:
+				else
 					gando.append(('P', line1[i][1], line1[i][2]))
 			elif line1[i][0] == 'B':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
 					gando.append(('O12' if line1[i-1][0] else 'O21', line1[i][1], line1[i][2]))
-				elif not withinOnly:
+				else:
 					gando.append(('O', line1[i][1], line1[i][2]))
 		return gando
 
