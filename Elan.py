@@ -328,7 +328,7 @@ class Eaf:
 	def getAnnotationDatasBetweenTimes(self, idTier, start, end):
 		try:
 			anns = self.tiers[idTier][0]
-			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and end>=self.timeslots[m[0]]], key=lambda x:x[0])
+			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and self.timeslots[m[0]]]<=end, key=lambda x:x[0])
 		except KeyError:
 			return None
 
