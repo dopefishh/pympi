@@ -67,7 +67,6 @@ class TextGrid:
 			f.write('size = %d\n' % self.tierNum)
 			f.write('item []:\n')
 			
-			#iterator = xrange(self.tierNum).__iter__()
 			for tierName in sorted(self.tiers.keys(), key=lambda k: self.tiers[k].number):
 				tier = self.getTier(tierName)
 				f.write('%sitem [%d]:\n' % (' '*4, tier.number))
@@ -151,9 +150,10 @@ class Tier:
 			raise Exception('No overlap is allowed!')
 		self.__update()
 
-	def addInterval(self, begin, end, value, check=True):
+	def addInterval(self, begin, end, value, check=True, threshhold=5):
 		"""Add an interval to the tier, with overlap checking(default: true)"""
-		if check is False or len([i for i in self.intervals if begin<i[1] and i[0]<end]) is 0:
+		listt = [i for i in self.intervals if begin<i[1]-threshhold and end>i[0]+threshhold]
+		if check is False or len(listt) == 0:
 			self.intervals.append((begin, end, value))
 		else:
 			raise Exception('No overlap is allowed!')

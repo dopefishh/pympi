@@ -6,7 +6,7 @@ from time import localtime as now
 class Eaf:
 	"""Class to work with elan files"""
 	
-	html_escape_table = {'&':'&amp;', '"': 'quot;', '\'':'&apos;', '<':'&gt;', '>':'%lt;'}
+	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'%lt;'}
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
 
 	#Document root data
@@ -425,8 +425,8 @@ class Eaf:
 		self.removeTier(tierName)
 		self.addTier(tierName, tierType)
 		ftos = self.getGapsAndOverlapsDuration(tier1, tier2)
-		for go in ftos:
-			self.insertAnnotation(tierName, go[1], go[2], go[0])
+		for fto in ftos:
+			self.insertAnnotation(tierName, fto[1], fto[2], fto[0])
 		return ftos
 
 	def getGapsAndOverlapsDuration(self, tier1, tier2):
@@ -458,19 +458,19 @@ class Eaf:
 				line1.append((last[0], last[1], ts))
 				last = ('N', ts)
 		line1.append((last[0], last[1], minmax[1]))
-		gando = []
+		ftos = []
 		for i in xrange(len(line1)):
 			if line1[i][0] == 'N':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					gando.append(('G12' if line1[i-1][0]=='1' else 'G21', line1[i][1], line1[i][2]))
+					ftos.append(('G_%s_%s' % (tier1, tier2) if line1[i-1][0]=='1' else 'G_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
 				else:
-					gando.append(('P', line1[i][1], line1[i][2]))
+					ftos.append(('P_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
 			elif line1[i][0] == 'B':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					gando.append(('O12' if line1[i-1][0] else 'O21', line1[i][1], line1[i][2]))
+					ftos.append(('O_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
 				else:
-					gando.append(('O', line1[i][1], line1[i][2]))
-		return gando
+					ftos.append(('O_$s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
+		return ftos
 
 ###LINGUISTIC TYPE FUNCTIONS
 	def createControlledVocabulary(self, cvEntries, cvId, description=''):
