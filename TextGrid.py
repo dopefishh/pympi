@@ -33,11 +33,12 @@ class TextGrid:
 		self.tierNum = len(self.tiers)
 
 	def addTier(self, name, tierType='IntervalTier', number=None):
-		"""Add a tier to the grid the number it gets is optional and when not given it will be generated"""
+		"""Add a tier to the grid the number it gets is optional and when not given it will be generated, the added tier is returned"""
 		if number is None:
 			number = 1 if len(self.tiers) is 0 else int(max(j.number for j in self.tiers.itervalues()))+1
 		self.tiers[name] = Tier(name, number, tierType)
 		self.__update()
+		return self.tiers[name]
 
 	def removeTier(self, name):
 		"""Removes a tier, returns None if failed else 1"""
@@ -89,7 +90,11 @@ class TextGrid:
 
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted"""
-		from Elan import Eaf
+		try:
+			from Elan import Eaf
+		except ImportError:
+			print 'Please install the Eaf module from the Elan.py file found at https://github.com/dopefishh/pympi'
+			exit()
 		eafOut = Eaf()
 		for tier in self.tiers:
 			eafOut.addTier(tier)

@@ -200,11 +200,14 @@ class Eaf:
 
 	def toTextGrid(self, filePath):
 		"""Converts the object to praat's TextGrid format(warning some data is lost)"""
-		from TextGrid import TextGrid
+		try:
+			from TextGrid import TextGrid
+		except ImportError:
+			print 'Please install the TextGrid module from the TextGrid.py file found at https://github.com/dopefishh/pympi'
+			exit()
 		tgout = TextGrid()
 		for tier in self.tiers.iterkeys():
-			tgout.addTier(tier)
-			currentTier = tgout.getTier(tier)
+			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
 		tgout.tofile(filePath)
