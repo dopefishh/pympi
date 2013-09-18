@@ -462,14 +462,14 @@ class Eaf:
 		for i in xrange(len(line1)):
 			if line1[i][0] == 'N':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					ftos.append(('G_%s_%s' % (tier1, tier2) if line1[i-1][0]=='1' else 'G_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+					ftos.append(('G12_%s_%s' % (tier1, tier2) if line1[i-1][0]=='1' else 'G21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
 				else:
 					ftos.append(('P_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
 			elif line1[i][0] == 'B':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					ftos.append(('O_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+					ftos.append(('O12_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
 				else:
-					ftos.append(('O_$s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
+					ftos.append(('B_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
 		return ftos
 
 ###LINGUISTIC TYPE FUNCTIONS
