@@ -5,7 +5,7 @@ class TextGrid:
 	"""Class to read and write in TextGrid files, note all the times are in seconds"""
 
 	def __init__(self, filePath=None):
-		"""Constructor, if the filepath is not given an empty grid is created"""
+		"""Constructor, if the filepath is not given an empty TextGrid is created"""
 		self.tiers = dict()
 		if filePath is None:
 			self.xmin = 0
@@ -41,15 +41,18 @@ class TextGrid:
 		return self.tiers[name]
 
 	def removeTier(self, name):
-		"""Removes a tier, returns None if failed else 1"""
-		if name in self.tiers:
+		"""Removes a tier, when the tier doesn't exist nothing happens"""
+		try:
 			del(self.tiers[name])
-			return 1
-		return None
+		except:
+			pass
 
 	def getTier(self, name):
 		"""Returns the tier if it exists else it returns None"""
-		return None if not self.tiers.has_key(name) else self.tiers[name]
+		try:
+			return self.tiers[name]
+		except KeyError:
+			return None
 
 	def getTiers(self):
 		"""Returns the dictionary with tiers"""
@@ -109,15 +112,13 @@ class TextGrid:
 		"""Writes the object to a file given by the filepath"""
 		self.__update()
 		with open(filepath, 'w') as f:
-			f.write('File Type = "ooTextFile"\n')
-			f.write('Object class = "TextGrid"\n')
-			f.write('\n')
-			f.write('xmin = %f\n' % self.xmin)
-			f.write('xmax = %f\n' % self.xmax)
-			f.write('tiers? <exists>\n')
-			f.write('size = %d\n' % self.tierNum)
-			f.write('item []:\n')
-
+			f.write(('File Type = "ooTextFile\n'+
+					'Object class = "TextGrid"\n\n'+
+					'xmin = %f\n'+
+					'xmax = %f\n'+
+					'tiers? <exists>\n'+
+					'size = %d\n'+
+					'item []:\n') % (self.xmin, self.xmax, self.tierNum))
 			for tierName in sorted(self.tiers.keys(), key=lambda k: self.tiers[k].number):
 				tier = self.getTier(tierName)
 				f.write('%sitem [%d]:\n' % (' '*4, tier.number))
@@ -127,7 +128,7 @@ class TextGrid:
 				f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
 				f.write('%sintervals: size = %d\n' % (' '*8, len(tier.getIntervals())))
 				ints = tier.getIntervals()
-				for it in range(len(tier.getIntervals())):
+				for it in range(len(ints)):
 					if tier.tierType is 'TextTier':
 						f.write('%spoints [%d]:\n' % (' '*8, it+1))
 						f.write('%snumber = %f\n' % (' '*12, ints[it][0]))
@@ -162,8 +163,7 @@ class Tier:
 		self.number = number
 		self.tierType = tierType
 		if lines is None:
-			self.xmin = 0
-			self.xmax = 0
+			self.xmin, self.xmax = 0, 0
 		else:
 			self.xmin = float(lines[3].strip()[7:])
 			self.xmax = float(lines[4].strip()[7:])
@@ -183,7 +183,7 @@ class Tier:
 					mark = data[1].strip()[8:-1]
 					self.intervals.append((number, mark))
 			else:
-				raise Exception('Unknown tiertype')
+				raise Exception('Unknown tiertype: %s' % self.tierType)
 
 	def __update(self):
 		"""Update the internal values"""
@@ -197,8 +197,8 @@ class Tier:
 
 	def addPoint(self, point, value, check=True):
 		"""Adds a point to the tier"""
-		if self.tierType is not 'TextTier':
-			raise Exception('Wrong tier type...')
+		if self.tierType is not 'TextTier': 
+			raise Exception('Wrong tier type... Tier should be a TextTier')
 		elif check is False or point not in [i[0] for i in self.intervals]:
 			self.intervals.append((point, value))
 		else:
@@ -207,8 +207,9 @@ class Tier:
 
 	def addInterval(self, begin, end, value, check=True, threshhold=5):
 		"""Add an interval to the tier, with overlap checking(default: true)"""
-		listt = [i for i in self.intervals if begin<i[1]-threshhold and end>i[0]+threshhold]
-		if check is False or len(listt) == 0:
+		if self.tierType is not 'IntervalTier': 
+			raise Exception('Wrong tier type... Tier should be a IntervalTier')
+		if check is False or len(i for i in self.intervals if begin<i[1]-threshhold and end>i[0]+threshhold) == 0:
 			self.intervals.append((begin, end, value))
 		else:
 			raise Exception('No overlap is allowed!')
@@ -216,11 +217,7 @@ class Tier:
 
 	def removeInterval(self, time):
 		"""Removes the interval at the given time, returns the number of removals"""
-		remove = []
-		for interval in self.intervals:
-			if interval[0]<=time and interval[1]>=time:
-				remove.append(interval)
-		for r in remove:
+ 		for r in [i for i in self.intervals if i[0]<=time and i[1]>=time]:
 			self.intervals.remove(r)
 		return len(remove)
 

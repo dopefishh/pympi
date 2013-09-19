@@ -1,5 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from xml.etree import ElementTree
-from time import localtime as now
+from time import localtime
 
 class Eaf:
 	"""Class to work with elan files"""
@@ -39,7 +42,8 @@ class Eaf:
 
 ###IO OPERATIONS
 	def __init__(self, filePath=None):
-		self.annotationDocument = {'AUTHOR':'Eaf.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now()[0], now()[1], now()[2], now()[3], now()[4], now()[5], now()[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
+		now = localtime()
+		self.annotationDocument = {'AUTHOR':'Eaf.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now[0], now[1], now[2], now[3], now[4], now[5], now[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
 		self.fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
 		self.controlled_vocabularies, self.constraints, self.tiers, self.linguistic_types, self.header, self.timeslots = {}, {}, {}, {}, {}, {}
 		self.external_refs, self.lexicon_refs, self.locales, self.media_descriptors, self.properties, self.linked_file_descriptors = [], [], [], [], [], []
@@ -211,38 +215,25 @@ class Eaf:
 		tgout.tofile(filePath)
 
 ###MEDIA OPERATIONS
-	def getMediaForMimeType(self, mime):
-		"""Gives a list of media attachments containing mime in mime_type"""
-		return [m for m in self.media_descriptors if mime in m['MIME_TYPE']]
-
 	def getVideo(self):
 		"""Gives a list of all video files"""
-		return self.getMediaForMimeType('video')
-
-	def getVideoTimeOrigin(self):
-		"""Gives a list of all video time origins"""
-		return [0 if 'TIME_ORIGIN' not in m else m['TIME_ORIGIN'] for m in self.getMediaForMimeType('video')]
+		return [m for m in self.media_descriptors if 'video' in m['MIME_TYPE']]
 
 	def getAudio(self):
 		"""Gives a list of all audio files"""
-		return self.getMediaForMimeType('audio')
-
-	def getAudioTimeOrigin(self):
-		"""Gives a list of all audio time origins"""
-		return [0 if 'TIME_ORIGIN' not in m else m['TIME_ORIGIN'] for m in self.getMediaForMimeType('audio')]
+		return [m for m in self.media_descriptors if 'video' in m['MIME_TYPE']]
 
 ###TIER OPERATIONS
 	def addTier(self, idTier, tierType='default-lt', parent=None, defaultLocale=None, participant=None, annotator=None):
 		"""Adds a tier giving a id and type and optional extra data"""
-		data = {'TIER_ID':idTier, 'LINGUISTIC_TYPE_REF':tierType, 'PARENT_REF':parent, 'PARTICIPANT':participant,
-				'DEFAULT_LOCALE':defaultLocale, 'ANNOTATOR':annotator}
-		self.tiers[idTier] = ({}, {}, data, len(self.tiers))
+		self.tiers[idTier] = ({}, {}, {'TIER_ID':idTier, 'LINGUISTIC_TYPE_REF':tierType, 'PARENT_REF':parent, 'PARTICIPANT':participant, 'DEFAULT_LOCALE':defaultLocale, 'ANNOTATOR':annotator}, len(self.tiers))
 	
 	def removeTier(self, idTier):
 		"""Removes a tier by id, if it doesn't exist nothing happens"""
-		if idTier in self.tiers:
+		try:
 			del(self.tiers[idTier])
 			self.cleanTimeSlots()
+		except:	pass
 
 	def getTierNames(self):
 		"""Returns a list of tiernames"""
@@ -267,13 +258,12 @@ class Eaf:
 		"""Adds a ref annotation to the given tier"""
 		try:
 			self.tiers[idTier][1][idAnn] = (annRef, strAnn, prevAnn, svg_ref)
-		except KeyError:
-			pass
+		except KeyError: pass
 
 	def childTiersFor(self, idTier):
 		"""Returns a list of all the children of the given tier, None if the tier doesn't exist"""
 		try:
-			return [m for m in self.tiers.keys() if 'PARENT_REF' in self.tiers[m][2] and self.tiers[m][2]['PARENT_REF']==idTier]
+			return [m for m in self.tiers.iterkeys() if 'PARENT_REF' in self.tiers[m][2] and self.tiers[m][2]['PARENT_REF']==idTier]
 		except KeyError:
 			return None
 
@@ -299,10 +289,7 @@ class Eaf:
 		"""Returns the participant for the given tier, '' if none and None if tier doesn't exist"""
 		try:
 			tier = self.tiers[idTier]
-			try:
-				return tier[2]['PARTICIPANT']
-			except KeyError:
-				return ''
+			return '' if 'PARTICIPANT' not in tier[2] else tier[2]['PARTICIPANT']
 		except KeyError:
 			return None
 
@@ -319,7 +306,7 @@ class Eaf:
 		"""Returns an annotation at time in the given tier, None if the tier doesn't exist"""
 		try:
 			anns = self.tiers[idTier][0]
-			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[0]]<=time and self.timeslots[m[1]]>=time], key=lambda a:a[0])
+			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[0]]<=time and self.timeslots[m[1]]>=time])
 		except KeyError:
 			return None
 
@@ -327,34 +314,30 @@ class Eaf:
 		"""Returns all the annotations overlapping with the given interval in the given tier, None if the tier doesn't exist"""
 		try:
 			anns = self.tiers[idTier][0]
-			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and self.timeslots[m[0]]<=end], key=lambda x:x[0])
+			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and self.timeslots[m[0]]<=end])
 		except KeyError:
 			return None
 
 	def removeAllAnnotationsFromTier(self, idTier):
 		"""Removes all the annotations from the given tier, when the tier doesn't exist nothing happens"""
 		try:
-			self.tiers[idTier][0] = {}
-			self.tiers[idTier][1] = {}
+			self.tiers[idTier][0], self.tiers[idTier][1] = {}, {}
 			self.cleanTimeSlots()
-		except KeyError:
-			pass
+		except KeyError: pass
 	
 	def updatePrevAnnotationForAnnotation(self, idTier, idAnn, idPrevAnn=None):
 		"""Updates the previous annotation value in an annotation in the given tier, nothing happens if they don't exist"""
 		try:
 			self.tiers[idTier][1][idAnn][2] = idPrevAnn
-		except KeyError:
-			pass
+		except KeyError: pass
 
 	def insertAnnotation(self, idTier, start, end, value='', svg_ref=None):
 		"""Add an annotation in the given tier, if the tiers doesn't exist nothing happens"""
-		if idTier in self.tiers:
-			startTs = self.generateTsId()
-			endTs = self.generateTsId()
-			self.timeslots[startTs] = start
-			self.timeslots[endTs] = end
+		try:
+			startTs, endTs = self.generateTsId(), self.generateTsId()
+			self.timeslots[startTs], self.timeslots[endTs] = start, end
 			self.tiers[idTier][0][self.generateAnnotationId()] = (startTs, endTs, value, svg_ref)
+		except KeyError: pass
 
 	def getRefAnnotationDataForTier(self, idTier):
 		"""Returns all the ref annotation for a given tier in the form: (id->(ref, value, prev, svg_ref), None if the tier doesn't exist"""
@@ -368,15 +351,13 @@ class Eaf:
 		"""Adds a controlled vocabulary to a linguistic type, when the lingtype doesn't exist nothing happens"""
 		try:
 			self.linguistic_types[linguisticType]['CONTROLLED_VOCABULARY_REF'] = cvId
-		except KeyError:
-			pass
+		except KeyError: pass
 
 	def removeControlledVocabulary(self, cv):
 		"""Removes a controlled vocabulary, when the cv doesn't exist nothing happens"""
 		try:
 			del(self.controlled_vocabularies[cv])
-		except KeyError:
-			pass
+		except KeyError: pass
 
 ###HELPER FUNCTIONS
 	def generateAnnotationId(self):
@@ -487,8 +468,7 @@ class Eaf:
 		"""Removes a linguistic type, if the lingtype doesn't exist nothing happens"""
 		try:
 			del(self.linguistic_types[lingType])
-		except KeyError:
-			pass
+		except KeyError: pass
 
 	def addLinguisticType(self, lingtype, constraints, timealignable=False, graphicreferences=False, extref=None):
 		"""Adds a linguistic type"""
