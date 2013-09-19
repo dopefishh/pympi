@@ -1,6 +1,6 @@
 pympi
 =====
-TextGrid.py - A python class to read, write, edit and create praat's TextGrid files.
+Praat.py 	- A python class to read, write, edit and create praat's TextGrid files.
 
   todo      - Gap and overlap functions
 
