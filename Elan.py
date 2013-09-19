@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-# 
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree
 from time import localtime as now
 
 class Eaf:
@@ -10,9 +8,9 @@ class Eaf:
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
 
 	#Document root data
-	annotationDocument = {'AUTHOR':'Eaf.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now()[0], now()[1], now()[2], now()[3], now()[4], now()[5], now()[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
+	annotationDocument = {}
 	#File header
-	fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
+	fileheader = ''
 	#Header data
 	header = {}
 	media_descriptors, properties, linked_file_descriptors = [], [], []
@@ -52,7 +50,7 @@ class Eaf:
 		else:
 			with open(filePath, 'r') as f:
 				self.fileheader = f.readlines()[0]
-			treeRoot = ET.parse(filePath).getroot()
+			treeRoot = ElementTree.parse(filePath).getroot()
 			self.annotationDocument.update(treeRoot.attrib)
 			del(self.annotationDocument['{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation'])
 			tierNumber = 0
@@ -198,15 +196,15 @@ class Eaf:
 				f.write('%s%s\n' % ('    '*tabs, xmlPrint('LEXICON_REF', m, '/')))
 			f.write('</ANNOTATION_DOCUMENT>')
 
-	def toTextGrid(self, filePath):
-		"""Converts the object to praat's TextGrid format(warning some data is lost)"""
+	def toTextGrid(self, filePath, excludedTiers=[]):
+		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. (warning some data is lost because praat can hold less datatypes)"""
 		try:
-			from TextGrid import TextGrid
+			from Praat import TextGrid
 		except ImportError:
 			print 'Please install the TextGrid module from the TextGrid.py file found at https://github.com/dopefishh/pympi'
 			exit()
 		tgout = TextGrid()
-		for tier in self.tiers.iterkeys():
+		for tier in [a for a in self.tiers.iterkeys() if a not in excludedTiers]:
 			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
