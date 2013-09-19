@@ -25,7 +25,7 @@ class TextGrid:
 					numinterval = int(lines[5].strip()[18:])
 					self.tiers[name] = Tier(name, number, tierType, lines[:6+4*numinterval])
 					lines = lines[6+4*numinterval:]
-	
+
 	def __update(self):
 		"""Update the internal values"""
 		self.xmin = 0 if len(self.tiers) is 0 else min(t.xmin for t in self.tiers.itervalues())
@@ -46,7 +46,7 @@ class TextGrid:
 			del(self.tiers[name])
 			return 1
 		return None
-	
+
 	def getTier(self, name):
 		"""Returns the tier if it exists else it returns None"""
 		return None if not self.tiers.has_key(name) else self.tiers[name]
@@ -54,6 +54,56 @@ class TextGrid:
 	def getTiers(self):
 		"""Returns the dictionary with tiers"""
 		return self.tiers
+
+	def getGapsAndOverlapsDuration(self, tier1, tier2):
+		"""Gives the gaps and the overlaps between tiers in (type, begin, end), None if one of the tiers doesn't exist"""
+		if tier1 not in self.tiers or tier2 not in self.tiers: return None
+		spkr1anns = sorted(self.tiers[tier1].getIntervals())
+		spkr2anns = sorted(self.tiers[tier2].getIntervals())
+		line1 = []
+		isin = lambda x, lst: False if len([i for i in lst if i[0]<=x and i[1]>=x])==0 else True
+		minmax = (min(spkr1anns[0][0], spkr2anns[0][0]), max(spkr1anns[-1][1], spkr2anns[-1][1]))
+		last = (1, minmax[0])
+		for ts in xrange(*minmax):
+			in1, in2 = isin(ts, spkr1anns), isin(ts, spkr2anns)
+			if in1 and in2:
+				if last[0] == 'B': continue
+				ty = 'B'
+			elif in1:
+				if last[0] == '1': continue
+				ty = '1'
+			elif in2:
+				if last[0] == '2': continue
+				ty = '2'
+			else:
+				if last[0] == 'N': continue
+				ty = 'N'
+			line1.append( (last[0], last[1], ts) )
+			last = (ty, ts)
+		line1.append( (last[0], last[1], minmax[1]) )
+		ftos = []
+		for i in xrange(len(line1)):
+			if line1[i][0] == 'N':
+				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
+					ftos.append(('G12_%s_%s' % (tier1, tier2) if line1[i-1][0]=='1' else 'G21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+				else:
+					ftos.append(('P_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
+			elif line1[i][0] == 'B':
+				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
+					ftos.append(('O12_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+				else:
+					ftos.append(('B_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
+		return ftos
+
+	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None):
+		"""Creates a gaps and overlap tier and returns the gaps and overlaps as triplets(type, start, end)"""
+		if tierName is None: tierName = '%s_%s_go' % (tier1, tier2)
+		self.removeTier(tierName)
+		goTier = self.addTier(tierName)
+		ftos = self.getGapsAndOverlapsDuration(tier1, tier2)
+		for fto in ftos:
+			goTier.addInterval(fto[1], fto[2], fto[0])
+		return ftos
 
 	def tofile(self, filepath):
 		"""Writes the object to a file given by the filepath"""
@@ -67,7 +117,7 @@ class TextGrid:
 			f.write('tiers? <exists>\n')
 			f.write('size = %d\n' % self.tierNum)
 			f.write('item []:\n')
-			
+
 			for tierName in sorted(self.tiers.keys(), key=lambda k: self.tiers[k].number):
 				tier = self.getTier(tierName)
 				f.write('%sitem [%d]:\n' % (' '*4, tier.number))
@@ -134,7 +184,7 @@ class Tier:
 					self.intervals.append((number, mark))
 			else:
 				raise Exception('Unknown tiertype')
-	
+
 	def __update(self):
 		"""Update the internal values"""
 		self.intervals.sort()
@@ -144,7 +194,7 @@ class Tier:
 		elif self.tierType is 'IntervalTier':
 			self.xmin = min(i[0] for i in self.intervals)
 			self.xmax = max(i[1] for i in self.intervals)
-	
+
 	def addPoint(self, point, value, check=True):
 		"""Adds a point to the tier"""
 		if self.tierType is not 'TextTier':
@@ -163,7 +213,7 @@ class Tier:
 		else:
 			raise Exception('No overlap is allowed!')
 		self.__update()
-	
+
 	def removeInterval(self, time):
 		"""Removes the interval at the given time, returns the number of removals"""
 		remove = []

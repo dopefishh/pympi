@@ -4,7 +4,7 @@ from time import localtime as now
 class Eaf:
 	"""Class to work with elan files"""
 	
-	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'%lt;'}
+	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'&lt;'}
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
 
 	#Document root data
@@ -243,6 +243,10 @@ class Eaf:
 		if idTier in self.tiers:
 			del(self.tiers[idTier])
 			self.cleanTimeSlots()
+
+	def getTierNames(self):
+		"""Returns a list of tiernames"""
+		return self.tiers.keys()
 	
 	def getIndexOfTier(self, idTier):
 		"""Returns the index of a given tier, -1 if tier doesn't exist"""
@@ -431,9 +435,8 @@ class Eaf:
 		return ftos
 
 	def getGapsAndOverlapsDuration(self, tier1, tier2):
-		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist. If the withinOnly flag is true the pauses and betweenspeaker overlaps are not included"""
-		if tier1 not in self.tiers or tier2 not in self.tiers:
-			return None
+		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist."""
+		if tier1 not in self.tiers or tier2 not in self.tiers: return None
 		spkr1anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier1][0].values())
 		spkr2anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier2][0].values())
 		line1 = []
@@ -444,20 +447,18 @@ class Eaf:
 			in1, in2 = isin(ts, spkr1anns), isin(ts, spkr2anns)
 			if in1 and in2:		#Both speaking
 				if last[0] == 'B': continue
-				line1.append((last[0], last[1], ts))
-				last = ('B', ts)
+				ty = 'B'
 			elif in1:			#Only 1 speaking
 				if last[0] == '1': continue
-				line1.append((last[0], last[1], ts))
-				last = ('1', ts)
+				ty = '2'
 			elif in2:			#Only 2 speaking
 				if last[0] == '2': continue
-				line1.append((last[0], last[1], ts))
-				last = ('2', ts)
+				ty = '2'
 			else:				#None speaking
 				if last[0] == 'N': continue
-				line1.append((last[0], last[1], ts))
-				last = ('N', ts)
+				ty = 'N'
+			line1.append( (last[0], last[1], ts) )
+			last = (ty, ts)
 		line1.append((last[0], last[1], minmax[1]))
 		ftos = []
 		for i in xrange(len(line1)):
