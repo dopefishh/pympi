@@ -21,4 +21,4 @@ INSTALLATION
 Run:
 # python setup.py -install 
 
-The Phonetizers can be used when you put them in the same folder as your script.
+The Utils can be used when you put them in the same folder as your script.

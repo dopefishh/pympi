@@ -415,7 +415,7 @@ class Eaf:
 			self.insertAnnotation(tierName, fto[1], fto[2], fto[0])
 		return ftos
 
-	def getGapsAndOverlapsDuration(self, tier1, tier2):
+	def getGapsAndOverlapsDuration(self, tier1, tier2, progressbar=False):
 		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist."""
 		if tier1 not in self.tiers or tier2 not in self.tiers: return None
 		spkr1anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier1][0].values())
@@ -424,6 +424,7 @@ class Eaf:
 		isin = lambda x, lst: False if len([i for i in lst if i[0]<=x and i[1]>=x])==0 else True
 		minmax = (min(spkr1anns[0][0], spkr2anns[0][0]), max(spkr1anns[-1][1], spkr2anns[-1][1]))
 		last = (1, minmax[0])
+		lastP = 0
 		for ts in xrange(*minmax):
 			in1, in2 = isin(ts, spkr1anns), isin(ts, spkr2anns)
 			if in1 and in2:		#Both speaking
@@ -440,6 +441,9 @@ class Eaf:
 				ty = 'N'
 			line1.append( (last[0], last[1], ts) )
 			last = (ty, ts)
+			if progressbar and int((ts*1.0/minmax[1])*100) > lastP:
+				lastP = int((ts*1.0/minmax[1])*100)
+				print '%d%%' % lastP
 		line1.append((last[0], last[1], minmax[1]))
 		ftos = []
 		for i in xrange(len(line1)):

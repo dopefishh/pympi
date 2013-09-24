@@ -209,7 +209,7 @@ class Tier:
 		"""Add an interval to the tier, with overlap checking(default: true)"""
 		if self.tierType is not 'IntervalTier': 
 			raise Exception('Wrong tier type... Tier should be a IntervalTier')
-		if check is False or len(i for i in self.intervals if begin<i[1]-threshhold and end>i[0]+threshhold) == 0:
+		if check is False or len([i for i in self.intervals if begin<i[1]-threshhold and end>i[0]+threshhold]) == 0:
 			self.intervals.append((begin, end, value))
 		else:
 			raise Exception('No overlap is allowed!')
