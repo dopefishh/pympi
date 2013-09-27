@@ -11,34 +11,34 @@ class Eaf:
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
 
 	#Document root data
-	annotationDocument = {}
+#	annotationDocument = {}
 	#File header
-	fileheader = ''
+#	fileheader = ''
 	#Header data
-	header = {}
-	media_descriptors, properties, linked_file_descriptors = [], [], []
+#	header = {}
+#	media_descriptors, properties, linked_file_descriptors = [], [], []
 	#Timeslot data {id -> time}
-	timeslots = {}
+#	timeslots = {}
 	#Tier data: {id -> (align, ref, attrib, num)}, 
 	# align = {id -> (begin, end, value, svg_ref)}
 	# ref   = {id -> (ref, value, previous, svg_ref)}
-	tiers = {}
+#	tiers = {}
 	#Linguistic type data {id -> attrib}
-	linguistic_types = {}
+#	linguistic_types = {}
 	#Locale data [attrib]
-	locales = []
+#	locales = []
 	#Constraint data {stereotype -> description}
-	constraints = {}
+#	constraints = {}
 	#Controlled vocabulary data {id -> (description, entries)}
 	# entry = {value -> description}
-	controlled_vocabularies = {}
+#	controlled_vocabularies = {}
 	#External refs [id, type, value]
-	external_refs = []
+#	external_refs = []
 	#Lexicon refs
-	lexicon_refs = []
+#	lexicon_refs = []
 
 	#new timeslot and annotation value
-	new_time, new_ann = 0, 0
+#	new_time, new_ann = 0, 0
 
 ###IO OPERATIONS
 	def __init__(self, filePath=None):
