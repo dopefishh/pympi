@@ -20,3 +20,8 @@ Then you can just run for example:
 >>> from pympi import Praat, Elan
 
 The phonetizer can be used by putting it in the same folder as your script.
+
+TODO
+====
+- Transfer tier between Elan files
+- Add time series to Elan files
