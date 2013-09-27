@@ -9,41 +9,42 @@ class Eaf:
 	
 	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'&lt;'}
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
-
+"""
 	#Document root data
-#	annotationDocument = {}
+	annotationDocument = {}
 	#File header
-#	fileheader = ''
+	fileheader = ''
 	#Header data
-#	header = {}
-#	media_descriptors, properties, linked_file_descriptors = [], [], []
+	header = {}
+	media_descriptors, properties, linked_file_descriptors = [], [], []
 	#Timeslot data {id -> time}
-#	timeslots = {}
+	timeslots = {}
 	#Tier data: {id -> (align, ref, attrib, num)}, 
 	# align = {id -> (begin, end, value, svg_ref)}
 	# ref   = {id -> (ref, value, previous, svg_ref)}
-#	tiers = {}
+	tiers = {}
 	#Linguistic type data {id -> attrib}
-#	linguistic_types = {}
+	linguistic_types = {}
 	#Locale data [attrib]
-#	locales = []
+	locales = []
 	#Constraint data {stereotype -> description}
-#	constraints = {}
+	constraints = {}
 	#Controlled vocabulary data {id -> (description, entries)}
 	# entry = {value -> description}
-#	controlled_vocabularies = {}
+	controlled_vocabularies = {}
 	#External refs [id, type, value]
-#	external_refs = []
+	external_refs = []
 	#Lexicon refs
-#	lexicon_refs = []
+	lexicon_refs = []
 
 	#new timeslot and annotation value
-#	new_time, new_ann = 0, 0
+	new_time, new_ann = 0, 0
+"""
 
 ###IO OPERATIONS
 	def __init__(self, filePath=None):
 		now = localtime()
-		self.annotationDocument = {'AUTHOR':'Eaf.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now[0], now[1], now[2], now[3], now[4], now[5], now[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
+		self.annotationDocument = {'AUTHOR':'Elan.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now[0], now[1], now[2], now[3], now[4], now[5], now[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
 		self.fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
 		self.controlled_vocabularies, self.constraints, self.tiers, self.linguistic_types, self.header, self.timeslots = {}, {}, {}, {}, {}, {}
 		self.external_refs, self.lexicon_refs, self.locales, self.media_descriptors, self.properties, self.linked_file_descriptors = [], [], [], [], [], []
@@ -215,13 +216,17 @@ class Eaf:
 		tgout.tofile(filePath)
 
 ###MEDIA OPERATIONS
+	def getTimeSeries(self):
+		"""Gives a list of all time secondary linked txt files"""
+		return [m for m in self.linked_file_descriptors if 'text/plain' in m['MIME_TYPE']]
+
 	def getVideo(self):
 		"""Gives a list of all video files"""
 		return [m for m in self.media_descriptors if 'video' in m['MIME_TYPE']]
 
 	def getAudio(self):
 		"""Gives a list of all audio files"""
-		return [m for m in self.media_descriptors if 'video' in m['MIME_TYPE']]
+		return [m for m in self.media_descriptors if 'audio' in m['MIME_TYPE']]
 
 ###TIER OPERATIONS
 	def addTier(self, idTier, tierType='default-lt', parent=None, defaultLocale=None, participant=None, annotator=None):
@@ -229,11 +234,13 @@ class Eaf:
 		self.tiers[idTier] = ({}, {}, {'TIER_ID':idTier, 'LINGUISTIC_TYPE_REF':tierType, 'PARENT_REF':parent, 'PARTICIPANT':participant, 'DEFAULT_LOCALE':defaultLocale, 'ANNOTATOR':annotator}, len(self.tiers))
 	
 	def removeTier(self, idTier):
-		"""Removes a tier by id, if it doesn't exist nothing happens"""
+		"""Removes a tier by id, returns 0 if succesfull"""
 		try:
 			del(self.tiers[idTier])
 			self.cleanTimeSlots()
-		except:	pass
+			return 1
+		except KeyError:	
+			return 0
 
 	def getTierNames(self):
 		"""Returns a list of tiernames"""
@@ -241,7 +248,10 @@ class Eaf:
 	
 	def getIndexOfTier(self, idTier):
 		"""Returns the index of a given tier, -1 if tier doesn't exist"""
-		return -1 if idTier not in self.tiers else self.tiers[3]
+		try:
+			return self.tiers[idTier][3]
+		except KeyError:
+			return -1
 
 	def getParameterDictForTier(self, idTier):
 		"""Returns a dictionary with all the parameters of the given tier, None if tier doesn't exist"""
@@ -250,15 +260,13 @@ class Eaf:
 		except KeyError:
 			return None
 
-	def getIndexOfLastTier(self):
-		"""Gives the index of the last tier"""
-		return len(self.tiers)-1
-
 	def appendRefAnnotationToTier(self, idTier, idAnn, strAnn, annRef, prevAnn=None, svg_ref=None):
-		"""Adds a ref annotation to the given tier"""
+		"""Adds a ref annotation to the given tier, returns 0 if succesfull"""
 		try:
 			self.tiers[idTier][1][idAnn] = (annRef, strAnn, prevAnn, svg_ref)
-		except KeyError: pass
+			return 0
+		except KeyError: 
+			return 1
 
 	def childTiersFor(self, idTier):
 		"""Returns a list of all the children of the given tier, None if the tier doesn't exist"""
@@ -319,25 +327,31 @@ class Eaf:
 			return None
 
 	def removeAllAnnotationsFromTier(self, idTier):
-		"""Removes all the annotations from the given tier, when the tier doesn't exist nothing happens"""
+		"""Removes all the annotations from the given tier, returns 0 if succesfull"""
 		try:
 			self.tiers[idTier][0], self.tiers[idTier][1] = {}, {}
 			self.cleanTimeSlots()
-		except KeyError: pass
+			return 0
+		except KeyError: 
+			return 1
 	
 	def updatePrevAnnotationForAnnotation(self, idTier, idAnn, idPrevAnn=None):
-		"""Updates the previous annotation value in an annotation in the given tier, nothing happens if they don't exist"""
+		"""Updates the previous annotation value in an annotation in the given tier, returns 0 if succesfull"""
 		try:
 			self.tiers[idTier][1][idAnn][2] = idPrevAnn
-		except KeyError: pass
+			return 0
+		except KeyError: 
+			return 1
 
 	def insertAnnotation(self, idTier, start, end, value='', svg_ref=None):
-		"""Add an annotation in the given tier, if the tiers doesn't exist nothing happens"""
+		"""Add an annotation in the given tier, returns 0 if succesfull"""
 		try:
 			startTs, endTs = self.generateTsId(), self.generateTsId()
 			self.timeslots[startTs], self.timeslots[endTs] = start, end
 			self.tiers[idTier][0][self.generateAnnotationId()] = (startTs, endTs, value, svg_ref)
-		except KeyError: pass
+			return 0
+		except KeyError:
+			return 1
 
 	def getRefAnnotationDataForTier(self, idTier):
 		"""Returns all the ref annotation for a given tier in the form: (id->(ref, value, prev, svg_ref), None if the tier doesn't exist"""
@@ -348,16 +362,20 @@ class Eaf:
 
 ###CONTROLLED VOCABULARY OPERATIONS
 	def addControlledVocabularyToLinguisticType(self, linguisticType, cvId):
-		"""Adds a controlled vocabulary to a linguistic type, when the lingtype doesn't exist nothing happens"""
+		"""Adds a controlled vocabulary to a linguistic type, returns 0 if succesfull"""
 		try:
 			self.linguistic_types[linguisticType]['CONTROLLED_VOCABULARY_REF'] = cvId
-		except KeyError: pass
+			return 0
+		except KeyError:
+			return 1
 
 	def removeControlledVocabulary(self, cv):
-		"""Removes a controlled vocabulary, when the cv doesn't exist nothing happens"""
+		"""Removes a controlled vocabulary, returns 0 if succesfull"""
 		try:
 			del(self.controlled_vocabularies[cv])
-		except KeyError: pass
+			return 1
+		except KeyError:
+			return 1
 
 ###HELPER FUNCTIONS
 	def generateAnnotationId(self):
@@ -378,7 +396,7 @@ class Eaf:
 				del(self.timeslots[an[0]])
 				del(self.timeslots[an[1]])
 	
-###GAP AND OVERLAP FUNCTIONS
+###ADVANCED FUNCTIONS
 	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=30):
 		"""Glues all the continues annotations together"""
 		if tierName is None: tierName = '%s_glued' % tier
@@ -399,7 +417,7 @@ class Eaf:
 			self.insertAnnotation(tierName, currentAnn[0], tierData[len(tierData)-1][1], currentAnn[2])
 
 	def getFullTimeInterval(self):
-		"""Returns a tuple (start, end) of the full time frame. optional tier"""
+		"""Returns a tuple (start, end) of the full time frame"""
 		return (min(self.timeslots.itervalues()), max(self.timeslots.itervalues()))
 
 	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None):
@@ -469,13 +487,15 @@ class Eaf:
 		return [t for t in self.tiers.iterkeys() if self.tiers[t][2]['LINGUISTIC_TYPE_REF']==lingType and (parent is None or self.tiers[t][2]['PARENT_REF']==parent)]
 
 	def removeLinguisticType(self, lingType):
-		"""Removes a linguistic type, if the lingtype doesn't exist nothing happens"""
+		"""Removes a linguistic type, returns 0 if succesfull"""
 		try:
 			del(self.linguistic_types[lingType])
-		except KeyError: pass
+			return 0
+		except KeyError:
+			return 1
 
 	def addLinguisticType(self, lingtype, constraints, timealignable=False, graphicreferences=False, extref=None):
-		"""Adds a linguistic type"""
+		"""Adds a linguistic type, if it already exists the ling type is updated"""
 		self.linguistic_types[lingtype] = {'LINGUISTIC_TYPE_ID':lingtype, 'TIME_ALIGNABLE':str(timealignable).lower(), 'GRAPHIC_REFERENCES':str(graphicreferences).lower(), 'CONSTRAINTS':constraints}
 		if extref is not None:
 			self.linguistic_types[lingtype]['EXT_REF'] = extref
