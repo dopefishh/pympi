@@ -206,6 +206,19 @@ class Eaf:
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
 		tgout.tofile(filePath)
 
+	def extract(self, start, end):
+		"""Extracts a timeframe from the eaf file and returns it"""
+		from copy import deepcopy
+		eafOut = deepcopy(self)
+		for tier in eafOut.tiers.itervalues():
+			rems = []
+			for ann in tier[0].iterkeys():
+				if eafOut.timeslots[tier[0][ann][1]] > end or eafOut.timeslots[tier[0][ann][0]] < start:
+					rems.append(ann)
+			for r in rems:
+				del tier[0][r]
+		return eafOut
+
 ###MEDIA OPERATIONS
 	def getTimeSeries(self):
 		"""Gives a list of all time secondary linked txt files"""
@@ -227,7 +240,7 @@ class Eaf:
 			t = self.tiers[tierName][3]
 			eafObj.addTier(tierName, tierDict=self.tiers[tierName][3])
 			for ann in self.getAnnotationDataForTier(tierName):
-				eafObj.insertAnnotation(ann[0], ann[1], ann[2])
+				eafObj.insertAnnotation(tierName, ann[0], ann[1], ann[2])
 			return 0
 		except KeyError:
 			return 1
@@ -399,8 +412,11 @@ class Eaf:
 		tsInTier = []
 		for t in self.tiers.itervalues():
 			for an in t[0].itervalues():
-				del(self.timeslots[an[0]])
-				del(self.timeslots[an[1]])
+				tsInTier.append(an[0])
+				tsInTier.append(an[1])
+		tsNotInTier = [t for t in self.timeslots.iterkeys() if t not in tsInTier]
+		for t in tsNotInTier:
+			del self.timeslots[t]
 	
 ###ADVANCED FUNCTIONS
 	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=30):

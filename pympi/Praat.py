@@ -3,7 +3,13 @@
 
 class TextGrid:
 	"""Class to read and write in TextGrid files, note all the times are in seconds"""
-
+	
+	"""
+	xmin    - maximum x value
+	xmax    - maximum y value
+	tierNum - number of tiers currently present
+	tiers   - dict of tiers
+	"""
 	def __init__(self, filePath=None):
 		"""Constructor, if the filepath is not given an empty TextGrid is created"""
 		self.tiers = dict()
@@ -155,6 +161,15 @@ class TextGrid:
 
 class Tier:
 	"""Class to represent a TextGrid tier: IntervalTier or TextTier"""
+
+	"""
+	name      - tier name
+	intervals - list of intervals (start, [end,] value)
+	number    - number of the tier
+	tierType  - TextTier or IntervalTier
+	xmin      - minimum x value
+	xmax      - maximum x value
+	"""
 
 	def __init__(self, name, number, tierType, lines=None):
 		"""Constructor, if no lines are given a empty tier is created"""
