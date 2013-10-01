@@ -10,39 +10,30 @@ class Eaf:
 	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'&lt;'}
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
 	"""
-	#Document root data
-	annotationDocument = {}
-	#File header
-	fileheader = ''
-	#Header data
-	header = {}
-	media_descriptors, properties, linked_file_descriptors = [], [], []
-	#Timeslot data {id -> time}
-	timeslots = {}
-	#Tier data: {id -> (align, ref, attrib, num)}, 
-	# align = {id -> (begin, end, value, svg_ref)}
-	# ref   = {id -> (ref, value, previous, svg_ref)}
-	tiers = {}
-	#Linguistic type data {id -> attrib}
-	linguistic_types = {}
-	#Locale data [attrib]
-	locales = []
-	#Constraint data {stereotype -> description}
-	constraints = {}
-	#Controlled vocabulary data {id -> (description, entries)}
-	# entry = {value -> description}
-	controlled_vocabularies = {}
-	#External refs [id, type, value]
-	external_refs = []
-	#Lexicon refs
-	lexicon_refs = []
-
-	#new timeslot and annotation value
-	new_time, new_ann = 0, 0
+	annotationDocument      - Dict of all annotationdocument TAG entries.
+	fileheader              - String of the header(xml version etc).
+	header                  - Dict of the header TAG entries.
+	media_descriptors       - List of all linked files: [{attributes}]
+	properties              - List of all properties: [{attributes]}
+	linked_file_descriptors - List of all secondary linked files: [{attributes}].
+	timeslots               - Timeslot data: {TimslotID -> time(ms)}
+	tiers                   - Tier data: {TierName -> (alignedAnnotations, referenceAnnotations, attributes, ordinal)}, 
+	                            alignedAnnotations    : {annotationId -> (beginTs, endTs, value, svg_ref)}
+	                            referenceAnnotations: {annotationId -> (reference, value, previous, svg_ref)}
+	linguistic_types        - Linguistic type data {id -> attrib}
+	locales                 - List of locale data: [attrib]
+	constraints             - Constraint data: {stereotype -> description}
+	controlled_vocabularies - Controlled vocabulary data: {id -> (description, entries)}
+	                            entry: {value -> description}
+	external refs           - External refs [extref]
+	                            extref: [id, type, value]
+	lexicon_refs            - Lexicon refs [lexref]
+	new_time                - Next new timeslot
+	new_ann                 - Next new annotation ID
 	"""
 
 ###IO OPERATIONS
-	def __init__(self, filePath=None):
+	def __init__(self, filePath=None, deflingtype='default-lt'):
 		now = localtime()
 		self.annotationDocument = {'AUTHOR':'Elan.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now[0], now[1], now[2], now[3], now[4], now[5], now[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
 		self.fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -51,7 +42,7 @@ class Eaf:
 		self.new_time, self.new_ann = 0, 0
 
 		if filePath is None:
-			self.addLinguisticType('default-lt', None)
+			self.addLinguisticType(deflingtype, None)
 		else:
 			with open(filePath, 'r') as f:
 				self.fileheader = f.readlines()[0]
@@ -229,9 +220,24 @@ class Eaf:
 		return [m for m in self.media_descriptors if 'audio' in m['MIME_TYPE']]
 
 ###TIER OPERATIONS
-	def addTier(self, idTier, tierType='default-lt', parent=None, defaultLocale=None, participant=None, annotator=None):
+	def copyTier(self, eafObj, tierName):
+		"""Copies the tier from this object to the given object, if the tier is present it removes it. Returns 0 if succesfull"""
+		eafObj.removeTier(tierName)
+		try:
+			t = self.tiers[tierName][3]
+			eafObj.addTier(tierName, tierDict=self.tiers[tierName][3])
+			for ann in self.getAnnotationDataForTier(tierName):
+				eafObj.insertAnnotation(ann[0], ann[1], ann[2])
+			return 0
+		except KeyError:
+			return 1
+
+	def addTier(self, tierId, ling='default-lt', parent=None, locale=None, part=None, ann=None, tierDict=None):
 		"""Adds a tier giving a id and type and optional extra data"""
-		self.tiers[idTier] = ({}, {}, {'TIER_ID':idTier, 'LINGUISTIC_TYPE_REF':tierType, 'PARENT_REF':parent, 'PARTICIPANT':participant, 'DEFAULT_LOCALE':defaultLocale, 'ANNOTATOR':annotator}, len(self.tiers))
+		if tierDict is None:
+			self.tiers[tierId] = ({}, {}, {'TIER_ID':tierId, 'LINGUISTIC_TYPE_REF':ling, 'PARENT_REF':parent, 'PARTICIPANT':part, 'DEFAULT_LOCALE':locale, 'ANNOTATOR':ann}, len(self.tiers))
+		else:
+			self.tiers[tierId] = ({}, {}, tierDict, len(self.tiers))
 	
 	def removeTier(self, idTier):
 		"""Removes a tier by id, returns 0 if succesfull"""

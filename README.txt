@@ -1,4 +1,4 @@
-pympi version 0.5 
+pympi version 0.5
 2013-09-19
 =====
 
@@ -18,10 +18,12 @@ Run:
 
 Then you can just run for example:
 >>> from pympi import Praat, Elan
+>>> help(Elan.Eaf)
+>>> help(Praat.TextGrid)
 
 The phonetizer can be used by putting it in the same folder as your script.
 
 TODO
 ====
-- Transfer tier between Elan files
 - Add time series to Elan files
+- Extract a time frame of that elan file
