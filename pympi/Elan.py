@@ -9,7 +9,7 @@ class Eaf:
 	
 	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'&lt;'}
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
-"""
+	"""
 	#Document root data
 	annotationDocument = {}
 	#File header
@@ -39,7 +39,7 @@ class Eaf:
 
 	#new timeslot and annotation value
 	new_time, new_ann = 0, 0
-"""
+	"""
 
 ###IO OPERATIONS
 	def __init__(self, filePath=None):
