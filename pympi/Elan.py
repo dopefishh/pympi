@@ -419,6 +419,19 @@ class Eaf:
 			del self.timeslots[t]
 	
 ###ADVANCED FUNCTIONS
+	def shiftAnnotations(self, time):
+		"""Returns a copy of the object with the shift in the desired ms(negative for right shift, positive for left shift)"""
+		if time < 0:
+			e = self.extract(-1*time, self.getFullTimeInterval()[1])
+		else:
+			e = self.extract(0, self.getFullTimeInterval()[1]-time)
+		for tier in e.tiers.itervalues():
+			for ann in tier[0].itervalues():
+				e.timeslots[ann[0]] = e.timeslots[ann[0]]+offset
+				e.timeslots[ann[1]] = e.timeslots[ann[1]]+offset
+		e.cleanTimeSlots()
+		return e
+
 	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=30):
 		"""Glues all the continues annotations together"""
 		if tierName is None: tierName = '%s_glued' % tier
