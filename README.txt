@@ -26,4 +26,3 @@ The phonetizer can be used by putting it in the same folder as your script.
 TODO
 ====
 - Add time series to Elan files
-- Extract a time frame of that elan file
