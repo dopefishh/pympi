@@ -9,6 +9,7 @@ class Eaf:
 	
 	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'&lt;'}
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
+	
 	"""
 	annotationDocument      - Dict of all annotationdocument TAG entries.
 	fileheader              - String of the header(xml version etc).
@@ -34,6 +35,7 @@ class Eaf:
 
 ###IO OPERATIONS
 	def __init__(self, filePath=None, deflingtype='default-lt'):
+		"""Constructor, builds an elan object from file(if given) or an empty one"""
 		now = localtime()
 		self.annotationDocument = {'AUTHOR':'Elan.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now[0], now[1], now[2], now[3], now[4], now[5], now[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
 		self.fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -110,6 +112,7 @@ class Eaf:
 					self.external_refs.append((elem.attrib['EXT_REF_ID'], elem.attrib['TYPE'], elem.attrib['VALUE']))
 	
 	def tofile(self, filePath):
+		"""Exports the eaf object to a file give by the path"""
 		xmlFormat = lambda k, d: '' if d[k] is None else '%s="%s"' % (k, d[k])
 		xmlPrint = lambda t, x, c: '<%s %s%s>' % (t, ' '.join([xmlFormat(key, x) for key in sorted(x.keys())]), c)
 		tabs = 0
@@ -420,7 +423,7 @@ class Eaf:
 	
 ###ADVANCED FUNCTIONS
 	def shiftAnnotations(self, time):
-		"""Returns a copy of the object with the shift in the desired ms(negative for right shift, positive for left shift)"""
+		"""Returns a copy of the object with the timeshift of the desired ms (negative for right shift, positive for left shift)"""
 		if time < 0:
 			e = self.extract(-1*time, self.getFullTimeInterval()[1])
 		else:
