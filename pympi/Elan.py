@@ -20,7 +20,7 @@ class Eaf:
 	timeslots               - Timeslot data: {TimslotID -> time(ms)}
 	tiers                   - Tier data: {TierName -> (alignedAnnotations, referenceAnnotations, attributes, ordinal)}, 
 	                            alignedAnnotations    : {annotationId -> (beginTs, endTs, value, svg_ref)}
-	                            referenceAnnotations: {annotationId -> (reference, value, previous, svg_ref)}
+	                            referenceAnnotations  : {annotationId -> (reference, value, previous, svg_ref)}
 	linguistic_types        - Linguistic type data {id -> attrib}
 	locales                 - List of locale data: [attrib]
 	constraints             - Constraint data: {stereotype -> description}
@@ -487,7 +487,7 @@ class Eaf:
 
 	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None):
 		"""Creates a tier out of the gaps and overlap between two tiers, returns the fto data, returns None if one of the tiers doesn't exist"""
-		if tier1 not in self.tiers() or tier2 not in self.tiers():
+		if tier1 not in self.tiers or tier2 not in self.tiers:
 			return None
 		if tierName is None:
 			tierName = '%s_%s_go' % (tier1, tier2)
