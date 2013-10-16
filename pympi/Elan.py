@@ -113,7 +113,7 @@ class Eaf:
 	
 	def tofile(self, filePath):
 		"""Exports the eaf object to a file give by the path"""
-		xmlFormat = lambda k, d: '' if d[k] is None else '%s="%s"' % (k, d[k])
+		xmlFormat = lambda k, d: '' if d[k] is None else '%s="%s"' % (self.html_escape(k), self.html_escape(d[k]))
 		xmlPrint = lambda t, x, c: '<%s %s%s>' % (t, ' '.join([xmlFormat(key, x) for key in sorted(x.keys())]), c)
 		tabs = 0
 		with open(filePath, 'w') as f:
@@ -422,6 +422,30 @@ class Eaf:
 			del self.timeslots[t]
 	
 ###ADVANCED FUNCTIONS
+	def generateAnnotationConcat(self, tiers, start, end):
+		"""Generates a general value combining all the unique values within the tiers given"""
+		return '_'.join(set(d[2] for t in tiers if t in self.tiers for d in self.getAnnotationDatasBetweenTimes(t, start, end)))
+
+	def mergeTiers(self, tiers, tiernew=None, gaptresh=1):
+		"""Merges the given tiers together in the new tier, returns 0 if succesfull"""
+		if len([t for t in tiers if t not in self.tiers]) > 0:
+			return 1	
+		if tiernew is None: 
+			tiernew = '_'.join(tiers) + '_Merged'
+		self.removeTier(tiernew)
+		self.addTier(tiernew)
+		timepts = sorted(set.union(\
+			*[set(j for j in xrange(d[0], d[1])) for d in\
+				[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
+		if len(timepts) !=0:
+			start = timepts[0]
+			for i in xrange(1, len(timepts)):
+				if timepts[i]-timepts[i-1] > gaptresh:
+					self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+					start = timepts[i]
+			self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+		return 0
+
 	def shiftAnnotations(self, time):
 		"""Returns a copy of the object with the timeshift of the desired ms (negative for right shift, positive for left shift)"""
 		if time < 0:
@@ -436,11 +460,13 @@ class Eaf:
 		return e
 
 	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=30):
-		"""Glues all the continues annotations together"""
-		if tierName is None: tierName = '%s_glued' % tier
+		"""Glues all the continues annotations together, returns 0 if succesfull"""
+		if tier not in self.tiers():
+			return 1
+		if tierName is None: 
+			tierName = '%s_glued' % tier
 		self.removeTier(tierName)
 		self.addTier(tierName)
-
 		tierData = sorted(self.getAnnotationDataForTier(tier), key=lambda a: a[0])
 		currentAnn = None
 		for i in xrange(0, len(tierData)):
@@ -453,13 +479,16 @@ class Eaf:
 				currentAnn = tierData[i]
 		if currentAnn is not None:
 			self.insertAnnotation(tierName, currentAnn[0], tierData[len(tierData)-1][1], currentAnn[2])
+		return 0
 
 	def getFullTimeInterval(self):
 		"""Returns a tuple (start, end) of the full time frame"""
 		return (min(self.timeslots.itervalues()), max(self.timeslots.itervalues()))
 
 	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None):
-		"""Creates a tier out of the gaps and overlap between two tiers, returns the fto data"""
+		"""Creates a tier out of the gaps and overlap between two tiers, returns the fto data, returns None if one of the tiers doesn't exist"""
+		if tier1 not in self.tiers() or tier2 not in self.tiers():
+			return None
 		if tierName is None:
 			tierName = '%s_%s_go' % (tier1, tier2)
 		if tierType is None:
@@ -473,7 +502,8 @@ class Eaf:
 
 	def getGapsAndOverlapsDuration(self, tier1, tier2, progressbar=False):
 		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist."""
-		if tier1 not in self.tiers or tier2 not in self.tiers: return None
+		if tier1 not in self.tiers or tier2 not in self.tiers: 
+			return None
 		spkr1anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier1][0].values())
 		spkr2anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier2][0].values())
 		line1 = []
