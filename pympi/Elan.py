@@ -434,9 +434,8 @@ class Eaf:
 			tiernew = '_'.join(tiers) + '_Merged'
 		self.removeTier(tiernew)
 		self.addTier(tiernew)
-		timepts = sorted(set.union(\
-			*[set(j for j in xrange(d[0], d[1])) for d in\
-				[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
+		allAnn = [ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]
+		timepts = sorted(set.union(*[set(j for j in xrange(d[0], d[1])) for d in allAnn]))
 		if len(timepts) !=0:
 			start = timepts[0]
 			for i in xrange(1, len(timepts)):
@@ -459,15 +458,16 @@ class Eaf:
 		e.cleanTimeSlots()
 		return e
 
-	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=30):
+	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=30, filt=[]):
 		"""Glues all the continues annotations together, returns 0 if succesfull"""
-		if tier not in self.tiers():
+		if tier not in self.tiers:
 			return 1
 		if tierName is None: 
 			tierName = '%s_glued' % tier
 		self.removeTier(tierName)
 		self.addTier(tierName)
 		tierData = sorted(self.getAnnotationDataForTier(tier), key=lambda a: a[0])
+		tierData = [t for t in tierData if t[2] not in filt]
 		currentAnn = None
 		for i in xrange(0, len(tierData)):
 			if currentAnn is None:
@@ -485,7 +485,7 @@ class Eaf:
 		"""Returns a tuple (start, end) of the full time frame"""
 		return (min(self.timeslots.itervalues()), max(self.timeslots.itervalues()))
 
-	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, tierType=None):
+	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, maxlen=-1, tierType=None):
 		"""Creates a tier out of the gaps and overlap between two tiers, returns the fto data, returns None if one of the tiers doesn't exist"""
 		if tier1 not in self.tiers or tier2 not in self.tiers:
 			return None
@@ -495,12 +495,12 @@ class Eaf:
 			tierType = self.linguistic_types.keys()[0]
 		self.removeTier(tierName)
 		self.addTier(tierName, tierType)
-		ftos = self.getGapsAndOverlapsDuration(tier1, tier2)
+		ftos = self.getGapsAndOverlapsDuration(tier1, tier2, maxlen)
 		for fto in ftos:
 			self.insertAnnotation(tierName, fto[1], fto[2], fto[0])
 		return ftos
 
-	def getGapsAndOverlapsDuration(self, tier1, tier2, progressbar=False):
+	def getGapsAndOverlapsDuration(self, tier1, tier2, maxlen=-1, progressbar=False):
 		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist."""
 		if tier1 not in self.tiers or tier2 not in self.tiers: 
 			return None
@@ -535,15 +535,19 @@ class Eaf:
 		for i in xrange(len(line1)):
 			if line1[i][0] == 'N':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					ftos.append(('G12_%s_%s' % (tier1, tier2) if line1[i-1][0]=='1' else 'G21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+#					ftos.append(('G12_%s_%s' % (tier1, tier2) if line1[i-1][0]=='1' else 'G21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+					ftos.append(('G12' if line1[i-1][0]=='1' else 'G21', line1[i][1], line1[i][2]))
 				else:
-					ftos.append(('P_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
+#					ftos.append(('P_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
+					ftos.append(('P1' if line1[i-1][0]=='1' else 'P2', line1[i][1], line1[i][2]))
 			elif line1[i][0] == 'B':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					ftos.append(('O12_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+#					ftos.append(('O12_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+					ftos.append(('O12' if line1[i-1][0] else 'O21', line1[i][1], line1[i][2]))
 				else:
-					ftos.append(('B_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
-		return ftos
+#					ftos.append(('B_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
+					ftos.append(('B1' if line1[i-1][0]=='1' else 'B2', line1[i][1], line1[i][2]))
+		return [f for f in ftos if maxlen==-1 or abs(f[2]-f[1])<maxlen]
 
 ###LINGUISTIC TYPE FUNCTIONS
 	def createControlledVocabulary(self, cvEntries, cvId, description=''):
