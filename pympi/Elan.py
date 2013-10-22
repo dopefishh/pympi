@@ -260,9 +260,9 @@ class Eaf:
 		try:
 			del(self.tiers[idTier])
 			self.cleanTimeSlots()
-			return 1
-		except KeyError:	
 			return 0
+		except KeyError:	
+			return 1
 
 	def getTierNames(self):
 		"""Returns a list of tiernames"""
@@ -412,6 +412,7 @@ class Eaf:
 
 	def cleanTimeSlots(self):
 		"""Removes all the unused timeslots"""
+		return
 		tsInTier = []
 		for t in self.tiers.itervalues():
 			for an in t[0].itervalues():
@@ -429,14 +430,15 @@ class Eaf:
 	def mergeTiers(self, tiers, tiernew=None, gaptresh=1):
 		"""Merges the given tiers together in the new tier, returns 0 if succesfull"""
 		if len([t for t in tiers if t not in self.tiers]) > 0:
-			return 1	
+			return 1        
 		if tiernew is None: 
 			tiernew = '_'.join(tiers) + '_Merged'
 		self.removeTier(tiernew)
 		self.addTier(tiernew)
-		allAnn = [ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]
-		timepts = sorted(set.union(*[set(j for j in xrange(d[0], d[1])) for d in allAnn]))
-		if len(timepts) !=0:
+		timepts = sorted(set.union(\
+						*[set(j for j in xrange(d[0], d[1])) for d in\
+						[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
+		if len(timepts) > 1:
 			start = timepts[0]
 			for i in xrange(1, len(timepts)):
 				if timepts[i]-timepts[i-1] > gaptresh:
@@ -444,6 +446,25 @@ class Eaf:
 					start = timepts[i]
 			self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
 		return 0
+
+#	def mergeTiers(self, tiers, tiernew=None, gaptresh=1):
+#		"""Merges the given tiers together in the new tier, returns 0 if succesfull"""
+#		if len([t for t in tiers if t not in self.tiers]) > 0:
+#			return 1	
+#		if tiernew is None: 
+#			tiernew = '_'.join(tiers) + '_Merged'
+#		self.removeTier(tiernew)
+#		self.addTier(tiernew)
+#		allAnn = [ann for tier in self.tiers for ann in self.getAnnotationDataForTier(tier)]
+#		timepts = sorted(set.union(*[set(j for j in xrange(d[0], d[1])) for d in allAnn]))
+#		if len(timepts) > 1:
+#			start = timepts[0]
+#			for i in xrange(1, len(timepts)):
+#				if timepts[i]-timepts[i-1] > gaptresh:
+#					self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+#					start = timepts[i]
+#			self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+#		return 0
 
 	def shiftAnnotations(self, time):
 		"""Returns a copy of the object with the timeshift of the desired ms (negative for right shift, positive for left shift)"""
@@ -458,7 +479,7 @@ class Eaf:
 		e.cleanTimeSlots()
 		return e
 
-	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=30, filt=[]):
+	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=85, filt=[]):
 		"""Glues all the continues annotations together, returns 0 if succesfull"""
 		if tier not in self.tiers:
 			return 1
