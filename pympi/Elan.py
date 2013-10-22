@@ -502,6 +502,7 @@ class Eaf:
 
 	def getGapsAndOverlapsDuration(self, tier1, tier2, maxlen=-1, progressbar=False):
 		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist."""
+		import pdb
 		if tier1 not in self.tiers or tier2 not in self.tiers: 
 			return None
 		spkr1anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier1][0].values())
@@ -518,7 +519,7 @@ class Eaf:
 				ty = 'B'
 			elif in1:			#Only 1 speaking
 				if last[0] == '1': continue
-				ty = '2'
+				ty = '1'
 			elif in2:			#Only 2 speaking
 				if last[0] == '2': continue
 				ty = '2'
@@ -535,18 +536,14 @@ class Eaf:
 		for i in xrange(len(line1)):
 			if line1[i][0] == 'N':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-#					ftos.append(('G12_%s_%s' % (tier1, tier2) if line1[i-1][0]=='1' else 'G21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
-					ftos.append(('G12' if line1[i-1][0]=='1' else 'G21', line1[i][1], line1[i][2]))
+					ftos.append(('G12_%s_%s' % (tier1, tier2) if line1[i-1][0]=='1' else 'G21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
 				else:
-#					ftos.append(('P_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
-					ftos.append(('P1' if line1[i-1][0]=='1' else 'P2', line1[i][1], line1[i][2]))
+					ftos.append(('P_%s' % (tier1 if line1[i-1][0]=='1' else tier2), line1[i][1], line1[i][2]))
 			elif line1[i][0] == 'B':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-#					ftos.append(('O12_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
-					ftos.append(('O12' if line1[i-1][0] else 'O21', line1[i][1], line1[i][2]))
+					ftos.append(('O12_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
 				else:
-#					ftos.append(('B_%s' % tier1 if line1[i-1][0]=='1' else tier2, line1[i][1], line1[i][2]))
-					ftos.append(('B1' if line1[i-1][0]=='1' else 'B2', line1[i][1], line1[i][2]))
+					ftos.append(('B_%s' % (tier1 if line1[i-1][0]=='1' else tier2), line1[i][1], line1[i][2]))
 		return [f for f in ftos if maxlen==-1 or abs(f[2]-f[1])<maxlen]
 
 ###LINGUISTIC TYPE FUNCTIONS
