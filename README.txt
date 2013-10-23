@@ -11,6 +11,8 @@ Elan.py
 PhonetizerSpanish.py
 	A class that converts spanish words to phone representation.
 
+In the test folder there is a case example of the fto function(gaps and overlaps)
+
 INSTALLATION
 ============
 Run:
