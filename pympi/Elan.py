@@ -6,10 +6,10 @@ from time import localtime
 
 class Eaf:
 	"""Class to work with elan files"""
-	
+
 	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'&lt;'}
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
-	
+
 	"""
 	annotationDocument      - Dict of all annotationdocument TAG entries.
 	fileheader              - String of the header(xml version etc).
@@ -19,15 +19,15 @@ class Eaf:
 	linked_file_descriptors - List of all secondary linked files: [{attributes}].
 	timeslots               - Timeslot data: {TimslotID -> time(ms)}
 	tiers                   - Tier data: {TierName -> (alignedAnnotations, referenceAnnotations, attributes, ordinal)}, 
-	                            alignedAnnotations    : {annotationId -> (beginTs, endTs, value, svg_ref)}
-	                            referenceAnnotations  : {annotationId -> (reference, value, previous, svg_ref)}
+								alignedAnnotations    : {annotationId -> (beginTs, endTs, value, svg_ref)}
+								referenceAnnotations  : {annotationId -> (reference, value, previous, svg_ref)}
 	linguistic_types        - Linguistic type data {id -> attrib}
 	locales                 - List of locale data: [attrib]
 	constraints             - Constraint data: {stereotype -> description}
 	controlled_vocabularies - Controlled vocabulary data: {id -> (description, entries)}
-	                            entry: {value -> description}
+								entry: {value -> description}
 	external refs           - External refs [extref]
-	                            extref: [id, type, value]
+								extref: [id, type, value]
 	lexicon_refs            - Lexicon refs [lexref]
 	new_time                - Next new timeslot
 	new_ann                 - Next new annotation ID
@@ -110,7 +110,7 @@ class Eaf:
 					self.lexicon_refs.append(elem.attrib)
 				elif elem.tag == 'EXTERNAL_REF':
 					self.external_refs.append((elem.attrib['EXT_REF_ID'], elem.attrib['TYPE'], elem.attrib['VALUE']))
-	
+
 	def tofile(self, filePath):
 		"""Exports the eaf object to a file give by the path"""
 		xmlFormat = lambda k, d: '' if d[k] is None else '%s="%s"' % (self.html_escape(k), self.html_escape(d[k]))
@@ -254,7 +254,7 @@ class Eaf:
 			self.tiers[tierId] = ({}, {}, {'TIER_ID':tierId, 'LINGUISTIC_TYPE_REF':ling, 'PARENT_REF':parent, 'PARTICIPANT':part, 'DEFAULT_LOCALE':locale, 'ANNOTATOR':ann}, len(self.tiers))
 		else:
 			self.tiers[tierId] = ({}, {}, tierDict, len(self.tiers))
-	
+
 	def removeTier(self, idTier):
 		"""Removes a tier by id, returns 0 if succesfull"""
 		try:
@@ -267,7 +267,7 @@ class Eaf:
 	def getTierNames(self):
 		"""Returns a list of tiernames"""
 		return self.tiers.keys()
-	
+
 	def getIndexOfTier(self, idTier):
 		"""Returns the index of a given tier, -1 if tier doesn't exist"""
 		try:
@@ -356,7 +356,7 @@ class Eaf:
 			return 0
 		except KeyError: 
 			return 1
-	
+
 	def updatePrevAnnotationForAnnotation(self, idTier, idAnn, idPrevAnn=None):
 		"""Updates the previous annotation value in an annotation in the given tier, returns 0 if succesfull"""
 		try:
@@ -413,7 +413,7 @@ class Eaf:
 	def cleanTimeSlots(self):
 		"""Removes all the unused timeslots"""
 		return
-		tsInTier = []
+	tsInTier = []
 		for t in self.tiers.itervalues():
 			for an in t[0].itervalues():
 				tsInTier.append(an[0])
@@ -421,7 +421,7 @@ class Eaf:
 		tsNotInTier = [t for t in self.timeslots.iterkeys() if t not in tsInTier]
 		for t in tsNotInTier:
 			del self.timeslots[t]
-	
+
 ###ADVANCED FUNCTIONS
 	def generateAnnotationConcat(self, tiers, start, end):
 		"""Generates a general value combining all the unique values within the tiers given"""
@@ -436,10 +436,10 @@ class Eaf:
 		self.removeTier(tiernew)
 		self.addTier(tiernew)
 		timepts = sorted(set.union(\
-						*[set(j for j in xrange(d[0], d[1])) for d in\
-						[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
-		if len(timepts) > 1:
-			start = timepts[0]
+				*[set(j for j in xrange(d[0], d[1])) for d in\
+				[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
+				if len(timepts) > 1:
+					start = timepts[0]
 			for i in xrange(1, len(timepts)):
 				if timepts[i]-timepts[i-1] > gaptresh:
 					self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
@@ -449,14 +449,10 @@ class Eaf:
 
 	def shiftAnnotations(self, time):
 		"""Returns a copy of the object with the timeshift of the desired ms (negative for right shift, positive for left shift)"""
-		if time < 0:
-			e = self.extract(-1*time, self.getFullTimeInterval()[1])
-		else:
-			e = self.extract(0, self.getFullTimeInterval()[1]-time)
+		e = self.extract(-1*time, self.getFullTimeInterval()[1]) if time < 0 else self.extract(0, self.getFullTimeInterval()[1]-time)
 		for tier in e.tiers.itervalues():
 			for ann in tier[0].itervalues():
-				e.timeslots[ann[0]] = e.timeslots[ann[0]]+offset
-				e.timeslots[ann[1]] = e.timeslots[ann[1]]+offset
+				e.timeslots[ann[0]],e.timeslots[ann[1]] = e.timeslots[ann[0]]+offset, e.timeslots[ann[1]]+offset
 		e.cleanTimeSlots()
 		return e
 
