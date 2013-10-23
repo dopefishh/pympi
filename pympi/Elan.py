@@ -447,25 +447,6 @@ class Eaf:
 			self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
 		return 0
 
-#	def mergeTiers(self, tiers, tiernew=None, gaptresh=1):
-#		"""Merges the given tiers together in the new tier, returns 0 if succesfull"""
-#		if len([t for t in tiers if t not in self.tiers]) > 0:
-#			return 1	
-#		if tiernew is None: 
-#			tiernew = '_'.join(tiers) + '_Merged'
-#		self.removeTier(tiernew)
-#		self.addTier(tiernew)
-#		allAnn = [ann for tier in self.tiers for ann in self.getAnnotationDataForTier(tier)]
-#		timepts = sorted(set.union(*[set(j for j in xrange(d[0], d[1])) for d in allAnn]))
-#		if len(timepts) > 1:
-#			start = timepts[0]
-#			for i in xrange(1, len(timepts)):
-#				if timepts[i]-timepts[i-1] > gaptresh:
-#					self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
-#					start = timepts[i]
-#			self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
-#		return 0
-
 	def shiftAnnotations(self, time):
 		"""Returns a copy of the object with the timeshift of the desired ms (negative for right shift, positive for left shift)"""
 		if time < 0:
@@ -562,9 +543,9 @@ class Eaf:
 					ftos.append(('P_%s' % (tier1 if line1[i-1][0]=='1' else tier2), line1[i][1], line1[i][2]))
 			elif line1[i][0] == 'B':
 				if i!=0 and i<len(line1)-1 and line1[i-1][0] != line1[i+1][0]:
-					ftos.append(('O12_%s_%s' % (tier1, tier2)  if line1[i-1][0] else 'O21_%s_%s' % (tier2, tier1), line1[i][1], line1[i][2]))
+					ftos.append(('O12_%s_%s' % ((tier1, tier2) if line1[i-1][0] else 'O21_%s_%s' % (tier2, tier1)), line1[i][1], line1[i][2]))
 				else:
-					ftos.append(('B_%s' % (tier1 if line1[i-1][0]=='1' else tier2), line1[i][1], line1[i][2]))
+					ftos.append(('B_%s_%s' % ((tier1, tier2) if line1[i-1][0]=='1' else (tier2, tier1)), line1[i][1], line1[i][2]))
 		return [f for f in ftos if maxlen==-1 or abs(f[2]-f[1])<maxlen]
 
 ###LINGUISTIC TYPE FUNCTIONS
