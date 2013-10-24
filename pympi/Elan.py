@@ -413,7 +413,7 @@ class Eaf:
 	def cleanTimeSlots(self):
 		"""Removes all the unused timeslots"""
 		return
-	tsInTier = []
+		tsInTier = []
 		for t in self.tiers.itervalues():
 			for an in t[0].itervalues():
 				tsInTier.append(an[0])
@@ -432,19 +432,19 @@ class Eaf:
 		if len([t for t in tiers if t not in self.tiers]) > 0:
 			return 1        
 		if tiernew is None: 
-			tiernew = '_'.join(tiers) + '_Merged'
+			tiernew = '%s_Merged' % '_'.join(tiers)
 		self.removeTier(tiernew)
 		self.addTier(tiernew)
 		timepts = sorted(set.union(\
 				*[set(j for j in xrange(d[0], d[1])) for d in\
 				[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
-				if len(timepts) > 1:
-					start = timepts[0]
-			for i in xrange(1, len(timepts)):
-				if timepts[i]-timepts[i-1] > gaptresh:
-					self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
-					start = timepts[i]
-			self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+		if len(timepts) > 1:
+			start = timepts[0]
+		for i in xrange(1, len(timepts)):
+			if timepts[i]-timepts[i-1] > gaptresh:
+				self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+				start = timepts[i]
+		self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
 		return 0
 
 	def shiftAnnotations(self, time):
@@ -456,7 +456,19 @@ class Eaf:
 		e.cleanTimeSlots()
 		return e
 
-	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=85, filt=[]):
+	def filterAnnotations(self, tier, tierName=None, filtin=None, filtex=None):
+		"""Filters the tier, retuns 0 when succesfull"""
+		if tier not in self.tiers:
+			return 1
+		if tierName is None:
+			tierName = '%s_filter' % tier1
+		self.removeTier(tierName)
+		self.addTier(tierName)
+		for a in [b for b in self.getAnnotationDataForTier(tier) if (filtex is None or b[2] not in filtex) and (filtin is None or b[2] in filtin)]:
+			self.insertAnnotation(tierName, a[0], a[1], a[2])
+		return 0
+
+	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=85, filtin=None, filtex=None):
 		"""Glues all the continues annotations together, returns 0 if succesfull"""
 		if tier not in self.tiers:
 			return 1
@@ -465,7 +477,7 @@ class Eaf:
 		self.removeTier(tierName)
 		self.addTier(tierName)
 		tierData = sorted(self.getAnnotationDataForTier(tier), key=lambda a: a[0])
-		tierData = [t for t in tierData if t[2] not in filt]
+		tierData = [t for t in tierData if (filtin is None or t[2] in filtin) and (filtex is None or t[2] not in filtex)]
 		currentAnn = None
 		for i in xrange(0, len(tierData)):
 			if currentAnn is None:
@@ -488,7 +500,7 @@ class Eaf:
 		if tier1 not in self.tiers or tier2 not in self.tiers:
 			return None
 		if tierName is None:
-			tierName = '%s_%s_go' % (tier1, tier2)
+			tierName = '%s_%s_ftos' % (tier1, tier2)
 		if tierType is None:
 			tierType = self.linguistic_types.keys()[0]
 		self.removeTier(tierName)
