@@ -26,3 +26,9 @@ Then you can just run for example:
 TODO
 ====
 - clean timeslots function is too slow(disabled for now)
+- add warnings when a function failed(right now only return code)
+
+KNOWM BUGS
+==========
+Sometimes the media descriptor gets copied, still don't know how that happens.
+

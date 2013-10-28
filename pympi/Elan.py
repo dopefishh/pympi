@@ -3,6 +3,7 @@
 
 from xml.etree import ElementTree
 from time import localtime
+import warnings
 
 class Eaf:
 	"""Class to work with elan files"""
@@ -198,9 +199,9 @@ class Eaf:
 	def toTextGrid(self, filePath, excludedTiers=[]):
 		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. (warning some data is lost because praat can hold less datatypes)"""
 		try:
-			from Praat import TextGrid
+			from pympi.Praat import TextGrid
 		except ImportError:
-			print 'Please install the TextGrid module from the TextGrid.py file found at https://github.com/dopefishh/pympi'
+			warnings.warn('Please install the pympi.Praat module from the pympi module found at https://github.com/dopefishh/pympi')
 			exit()
 		tgout = TextGrid()
 		for tier in [a for a in self.tiers.iterkeys() if a not in excludedTiers]:
@@ -246,6 +247,7 @@ class Eaf:
 				eafObj.insertAnnotation(tierName, ann[0], ann[1], ann[2])
 			return 0
 		except KeyError:
+			warnings.warn('copyTier: Tier non existent!')
 			return 1
 
 	def addTier(self, tierId, ling='default-lt', parent=None, locale=None, part=None, ann=None, tierDict=None):
@@ -255,13 +257,14 @@ class Eaf:
 		else:
 			self.tiers[tierId] = ({}, {}, tierDict, len(self.tiers))
 
-	def removeTier(self, idTier):
+	def removeTier(self, idTier, check=False):
 		"""Removes a tier by id, returns 0 if succesfull"""
 		try:
 			del(self.tiers[idTier])
 			self.cleanTimeSlots()
 			return 0
 		except KeyError:	
+			if check: warnings.warn('removeTier: Tier non existent!\n' + 'looking for: ' + idTier)
 			return 1
 
 	def getTierNames(self):
@@ -273,6 +276,7 @@ class Eaf:
 		try:
 			return self.tiers[idTier][3]
 		except KeyError:
+			warnings.warn('getIndexOfTier: Tier non existent!')
 			return -1
 
 	def getParameterDictForTier(self, idTier):
@@ -280,21 +284,15 @@ class Eaf:
 		try:
 			return self.tiers[idTier][2]
 		except KeyError:
+			warnings.warn('getParameterDictForTier: Tier non existent!')
 			return None
-
-	def appendRefAnnotationToTier(self, idTier, idAnn, strAnn, annRef, prevAnn=None, svg_ref=None):
-		"""Adds a ref annotation to the given tier, returns 0 if succesfull"""
-		try:
-			self.tiers[idTier][1][idAnn] = (annRef, strAnn, prevAnn, svg_ref)
-			return 0
-		except KeyError: 
-			return 1
 
 	def childTiersFor(self, idTier):
 		"""Returns a list of all the children of the given tier, None if the tier doesn't exist"""
 		try:
 			return [m for m in self.tiers.iterkeys() if 'PARENT_REF' in self.tiers[m][2] and self.tiers[m][2]['PARENT_REF']==idTier]
 		except KeyError:
+			warnings.warn('childTierFor: Tier non existent!')
 			return None
 
 	def getLinguisticTypeForTier(self, idTier):
@@ -302,17 +300,16 @@ class Eaf:
 		try:
 			return self.tiers[idTier][2]['LINGUISTIC_TYPE_REF']
 		except KeyError:
+			warnings.warn('getLinguisticTypeForTier: Tier non existent!')
 			return None
 
 	def getLocaleForTier(self, idTier):
 		"""Returns the locale of the given tier, '' if none and None if tier doesn't exist"""
 		try:
 			tier = self.tiers[idTier]
-			try:
-				return tier[2]['DEFAULT_LOCALE']
-			except KeyError:
-				return ''
+			return '' if 'DEFAULT_LOCALE' not in tier[2] else tier[2]['DEFAULT_LOCALE']
 		except KeyError:
+			warnings.warn('getLocaleForTier: Tier non existent!')
 			return None
 
 	def getParticipantForTier(self, idTier):
@@ -321,6 +318,7 @@ class Eaf:
 			tier = self.tiers[idTier]
 			return '' if 'PARTICIPANT' not in tier[2] else tier[2]['PARTICIPANT']
 		except KeyError:
+			warnings.warn('getParticipantForTier: Tier non existent')
 			return None
 
 ###ANNOTATION OPERATIONS
@@ -330,6 +328,7 @@ class Eaf:
 			a = self.tiers[idTier][0]
 			return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2]) for b in a.iterkeys()]
 		except KeyError:
+			warnings.warn('getAnnotationDataForTier: Tier non existent!')
 			return None
 
 	def getAnnotationDataAtTime(self, idTier, time):
@@ -338,6 +337,7 @@ class Eaf:
 			anns = self.tiers[idTier][0]
 			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[0]]<=time and self.timeslots[m[1]]>=time])
 		except KeyError:
+			warnings.warn('getAnnotationDataAtTime: Tier non existent!')
 			return None
 
 	def getAnnotationDatasBetweenTimes(self, idTier, start, end):
@@ -346,6 +346,7 @@ class Eaf:
 			anns = self.tiers[idTier][0]
 			return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2]) for m in anns.itervalues() if self.timeslots[m[1]]>=start and self.timeslots[m[0]]<=end])
 		except KeyError:
+			warnings.warn('getAnnotationDatasBetweenTimes: Tier non existent!')
 			return None
 
 	def removeAllAnnotationsFromTier(self, idTier):
@@ -355,6 +356,7 @@ class Eaf:
 			self.cleanTimeSlots()
 			return 0
 		except KeyError: 
+			warnings.warn('removeAllAnnotationsFromTier: Tier non existent!')
 			return 1
 
 	def updatePrevAnnotationForAnnotation(self, idTier, idAnn, idPrevAnn=None):
@@ -363,6 +365,7 @@ class Eaf:
 			self.tiers[idTier][1][idAnn][2] = idPrevAnn
 			return 0
 		except KeyError: 
+			warnings.warn('updatePrevAnnotationForAnnotation: Tier or annotation non existent!')
 			return 1
 
 	def insertAnnotation(self, idTier, start, end, value='', svg_ref=None):
@@ -373,6 +376,7 @@ class Eaf:
 			self.tiers[idTier][0][self.generateAnnotationId()] = (startTs, endTs, value, svg_ref)
 			return 0
 		except KeyError:
+			warnings.warn('insertAnnotation: Tier non existent')
 			return 1
 
 	def getRefAnnotationDataForTier(self, idTier):
@@ -380,6 +384,7 @@ class Eaf:
 		try:
 			return self.tiers[idTier][1]
 		except KeyError:
+			warnings.warn('getRefAnnotationDataForTier: Tier non existent!')
 			return None
 
 ###CONTROLLED VOCABULARY OPERATIONS
@@ -389,14 +394,16 @@ class Eaf:
 			self.linguistic_types[linguisticType]['CONTROLLED_VOCABULARY_REF'] = cvId
 			return 0
 		except KeyError:
+			warnings.warn('addControlledVocabularyToLinguisticType: Linguistic type non existent!')
 			return 1
 
 	def removeControlledVocabulary(self, cv):
 		"""Removes a controlled vocabulary, returns 0 if succesfull"""
 		try:
 			del(self.controlled_vocabularies[cv])
-			return 1
+			return 0
 		except KeyError:
+			warnings.warn('removeControlledVocabulary: Controlled vocabulary non existent!')
 			return 1
 
 ###HELPER FUNCTIONS
@@ -430,6 +437,7 @@ class Eaf:
 	def mergeTiers(self, tiers, tiernew=None, gaptresh=1):
 		"""Merges the given tiers together in the new tier, returns 0 if succesfull"""
 		if len([t for t in tiers if t not in self.tiers]) > 0:
+			warnings.warn('mergeTiers: One or more tiers non existent!')
 			return 1        
 		if tiernew is None: 
 			tiernew = '%s_Merged' % '_'.join(tiers)
@@ -459,6 +467,7 @@ class Eaf:
 	def filterAnnotations(self, tier, tierName=None, filtin=None, filtex=None):
 		"""Filters the tier, retuns 0 when succesfull"""
 		if tier not in self.tiers:
+			warnings.warn('filterAnnotations: Tier non existent!')
 			return 1
 		if tierName is None:
 			tierName = '%s_filter' % tier1
@@ -471,6 +480,7 @@ class Eaf:
 	def glueAnnotationsInTier(self, tier, tierName=None, treshhold=85, filtin=None, filtex=None):
 		"""Glues all the continues annotations together, returns 0 if succesfull"""
 		if tier not in self.tiers:
+			warnings.warn('glueAnnotationsInTier: Tier non existent!')
 			return 1
 		if tierName is None: 
 			tierName = '%s_glued' % tier
@@ -498,6 +508,7 @@ class Eaf:
 	def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None, maxlen=-1, tierType=None):
 		"""Creates a tier out of the gaps and overlap between two tiers, returns the fto data, returns None if one of the tiers doesn't exist"""
 		if tier1 not in self.tiers or tier2 not in self.tiers:
+			warnings.warn('createGapsAndOverlapsTier: One or more tiers non existent!')
 			return None
 		if tierName is None:
 			tierName = '%s_%s_ftos' % (tier1, tier2)
@@ -512,8 +523,8 @@ class Eaf:
 
 	def getGapsAndOverlapsDuration(self, tier1, tier2, maxlen=-1, progressbar=False):
 		"""Gives the gaps and overlaps between tiers in the format: (type, start, end), None if one of the tiers don't exist."""
-		import pdb
 		if tier1 not in self.tiers or tier2 not in self.tiers: 
+			warnings.warn('getGapsAndOverlapsDuration: One or more tiers non existent!')
 			return None
 		spkr1anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier1][0].values())
 		spkr2anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier2][0].values())
@@ -571,6 +582,7 @@ class Eaf:
 			del(self.linguistic_types[lingType])
 			return 0
 		except KeyError:
+			warnings.warn('removeLinguisticType: Linguistic type non existent!')
 			return 1
 
 	def addLinguisticType(self, lingtype, constraints, timealignable=False, graphicreferences=False, extref=None):
@@ -579,27 +591,14 @@ class Eaf:
 		if extref is not None:
 			self.linguistic_types[lingtype]['EXT_REF'] = extref
 
-	def getConstraintForLinguisticType(self, lingid):
-		"""Returns the constraints for the linguistic type. None if the type doesn't exist"""
-		try:
-			return self.linguistic_types[lingid]['CONSTRAINTS']
-		except KeyError:
-			return None
-
 	def getParameterDictForLinguisticType(self, lingid):
 		"""Returns all the info of a lingtype in a dictionary, None if type doesn't exist"""
 		try:
 			return self.linguistic_types[lingid]
 		except KeyError:
+			warnings.warn('getParameterDictForLinguisticType: Linguistic type non existent!')
 			return None
 
 	def hasLinguisticType(self, lingtype):
 		"""Returns if the given type is in the linguistic types"""
 		return lingtype in self.linguistic_types
-
-	def linguisticTypeIsTimeAlignable(self, lingid):
-		"""Returns if the given type is time alignable, None if the type doesn't exist"""
-		try:
-			return self.linguistic_types[lingid]['TIME_ALIGNABLE']
-		except KeyError:
-			return None
