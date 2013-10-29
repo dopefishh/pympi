@@ -438,8 +438,7 @@ class Eaf:
 		"""Removes all the unused timeslots"""
 		tsInTier = set(sum([a[0:2] for tier in self.tiers.itervalues() for a in tier[0].itervalues()], ()))
 		tsAvail = set(self.timeslots.iterkeys())
-		rem = tsInTier.symmetric_difference(tsAvail)
-		for a in rem:
+		for a in tsInTier.symmetric_difference(tsAvail):
 			del(self.timeslots[a])
 
 ###ADVANCED FUNCTIONS
