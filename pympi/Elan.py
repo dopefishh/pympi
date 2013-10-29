@@ -257,11 +257,18 @@ class Eaf:
 		else:
 			self.tiers[tierId] = ({}, {}, tierDict, len(self.tiers))
 
-	def removeTier(self, idTier, check=False):
+	def removeTiers(self, tiers):
+		"""Removes the given tiers"""
+		for a in tiers:
+			self.removeTier(a, check=False, clean=False)
+		self.cleanTimeSlots()
+
+	def removeTier(self, idTier, check=False, clean=True):
 		"""Removes a tier by id, returns 0 if succesfull"""
 		try:
 			del(self.tiers[idTier])
-			self.cleanTimeSlots()
+			if clean: 
+				self.cleanTimeSlots()
 			return 0
 		except KeyError:	
 			if check: warnings.warn('removeTier: Tier non existent!\n' + 'looking for: ' + idTier)
@@ -371,8 +378,8 @@ class Eaf:
 	def insertAnnotation(self, idTier, start, end, value='', svg_ref=None):
 		"""Add an annotation in the given tier, returns 0 if succesfull"""
 		try:
-			startTs, endTs = self.generateTsId(), self.generateTsId()
-			self.timeslots[startTs], self.timeslots[endTs] = start, end
+			startTs = self.generateTsId(start)
+			endTs = self.generateTsId(end)
 			self.tiers[idTier][0][self.generateAnnotationId()] = (startTs, endTs, value, svg_ref)
 			return 0
 		except KeyError:
@@ -409,25 +416,31 @@ class Eaf:
 ###HELPER FUNCTIONS
 	def generateAnnotationId(self):
 		"""Helper function to generate the newest annotation id"""
-		self.new_ann += 1
-		return 'a%d' % (self.new_ann) 
+		new = 1
+		anns = {int(ann[1:]) for tier in self.tiers.itervalues() for ann in tier[0].iterkeys()}
+		if len(anns) > 0:
+			newann = set(xrange(1, max(anns))).difference(anns)
+			new = max(anns)+1 if len(newann)==0 else sorted(newann)[0]
+		return 'a%d' % new
 
-	def generateTsId(self):
+	def generateTsId(self, time=None):
 		"""Helper function te generate the newest timeslot id"""
-		self.new_time += 1
-		return 'ts%d' % (self.new_time)
+		new = 1
+		tss = {int(x[2:]) for x in self.timeslots.iterkeys()}
+		if len(tss) > 0:
+			newts = set(xrange(1, max(tss))).difference(tss)
+			new = max(tss)+1 if len(newts)==0 else sorted(newts)[0]
+		ts = 'ts%d' % new
+		self.timeslots[ts] = time
+		return ts
 
 	def cleanTimeSlots(self):
 		"""Removes all the unused timeslots"""
-		return
-		tsInTier = []
-		for t in self.tiers.itervalues():
-			for an in t[0].itervalues():
-				tsInTier.append(an[0])
-				tsInTier.append(an[1])
-		tsNotInTier = [t for t in self.timeslots.iterkeys() if t not in tsInTier]
-		for t in tsNotInTier:
-			del self.timeslots[t]
+		tsInTier = set(sum([a[0:2] for tier in self.tiers.itervalues() for a in tier[0].itervalues()], ()))
+		tsAvail = set(self.timeslots.iterkeys())
+		rem = tsInTier.symmetric_difference(tsAvail)
+		for a in rem:
+			del(self.timeslots[a])
 
 ###ADVANCED FUNCTIONS
 	def generateAnnotationConcat(self, tiers, start, end):

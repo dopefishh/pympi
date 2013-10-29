@@ -1,112 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.6.xsd" AUTHOR="" DATE="2013-10-22T08:16:17+01:00" FORMAT="2.7" VERSION="2.7">
-    <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
-        <MEDIA_DESCRIPTOR MEDIA_URL="file:///home/marlub/Documents/BC-FULL/00/BC_00L_bre_C.wav" MIME_TYPE="audio/x-wav" RELATIVE_MEDIA_URL="../../../../marlub/Documents/BC-FULL/00/BC_00L_bre_C.wav"/>
-        <PROPERTY NAME="lastUsedAnnotationId">7</PROPERTY>
+<ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.6.xsd" AUTHOR="Elan.py" DATE="2013-10-29T10:16:36+00:00" FORMAT="2.7" VERSION="2.7">
+    <HEADER >
     </HEADER>
     <TIME_ORDER>
-        <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="0"/>
-        <TIME_SLOT TIME_SLOT_ID="ts2" TIME_VALUE="1629"/>
-        <TIME_SLOT TIME_SLOT_ID="ts3" TIME_VALUE="1790"/>
-        <TIME_SLOT TIME_SLOT_ID="ts4" TIME_VALUE="2630"/>
-        <TIME_SLOT TIME_SLOT_ID="ts5" TIME_VALUE="2820"/>
-        <TIME_SLOT TIME_SLOT_ID="ts6" TIME_VALUE="3660"/>
-        <TIME_SLOT TIME_SLOT_ID="ts7" TIME_VALUE="4280"/>
-        <TIME_SLOT TIME_SLOT_ID="ts8" TIME_VALUE="4690"/>
-        <TIME_SLOT TIME_SLOT_ID="ts9" TIME_VALUE="5050"/>
-        <TIME_SLOT TIME_SLOT_ID="ts10" TIME_VALUE="5800"/>
-        <TIME_SLOT TIME_SLOT_ID="ts11" TIME_VALUE="6240"/>
-        <TIME_SLOT TIME_SLOT_ID="ts12" TIME_VALUE="7560"/>
-        <TIME_SLOT TIME_SLOT_ID="ts13" TIME_VALUE="7990"/>
-        <TIME_SLOT TIME_SLOT_ID="ts14" TIME_VALUE="9550"/>
-        <TIME_SLOT TIME_SLOT_ID="ts15" TIME_VALUE="1630"/>
-        <TIME_SLOT TIME_SLOT_ID="ts16" TIME_VALUE="1790"/>
-        <TIME_SLOT TIME_SLOT_ID="ts17" TIME_VALUE="2630"/>
-        <TIME_SLOT TIME_SLOT_ID="ts18" TIME_VALUE="2821"/>
-        <TIME_SLOT TIME_SLOT_ID="ts19" TIME_VALUE="3661"/>
-        <TIME_SLOT TIME_SLOT_ID="ts20" TIME_VALUE="4280"/>
-        <TIME_SLOT TIME_SLOT_ID="ts21" TIME_VALUE="4690"/>
-        <TIME_SLOT TIME_SLOT_ID="ts22" TIME_VALUE="5051"/>
-        <TIME_SLOT TIME_SLOT_ID="ts23" TIME_VALUE="5801"/>
-        <TIME_SLOT TIME_SLOT_ID="ts24" TIME_VALUE="6240"/>
-        <TIME_SLOT TIME_SLOT_ID="ts25" TIME_VALUE="7561"/>
-        <TIME_SLOT TIME_SLOT_ID="ts26" TIME_VALUE="7990"/>
+        <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="1"/>
+        <TIME_SLOT TIME_SLOT_ID="ts2" TIME_VALUE="500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts3" TIME_VALUE="1000"/>
+        <TIME_SLOT TIME_SLOT_ID="ts4" TIME_VALUE="2000"/>
+        <TIME_SLOT TIME_SLOT_ID="ts5" TIME_VALUE="3000"/>
+        <TIME_SLOT TIME_SLOT_ID="ts6" TIME_VALUE="4500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts7" TIME_VALUE="1500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts8" TIME_VALUE="2500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts9" TIME_VALUE="3500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts10" TIME_VALUE="4000"/>
+        <TIME_SLOT TIME_SLOT_ID="ts11" TIME_VALUE="501"/>
+        <TIME_SLOT TIME_SLOT_ID="ts12" TIME_VALUE="1000"/>
+        <TIME_SLOT TIME_SLOT_ID="ts13" TIME_VALUE="1500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts14" TIME_VALUE="2001"/>
+        <TIME_SLOT TIME_SLOT_ID="ts15" TIME_VALUE="2501"/>
+        <TIME_SLOT TIME_SLOT_ID="ts16" TIME_VALUE="3000"/>
+        <TIME_SLOT TIME_SLOT_ID="ts17" TIME_VALUE="3500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts18" TIME_VALUE="4001"/>
     </TIME_ORDER>
-    <TIER LINGUISTIC_TYPE_REF="default-lt" TIER_ID="default"/>
-    <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="a" TIER_ID="a">
+    <TIER   LINGUISTIC_TYPE_REF="default-lt"   TIER_ID="speaker_a">
         <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
                 <ANNOTATION_VALUE>a</ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a3" TIME_SLOT_REF1="ts7" TIME_SLOT_REF2="ts10">
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a3" TIME_SLOT_REF1="ts5" TIME_SLOT_REF2="ts6">
                 <ANNOTATION_VALUE>a</ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a2" TIME_SLOT_REF1="ts3" TIME_SLOT_REF2="ts5">
-                <ANNOTATION_VALUE>a</ANNOTATION_VALUE>
-            </ALIGNABLE_ANNOTATION>
-        </ANNOTATION>
-    </TIER>
-    <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="b" TIER_ID="b">
-        <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a5" TIME_SLOT_REF1="ts11" TIME_SLOT_REF2="ts12">
-                <ANNOTATION_VALUE>a</ANNOTATION_VALUE>
-            </ALIGNABLE_ANNOTATION>
-        </ANNOTATION>
-        <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a4" TIME_SLOT_REF1="ts4" TIME_SLOT_REF2="ts6">
-                <ANNOTATION_VALUE>a</ANNOTATION_VALUE>
-            </ALIGNABLE_ANNOTATION>
-        </ANNOTATION>
-        <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a7" TIME_SLOT_REF1="ts8" TIME_SLOT_REF2="ts9">
-                <ANNOTATION_VALUE>a</ANNOTATION_VALUE>
-            </ALIGNABLE_ANNOTATION>
-        </ANNOTATION>
-        <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a6" TIME_SLOT_REF1="ts13" TIME_SLOT_REF2="ts14">
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a2" TIME_SLOT_REF1="ts3" TIME_SLOT_REF2="ts4">
                 <ANNOTATION_VALUE>a</ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
     </TIER>
-    <TIER   LINGUISTIC_TYPE_REF="default-lt"   TIER_ID="fto-ab">
+    <TIER   LINGUISTIC_TYPE_REF="default-lt"   TIER_ID="speaker_b">
         <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a11" TIME_SLOT_REF1="ts21" TIME_SLOT_REF2="ts22">
-                <ANNOTATION_VALUE>B_a_b</ANNOTATION_VALUE>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a5" TIME_SLOT_REF1="ts9" TIME_SLOT_REF2="ts10">
+                <ANNOTATION_VALUE>b</ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a10" TIME_SLOT_REF1="ts19" TIME_SLOT_REF2="ts20">
-                <ANNOTATION_VALUE>G21_b_a</ANNOTATION_VALUE>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a4" TIME_SLOT_REF1="ts7" TIME_SLOT_REF2="ts8">
+                <ANNOTATION_VALUE>b</ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
-        <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a13" TIME_SLOT_REF1="ts25" TIME_SLOT_REF2="ts26">
-                <ANNOTATION_VALUE>P_b</ANNOTATION_VALUE>
-            </ALIGNABLE_ANNOTATION>
-        </ANNOTATION>
-        <ANNOTATION>
-            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a12" TIME_SLOT_REF1="ts23" TIME_SLOT_REF2="ts24">
-                <ANNOTATION_VALUE>G12_a_b</ANNOTATION_VALUE>
-            </ALIGNABLE_ANNOTATION>
-        </ANNOTATION>
+    </TIER>
+    <TIER   LINGUISTIC_TYPE_REF="default-lt"   TIER_ID="speaker_a_speaker_b_ftos">
         <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a9" TIME_SLOT_REF1="ts17" TIME_SLOT_REF2="ts18">
-                <ANNOTATION_VALUE>O12_a_b</ANNOTATION_VALUE>
+                <ANNOTATION_VALUE>B_speaker_a_speaker_b</ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a8" TIME_SLOT_REF1="ts15" TIME_SLOT_REF2="ts16">
-                <ANNOTATION_VALUE>P_a</ANNOTATION_VALUE>
+                <ANNOTATION_VALUE>G21_speaker_b_speaker_a</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a7" TIME_SLOT_REF1="ts13" TIME_SLOT_REF2="ts14">
+                <ANNOTATION_VALUE>O12_speaker_a_speaker_b</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a6" TIME_SLOT_REF1="ts11" TIME_SLOT_REF2="ts12">
+                <ANNOTATION_VALUE>P_speaker_a</ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
     </TIER>
-    <LINGUISTIC_TYPE GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="default-lt" TIME_ALIGNABLE="true"/>
-    <CONSTRAINT STEREOTYPE="Time_Subdivision" DESCRIPTION="Time subdivision of parent annotation's time interval, no time gaps allowed within this interval"/>
-    <CONSTRAINT STEREOTYPE="Symbolic_Subdivision" DESCRIPTION="Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered"/>
-    <CONSTRAINT STEREOTYPE="Symbolic_Association" DESCRIPTION="1-1 association with a parent annotation"/>
-    <CONSTRAINT STEREOTYPE="Included_In" DESCRIPTION="Time alignable annotations within the parent annotation's time interval, gaps are allowed"/>
+    <LINGUISTIC_TYPE  GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="default-lt" TIME_ALIGNABLE="false"/>
 </ANNOTATION_DOCUMENT>
