@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import warnings
+
 class TextGrid:
 	"""Class to read and write in TextGrid files, note all the times are in seconds"""
 	
@@ -48,16 +50,19 @@ class TextGrid:
 
 	def removeTier(self, name):
 		"""Removes a tier, when the tier doesn't exist nothing happens"""
-		try:
+		if name in self.tiers:
 			del(self.tiers[name])
-		except:
-			pass
+			return 0
+		else
+			warning.warn('removeTier: tier non existent')
+			return 1
 
 	def getTier(self, name):
 		"""Returns the tier if it exists else it returns None"""
 		try:
 			return self.tiers[name]
 		except KeyError:
+			warnings.warn('getTier: tier non existent')
 			return None
 
 	def getTiers(self):
@@ -146,18 +151,19 @@ class TextGrid:
 						f.write('%stext = "%s"\n' % (' '*12, ints[it][2]))
 
 	def toEaf(self, filepath):
-		"""Converts the object to elan's eaf format, pointtiers not converted"""
+		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
 		try:
 			from Elan import Eaf
 		except ImportError:
-			print 'Please install the Eaf module from the Elan.py file found at https://github.com/dopefishh/pympi'
-			exit()
+			warnings.warn('toEaf: Please install the Eaf module from the Elan.py file found at https://github.com/dopefishh/pympi')
+			return 1
 		eafOut = Eaf()
 		for tier in self.tiers:
 			eafOut.addTier(tier)
 			for annotation in self.tiers[tier].intervals:
 				eafOut.insertAnnotation(tier, int(annotation[0]*1000), int(annotation[1]*1000), annotation[2])
 		eafOut.tofile(filepath)
+		return 0
 
 class Tier:
 	"""Class to represent a TextGrid tier: IntervalTier or TextTier"""
@@ -213,21 +219,27 @@ class Tier:
 	def addPoint(self, point, value, check=True):
 		"""Adds a point to the tier"""
 		if self.tierType is not 'TextTier': 
-			raise Exception('Wrong tier type... Tier should be a TextTier')
+			warnings.warn('addPoint: Wrong tier type... Tier should be a TextTier')
+			return 1
 		elif check is False or point not in [i[0] for i in self.intervals]:
 			self.intervals.append((point, value))
 		else:
-			raise Exception('No overlap is allowed!')
+			warnings.warn('addPoint: No overlap is allowed!')
+			return 1
+		return 1
 		self.__update()
 
 	def addInterval(self, begin, end, value, check=True, threshhold=5):
 		"""Add an interval to the tier, with overlap checking(default: true)"""
 		if self.tierType is not 'IntervalTier': 
-			raise Exception('Wrong tier type... Tier should be a IntervalTier')
+			warnings.warn('addInterval: Wrong tier type... Tier should be a IntervalTier')
+			return 1
 		if check is False or len([i for i in self.intervals if begin<i[1]-threshhold and end>i[0]+threshhold]) == 0:
 			self.intervals.append((begin, end, value))
 		else:
-			raise Exception('No overlap is allowed!')
+			warnings.warn('addInterval: No overlap is allowed!')
+			return 1
+		return 0
 		self.__update()
 
 	def removeInterval(self, time):

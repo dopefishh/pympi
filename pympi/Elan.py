@@ -197,18 +197,19 @@ class Eaf:
 			f.write('</ANNOTATION_DOCUMENT>')
 
 	def toTextGrid(self, filePath, excludedTiers=[]):
-		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. (warning some data is lost because praat can hold less datatypes)"""
+		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. returns 0 when succesfull"""
 		try:
 			from pympi.Praat import TextGrid
 		except ImportError:
 			warnings.warn('Please install the pympi.Praat module from the pympi module found at https://github.com/dopefishh/pympi')
-			exit()
+			return 1
 		tgout = TextGrid()
 		for tier in [a for a in self.tiers.iterkeys() if a not in excludedTiers]:
 			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
 		tgout.tofile(filePath)
+		return 0
 
 	def extract(self, start, end):
 		"""Extracts a timeframe from the eaf file and returns it"""
@@ -227,14 +228,10 @@ class Eaf:
 	def getTimeSeries(self):
 		"""Gives a list of all time secondary linked txt files"""
 		return [m for m in self.linked_file_descriptors if 'text/plain' in m['MIME_TYPE']]
-
-	def getVideo(self):
-		"""Gives a list of all video files"""
-		return [m for m in self.media_descriptors if 'video' in m['MIME_TYPE']]
-
-	def getAudio(self):
-		"""Gives a list of all audio files"""
-		return [m for m in self.media_descriptors if 'audio' in m['MIME_TYPE']]
+	
+	def getLinkedFiles(self):
+		"""Gives a list of all media files"""
+		return self.media_descriptors
 
 ###TIER OPERATIONS
 	def copyTier(self, eafObj, tierName):
