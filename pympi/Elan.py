@@ -452,16 +452,20 @@ class Eaf:
 			tiernew = '%s_Merged' % '_'.join(tiers)
 		self.removeTier(tiernew)
 		self.addTier(tiernew)
-		timepts = sorted(set.union(\
+		try:
+			timepts = sorted(set.union(\
 				*[set(j for j in xrange(d[0], d[1])) for d in\
 				[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
+		except:
+			print 'hmm'
+			return 
 		if len(timepts) > 1:
 			start = timepts[0]
-		for i in xrange(1, len(timepts)):
-			if timepts[i]-timepts[i-1] > gaptresh:
-				self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
-				start = timepts[i]
-		self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+			for i in xrange(1, len(timepts)):
+				if timepts[i]-timepts[i-1] > gaptresh:
+					self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+					start = timepts[i]
+			self.insertAnnotation(tiernew, start, timepts[i-1], self.generateAnnotationConcat(tiers, start, timepts[i-1]))
 		return 0
 
 	def shiftAnnotations(self, time):

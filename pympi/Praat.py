@@ -53,7 +53,7 @@ class TextGrid:
 		if name in self.tiers:
 			del(self.tiers[name])
 			return 0
-		else
+		else:
 			warning.warn('removeTier: tier non existent')
 			return 1
 
