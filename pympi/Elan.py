@@ -454,11 +454,11 @@ class Eaf:
 		self.addTier(tiernew)
 		try:
 			timepts = sorted(set.union(\
-				*[set(j for j in xrange(d[0], d[1])) for d in\
-				[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
-		except:
-			print 'hmm'
-			return 
+			*[set(j for j in xrange(d[0], d[1])) for d in\
+			[ann for tier in tiers for ann in self.getAnnotationDataForTier(tier)]]))
+		except TypeError:
+			warnings.warn('mergeTiers: No annotations found!')
+			return 1
 		if len(timepts) > 1:
 			start = timepts[0]
 			for i in xrange(1, len(timepts)):
@@ -480,7 +480,7 @@ class Eaf:
 	def filterAnnotations(self, tier, tierName=None, filtin=None, filtex=None):
 		"""Filters the tier, retuns 0 when succesfull"""
 		if tier not in self.tiers:
-			warnings.warn('filterAnnotations: Tier non existent!')
+			warnings.warn('filterAnnotations: Tier non existent!' + tier)
 			return 1
 		if tierName is None:
 			tierName = '%s_filter' % tier1
@@ -543,7 +543,11 @@ class Eaf:
 		spkr2anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]]) for a in self.tiers[tier2][0].values())
 		line1 = []
 		isin = lambda x, lst: False if len([i for i in lst if i[0]<=x and i[1]>=x])==0 else True
-		minmax = (min(spkr1anns[0][0], spkr2anns[0][0]), max(spkr1anns[-1][1], spkr2anns[-1][1]))
+		try:
+			minmax = (min(spkr1anns[0][0], spkr2anns[0][0]), max(spkr1anns[-1][1], spkr2anns[-1][1]))
+		except IndexError:
+			warnings.warn('getGapsAndOverlapsDuration: No annotations found...')
+			return []
 		last = (1, minmax[0])
 		lastP = 0
 		for ts in xrange(*minmax):
