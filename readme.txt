@@ -28,4 +28,4 @@ TODO
 
 KNOWN BUGS
 ==========
-Sometimes the media descriptor gets copied, still don't know how that happens.
+Sometimes the media descriptor gets copied, still don't know how that happens and is not reproducable yet.
