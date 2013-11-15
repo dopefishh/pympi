@@ -26,6 +26,6 @@ Then you can just run for example:
 TODO
 ====
 
+
 KNOWN BUGS
 ==========
-Sometimes the media descriptor gets copied, still don't know how that happens and is not reproducable yet.
