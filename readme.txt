@@ -25,7 +25,6 @@ Then you can just run for example:
 
 TODO
 ====
-- Use the xml class to write the files
 
 KNOWN BUGS
 ==========

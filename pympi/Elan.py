@@ -25,8 +25,8 @@ class Eaf:
 	linguistic_types        - Linguistic type data {id -> attrib}
 	locales                 - List of locale data: [attrib]
 	constraints             - Constraint data: {stereotype -> description}
-	controlled_vocabularies - Controlled vocabulary data: {id -> (description, entries)}
-								entry: {value -> description}
+	controlled_vocabularies - Controlled vocabulary data: {id -> (description, entries, ext_ref)}
+								entry: [{description -> (attrib, value)}]
 	external refs           - External refs [extref]
 								extref: [id, type, value]
 	lexicon_refs            - Lexicon refs [lexref]
@@ -102,17 +102,85 @@ class Eaf:
 				elif elem.tag == 'CONTROLLED_VOCABULARY':
 					vcId = elem.attrib['CV_ID']
 					descr = elem.attrib['DESCRIPTION']
+					ext_ref = None if 'EXT_REF' not in elem.attrib else elem.attrib['EXT_REF']
 					entries = {}
 					for elem1 in elem:
 						if elem1.tag == 'CV_ENTRY':
-							entries[elem1.text] = elem1.attrib['DESCRIPTION']
-					self.controlled_vocabularies[vcId] = (descr, entries)
+							entries[elem1.attrib['DESCRIPTION']] = (elem1.attrib, elem1.text)
+					self.controlled_vocabularies[vcId] = (descr, entries, ext_ref)
 				elif elem.tag == 'LEXICON_REF':
 					self.lexicon_refs.append(elem.attrib)
 				elif elem.tag == 'EXTERNAL_REF':
 					self.external_refs.append((elem.attrib['EXT_REF_ID'], elem.attrib['TYPE'], elem.attrib['VALUE']))
 
-	def tofile(self, filePath):
+	
+	def tofile(self, filepath):
+		"""Exports the eaf object to a file given by the path"""
+		rmNone = lambda x: dict((k, str(v).decode('UTF-8')) for k, v in x.iteritems() if v is not None)
+		ANNOTATION_DOCUMENT = ElementTree.Element('ANNOTATION_DOCUMENT', self.annotationDocument)
+		
+		HEADER = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'HEADER', self.header)
+		for m in self.media_descriptors:
+			ElementTree.SubElement(HEADER, 'MEDIA_DESCRIPTOR', rmNone(m))
+		for m in self.properties:
+			ElementTree.SubElement(HEADER, 'PROPERTY', rmNone(m[1])).text = str(m[0]).decode('UTF-8')
+		for m in self.linked_file_descriptors:
+			ElementTree.SubElement(HEADER, 'LINKED_FILE_DESCRIPTOR', rmNone(m))
+
+		TIME_ORDER = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'TIME_ORDER')
+		for t in self.timeslots.iteritems():
+			ElementTree.SubElement(TIME_ORDER, 'TIME_SLOT', rmNone({'TIME_SLOT_ID': t[0], 'TIME_VALUE': t[1]}))
+
+		for t in self.tiers.iteritems():
+			tier = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'TIER', rmNone(t[1][2]))
+			for a in t[1][0].iteritems():
+				ann = ElementTree.SubElement(tier, 'ANNOTATION')
+				alan = ElementTree.SubElement(ann, 'ALIGNABLE_ANNOTATION', rmNone({'ANNOTATION_ID': a[0], 'TIME_SLOT_REF1': a[1][0], 'TIME_SLOT_REF2': a[1][1], 'SVG_REF': a[1][3]}))
+				ElementTree.SubElement(alan, 'ANNOTATION_VALUE').text = str(a[1][2]).decode('UTF-8')
+			for a in t[1][1].iteritems():
+				ann = ElementTree.SubElement(tier, 'ANNOTATION')
+				rean = ElementTree.SubElement(ann, 'REF_ANNOTATION', rmNone({'ANNOTATION_ID': a[0], 'ANNOTATION_REF': a[1][0], 'PREVIOUS_ANNOTATION': a[1][2], 'SVG_REF': a[1][3]}))
+				ElementTree.SubElement(rean, 'ANNOTATION_VALUE').text = str(a[1][1]).decode('UTF-8')
+
+		for l in self.linguistic_types.itervalues():
+			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LINGUISTIC_TYPE', rmNone(l))
+		
+		for l in self.constraints.iteritems():
+			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'CONSTRAINT', rmNone({'STEREOTYPE':l[0], 'DESCRIPTION':l[1]}))
+
+		for l in self.controlled_vocabularies.iteritems():
+			cv = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'CONTROLLED_VOCABULARY', rmNone({'CV_ID':l[0], 'DESCRIPTION':l[1][0], 'EXT_REF':l[1][2]}))
+			for c in l[1][1].itervalues():
+				ElementTree.SubElement(cv, 'CV_ENTRY', rmNone(c[0])).text = str(c[1]).decode('UTF-8')
+		
+		for r in self.external_refs:
+			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'EXTERNAL_REF', rmNone({'EXT_REF_ID':r[0], 'TYPE':r[1], 'VALUE':r[2]}))
+
+		for l in self.locales:
+			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LOCALE', l)
+		
+		for l in self.lexicon_refs:
+			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LEXICON_REF', l)
+	
+		def indent(el, level=0):
+			i = "\n" + level*"\t"
+			if len(el):
+				if not el.text or not el.text.strip():
+					el.text = i+"\t"
+				if not el.tail or not el.tail.strip():
+					el.tail = i
+				for elem in el:
+					indent(elem, level+1)
+				if not el.tail or not el.tail.strip():
+					el.tail = i
+			else:
+				if level and (not el.tail or not el.tail.strip()):
+					el.tail = i
+
+		indent(ANNOTATION_DOCUMENT)
+		ElementTree.ElementTree(ANNOTATION_DOCUMENT).write(filepath, xml_declaration=True, encoding='UTF-8')	
+
+	def tofileOLD(self, filePath):
 		"""Exports the eaf object to a file give by the path"""
 		xmlFormat = lambda k, d: '' if d[k] is None else '%s="%s"' % (self.html_escape(k), self.html_escape(d[k]))
 		xmlPrint = lambda t, x, c: '<%s %s%s>' % (t, ' '.join([xmlFormat(key, x) for key in sorted(x.keys())]), c)
