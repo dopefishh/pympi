@@ -29,3 +29,8 @@ TODO
 
 KNOWN BUGS
 ==========
+
+HISTORY
+=======
+2013-11-15
+	- Rewritten the tofile function, the old function is a bit faster but less reliable. The old function can still be used by using tofileOLD()
