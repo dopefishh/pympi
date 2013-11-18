@@ -1,6 +1,6 @@
 pympi version 0.5
 2013-11-18
-=====
+==========
 
 CONTENTS
 ========
@@ -14,7 +14,7 @@ CONTENTS
 INSTALLATION
 ============
 Run:
-# python setup.py -install 
+# python setup.py install 
 
 Then you can just run for example:
 >>> from pympi import Praat, Elan
