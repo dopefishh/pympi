@@ -1,5 +1,5 @@
 pympi version 0.5
-2013-09-19
+2013-11-18
 =====
 
 CONTENTS
@@ -8,13 +8,11 @@ CONTENTS
 	A python class to read, write, edit and create praat's TextGrid files.
 ./pympi/Elan.py
 	A python class to read, write, edit and create ELAN's eaf files.
-./PhonetizerSpanish.py
-	A class that converts spanish words to phone representation.
 ./test/*
 	In the test folder there is a case example of the fto function(gaps and overlaps)
 
-INSTALLATION PYMPI PACKAGE
-==========================
+INSTALLATION
+============
 Run:
 # python setup.py -install 
 
@@ -22,10 +20,6 @@ Then you can just run for example:
 >>> from pympi import Praat, Elan
 >>> help(Elan.Eaf)
 >>> help(Praat.TextGrid)
-
-TODO
-====
-
 
 KNOWN BUGS
 ==========
