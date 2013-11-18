@@ -37,7 +37,13 @@ class Eaf:
 	def __init__(self, filePath=None, deflingtype='default-lt'):
 		"""Constructor, builds an elan object from file(if given) or an empty one"""
 		now = localtime()
-		self.annotationDocument = {'AUTHOR':'Elan.py', 'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now[0], now[1], now[2], now[3], now[4], now[5], now[8]), 'VERSION':'2.7', 'FORMAT':'2.7'}
+		self.annotationDocument = {
+				'AUTHOR':'Elan.py', 
+				'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now[0], now[1], now[2], now[3], now[4], now[5], now[8]), 
+				'VERSION':'2.7', 
+				'FORMAT':'2.7', 
+				'xmlns:xsi':'http://www.w3.org/2001/XMLSchema-instance', 
+				'xsi:noNamespaceSchemaLocation':'http://www.mpi.nl/tools/elan/EAFv2.7.xsd'}
 		self.fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
 		self.controlled_vocabularies, self.constraints, self.tiers, self.linguistic_types, self.header, self.timeslots = {}, {}, {}, {}, {}, {}
 		self.external_refs, self.lexicon_refs, self.locales, self.media_descriptors, self.properties, self.linked_file_descriptors = [], [], [], [], [], []
@@ -46,8 +52,6 @@ class Eaf:
 		if filePath is None:
 			self.addLinguisticType(deflingtype, None)
 		else:
-			with open(filePath, 'r') as f:
-				self.fileheader = f.readlines()[0]
 			treeRoot = ElementTree.parse(filePath).getroot()
 			self.annotationDocument.update(treeRoot.attrib)
 			del(self.annotationDocument['{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation'])
@@ -162,10 +166,10 @@ class Eaf:
 			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LEXICON_REF', l)
 	
 		def indent(el, level=0):
-			i = "\n" + level*"\t"
+			i = '\n' + level*'\t'
 			if len(el):
 				if not el.text or not el.text.strip():
-					el.text = i+"\t"
+					el.text = i+'\t'
 				if not el.tail or not el.tail.strip():
 					el.tail = i
 				for elem in el:
