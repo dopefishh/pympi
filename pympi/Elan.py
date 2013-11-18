@@ -12,26 +12,25 @@ class Eaf:
 	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
 
 	"""
+	All the class variables present:
 	annotationDocument      - Dict of all annotationdocument TAG entries.
 	fileheader              - String of the header(xml version etc).
 	header                  - Dict of the header TAG entries.
 	media_descriptors       - List of all linked files: [{attributes}]
-	properties              - List of all properties: [{attributes]}
+	properties              - List of all properties: [{attributes}]
 	linked_file_descriptors - List of all secondary linked files: [{attributes}].
 	timeslots               - Timeslot data: {TimslotID -> time(ms)}
 	tiers                   - Tier data: {TierName -> (alignedAnnotations, referenceAnnotations, attributes, ordinal)}, 
-								alignedAnnotations    : {annotationId -> (beginTs, endTs, value, svg_ref)}
-								referenceAnnotations  : {annotationId -> (reference, value, previous, svg_ref)}
-	linguistic_types        - Linguistic type data {id -> attrib}
-	locales                 - List of locale data: [attrib]
+								alignedAnnotations    : [{annotationId -> (beginTs, endTs, value, svg_ref)}]
+								referenceAnnotations  : [{annotationId -> (reference, value, previous, svg_ref)}]
+	linguistic_types        - Linguistic type data [{id -> attrib}]
+	locales                 - List of locale data: [{attrib}]
 	constraints             - Constraint data: {stereotype -> description}
 	controlled_vocabularies - Controlled vocabulary data: {id -> (description, entries, ext_ref)}
-								entry: [{description -> (attrib, value)}]
+								entry: {description -> (attrib, value)}
 	external refs           - External refs [extref]
 								extref: [id, type, value]
-	lexicon_refs            - Lexicon refs [lexref]
-	new_time                - Next new timeslot
-	new_ann                 - Next new annotation ID
+	lexicon_refs            - Lexicon refs [attribs]
 	"""
 
 ###IO OPERATIONS
