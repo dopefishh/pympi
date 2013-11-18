@@ -13,3 +13,4 @@ a.insertAnnotation('speaker_b', 3500, 4000, 'b')
 a.createGapsAndOverlapsTier('speaker_a', 'speaker_b')
 
 a.tofile('fto.eaf')
+a.tofileXMLbeta('ftox.eaf')
