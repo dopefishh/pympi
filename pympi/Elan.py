@@ -6,19 +6,15 @@ from time import localtime
 import warnings
 
 class Eaf:
-	"""Class to work with elan files"""
+	"""Class to work with elan files
 
-	html_escape_table = {'&':'&amp;', '"': '&quot;', '\'':'&apos;', '<':'&gt;', '>':'&lt;'}
-	html_escape = lambda _, s: ''.join(c if c not in _.html_escape_table else _.html_escape_table[c] for c in s)
-
-	"""
 	All the class variables present:
 	annotationDocument      - Dict of all annotationdocument TAG entries.
 	fileheader              - String of the header(xml version etc).
 	header                  - Dict of the header TAG entries.
-	media_descriptors       - List of all linked files: [{attributes}]
-	properties              - List of all properties: [{attributes}]
-	linked_file_descriptors - List of all secondary linked files: [{attributes}].
+	media_descriptors       - List of all linked files: [{attrib}]
+	properties              - List of all properties: [{attrib}]
+	linked_file_descriptors - List of all secondary linked files: [{attrib}].
 	timeslots               - Timeslot data: {TimslotID -> time(ms)}
 	tiers                   - Tier data: {TierName -> (alignedAnnotations, referenceAnnotations, attributes, ordinal)}, 
 								alignedAnnotations    : [{annotationId -> (beginTs, endTs, value, svg_ref)}]
@@ -30,15 +26,15 @@ class Eaf:
 								entry: {description -> (attrib, value)}
 	external refs           - External refs [extref]
 								extref: [id, type, value]
-	lexicon_refs            - Lexicon refs [attribs]
+	lexicon_refs            - Lexicon refs [{attribs}]
 	"""
 
 ###IO OPERATIONS
-	def __init__(self, filePath=None, deflingtype='default-lt'):
+	def __init__(self, filePath=None, author='Elan.py', deflingtype='default-lt'):
 		"""Constructor, builds an elan object from file(if given) or an empty one"""
 		now = localtime()
 		self.annotationDocument = {
-				'AUTHOR':'Elan.py', 
+				'AUTHOR':author, 
 				'DATE':'%.4d-%.2d-%.2dT%.2d:%.2d:%.2d+%.2d:00' % (now[0], now[1], now[2], now[3], now[4], now[5], now[8]), 
 				'VERSION':'2.7', 
 				'FORMAT':'2.7', 
@@ -85,7 +81,7 @@ class Eaf:
 									annotStart = elem2.attrib['TIME_SLOT_REF1']
 									annotEnd = elem2.attrib['TIME_SLOT_REF2']
 									svg_ref = None if 'SVG_REF' not in elem2.attrib else elem2.attrib['SVG_REF']
-									align[annotID] = (annotStart, annotEnd, '' if list(elem2)[0].text is None else self.html_escape(list(elem2)[0].text.encode('utf-8')), svg_ref)
+									align[annotID] = (annotStart, annotEnd, '' if list(elem2)[0].text is None else list(elem2)[0].text, svg_ref)
 								elif elem2.tag == 'REF_ANNOTATION':
 									annotRef = elem2.attrib['ANNOTATION_REF']
 									previous = None if 'PREVIOUS_ANNOTATION' not in elem2.attrib else elem2.attrib['PREVIOUS_ANNOTATION']
@@ -93,7 +89,7 @@ class Eaf:
 									if int(annotID[1:])>self.new_ann:
 										self.new_ann = int(annotID[1:])
 									svg_ref = None if 'SVG_REF' not in elem2.attrib else elem2.attrib['SVG_REF']
-									ref[annotId] = (annotRef, '' if list(elem2)[0].text is None else self.html_escape(list(elem2)[0].text.encode('utf-8')), previous, svg_ref) 
+									ref[annotId] = (annotRef, '' if list(elem2)[0].text is None else list(elem2)[0].text, previous, svg_ref) 
 					self.tiers[tierId] = (align, ref, elem.attrib, tierNumber)
 					tierNumber += 1
 				elif elem.tag == 'LINGUISTIC_TYPE':
@@ -116,7 +112,7 @@ class Eaf:
 				elif elem.tag == 'EXTERNAL_REF':
 					self.external_refs.append((elem.attrib['EXT_REF_ID'], elem.attrib['TYPE'], elem.attrib['VALUE']))
 
-	
+
 	def tofile(self, filepath):
 		"""Exports the eaf object to a file given by the path"""
 		rmNone = lambda x: dict((k, str(v).decode('UTF-8')) for k, v in x.iteritems() if v is not None)
@@ -131,7 +127,7 @@ class Eaf:
 			ElementTree.SubElement(HEADER, 'LINKED_FILE_DESCRIPTOR', rmNone(m))
 
 		TIME_ORDER = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'TIME_ORDER')
-		for t in self.timeslots.iteritems():
+		for t in sorted(self.timeslots.iteritems(), key=lambda x: int(x[0][2:])):
 			ElementTree.SubElement(TIME_ORDER, 'TIME_SLOT', rmNone({'TIME_SLOT_ID': t[0], 'TIME_VALUE': t[1]}))
 
 		for t in self.tiers.iteritems():
@@ -148,6 +144,9 @@ class Eaf:
 		for l in self.linguistic_types.itervalues():
 			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LINGUISTIC_TYPE', rmNone(l))
 		
+		for l in self.locales:
+			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LOCALE', l)
+
 		for l in self.constraints.iteritems():
 			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'CONSTRAINT', rmNone({'STEREOTYPE':l[0], 'DESCRIPTION':l[1]}))
 
@@ -158,9 +157,6 @@ class Eaf:
 		
 		for r in self.external_refs:
 			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'EXTERNAL_REF', rmNone({'EXT_REF_ID':r[0], 'TYPE':r[1], 'VALUE':r[2]}))
-
-		for l in self.locales:
-			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LOCALE', l)
 		
 		for l in self.lexicon_refs:
 			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LEXICON_REF', l)
@@ -182,90 +178,6 @@ class Eaf:
 
 		indent(ANNOTATION_DOCUMENT)
 		ElementTree.ElementTree(ANNOTATION_DOCUMENT).write(filepath, xml_declaration=True, encoding='UTF-8')	
-
-	def tofileOLD(self, filePath):
-		"""Exports the eaf object to a file give by the path"""
-		xmlFormat = lambda k, d: '' if d[k] is None else '%s="%s"' % (self.html_escape(k), self.html_escape(d[k]))
-		xmlPrint = lambda t, x, c: '<%s %s%s>' % (t, ' '.join([xmlFormat(key, x) for key in sorted(x.keys())]), c)
-		tabs = 0
-		with open(filePath, 'w') as f:
-			f.write('%s%s' % ('    '*tabs, self.fileheader))
-			f.write('%s<ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.6.xsd"%s\n' % ('    '*tabs, xmlPrint('', self.annotationDocument, '')[1:]))
-			#HEADER
-			tabs += 1
-			f.write('%s%s\n' % ('    '*tabs, xmlPrint('HEADER', self.header, '')))
-			tabs += 1
-			for m in self.media_descriptors:
-				f.write('%s%s\n' % ('    '*tabs, xmlPrint('MEDIA_DESCRIPTOR', m, '/')))
-			for m in self.properties:
-				f.write('%s%s%s</PROPERTY>\n' % ('    '*tabs, xmlPrint('PROPERTY', m[1], ''), m[0]))
-			for m in self.linked_file_descriptors:
-				f.write('%s%s\n' % ('    '*tabs, xmlPrint('LINKED_FILE_DESCRIPTOR', m, '/')))
-			tabs -= 1
-			f.write('%s</HEADER>\n' % ('    '*tabs))
-			#TIMESLOTS
-			f.write('%s<TIME_ORDER>\n' % ('    '*tabs))
-			tabs += 1
-			for m in sorted(self.timeslots.keys(), key=lambda x: int(x[2:])):
-				f.write('%s<TIME_SLOT TIME_SLOT_ID="%s" TIME_VALUE="%d"/>\n' % ('    '*tabs, m, self.timeslots[m]))
-			tabs -= 1
-			f.write('%s</TIME_ORDER>\n' % ('    '*tabs))
-			#TIERS
-			for m in sorted(self.tiers.keys(), key=lambda k:self.tiers[k][3]):
-				curtier = self.tiers[m]
-				if len(curtier[0]) == 0 and len(curtier[1]) == 0:
-					f.write('%s%s\n' % ('    '*tabs, xmlPrint('TIER', (self.tiers[m])[2], '/')))
-					continue
-				f.write('%s%s\n' % ('    '*tabs, xmlPrint('TIER', (self.tiers[m])[2], '')))
-				tabs += 1
-				#ALIGNABLE ANNOTATIONS
-				for n in curtier[0].keys():
-					f.write('%s<ANNOTATION>\n' % ('    '*tabs))
-					tabs += 1
-					curann = curtier[0][n]
-					f.write('%s<ALIGNABLE_ANNOTATION ANNOTATION_ID="%s" TIME_SLOT_REF1="%s" TIME_SLOT_REF2="%s"' % ('    '*tabs, n, curann[0], curann[1]))
-					if curann[3] is not None: f.write('SVG_REF="%s"' % curann[3])
-					f.write('>\n%s<ANNOTATION_VALUE>%s</ANNOTATION_VALUE>\n%s</ALIGNABLE_ANNOTATION>\n%s</ANNOTATION>\n' % ('    '*(tabs+1), curann[2], '    '*tabs, '    '*(tabs-1)))
-					tabs -= 1
-				#REF ANNOTATIONS
-				for n in curtier[1].keys():
-					f.write('%s<ANNOTATION>\n' % ('    '*tabs))
-					tabs += 1
-					curann = curtier[1][n]
-					f.write('%s<REF_ANNOTATION ANNOTATION_ID="%s" ANNOTATION_REF="%s" ' % ('    '*tabs, n, curann[0]))
-					if curann[1] is not None:
-						f.write('PREVIOUS_ANNOTATION="%s" ' % curann[2])
-					if curann[3] is not None:
-						f.write('EXT_REF="%s"' % curann[3])
-					f.write('>\n%s<ANNOTATION_VALUE>%s</ANNOTATION_VALUE>\n%s</REF_ANNOTATION>\n%s</ANNOTATION\n' % ('    '*(tabs+1), curann[1], '    '*tabs, '    '*(tabs-1)))
-					tabs -= 1
-				tabs -= 1
-				f.write('%s</TIER>\n' % ('    '*tabs))
-			#LINGUISTIC TYPES
-			for m in self.linguistic_types:
-				f.write('%s%s\n' % ('    '*tabs, xmlPrint('LINGUISTIC_TYPE', self.linguistic_types[m], '/')))
-			#LOCALES
-			for m in self.locales:
-				f.write('%s%s\n' % ('    '*tabs, xmlPrint('LOCALE', m, '/')))
-			#CONSTRAINTS
-			for m in self.constraints:
-				f.write('%s<CONSTRAINT STEREOTYPE="%s" DESCRIPTION="%s"/>\n' % ('    '*tabs, m, self.constraints[m]))
-			#CONTROLLED VOCABULARIES
-			for m in self.controlled_vocabularies.keys():
-				curvoc = self.controlled_vocabularies[m]
-				f.write('%s<CONTROLLED_VOCABULARY CV_ID="%s" DESCRIPTION="%s">\n' % ('    '*tabs, m, curvoc[0]))
-				tabs += 1
-				for n in curvoc[1].keys():
-					f.write('%s<CV_ENTRY DESCRIPTION="%s">%s</CV_ENTRY>\n' % ('    '*tabs, curvoc[1][n], n))
-				tabs -= 1
-				f.write('%s</CONTROLLED_VOCABULARY>\n' % '    '*tabs)
-			#EXTERNAL REFS
-			for m in self.external_refs:
-				f.write('%s<EXTERNAL_REF EXT_REF_ID="%s" TYPE="%s" VALUE="%s"/>\n' % ('    '*tabs, m[0], m[1], m[2]))
-			#LEXICON REFS
-			for m in self.lexicon_refs:
-				f.write('%s%s\n' % ('    '*tabs, xmlPrint('LEXICON_REF', m, '/')))
-			f.write('</ANNOTATION_DOCUMENT>')
 
 	def toTextGrid(self, filePath, excludedTiers=[]):
 		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. returns 0 when succesfull"""
@@ -596,10 +508,8 @@ class Eaf:
 			return None
 		if tierName is None:
 			tierName = '%s_%s_ftos' % (tier1, tier2)
-		if tierType is None:
-			tierType = self.linguistic_types.keys()[0]
 		self.removeTier(tierName)
-		self.addTier(tierName, tierType)
+		self.addTier(tierName)
 		ftos = self.getGapsAndOverlapsDuration(tier1, tier2, maxlen)
 		for fto in ftos:
 			self.insertAnnotation(tierName, fto[1], fto[2], fto[0])
