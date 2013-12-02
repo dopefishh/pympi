@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from xml.etree import ElementTree
+import EafIO
 from time import localtime
 import warnings
 
 class Eaf:
 	"""Class to work with elan files
-
-	All the class variables present:
+	Class variables
+	---------------
 	annotationDocument      - Dict of all annotationdocument TAG entries.
 	fileheader              - String of the header(xml version etc).
 	header                  - Dict of the header TAG entries.
@@ -32,6 +32,8 @@ class Eaf:
 ###IO OPERATIONS
 	def __init__(self, filePath=None, author='Elan.py', deflingtype='default-lt'):
 		"""Constructor, builds an elan object from file(if given) or an empty one"""
+		self.naiveGenAnn = False
+		self.naiveGenTS = False
 		now = localtime()
 		self.annotationDocument = {
 				'AUTHOR':author, 
@@ -40,7 +42,6 @@ class Eaf:
 				'FORMAT':'2.7', 
 				'xmlns:xsi':'http://www.w3.org/2001/XMLSchema-instance', 
 				'xsi:noNamespaceSchemaLocation':'http://www.mpi.nl/tools/elan/EAFv2.7.xsd'}
-		self.fileheader = '<?xml version="1.0" encoding="UTF-8"?>\n'
 		self.controlled_vocabularies, self.constraints, self.tiers, self.linguistic_types, self.header, self.timeslots = {}, {}, {}, {}, {}, {}
 		self.external_refs, self.lexicon_refs, self.locales, self.media_descriptors, self.properties, self.linked_file_descriptors = [], [], [], [], [], []
 		self.new_time, self.new_ann = 0, 0
@@ -48,136 +49,11 @@ class Eaf:
 		if filePath is None:
 			self.addLinguisticType(deflingtype, None)
 		else:
-			treeRoot = ElementTree.parse(filePath).getroot()
-			self.annotationDocument.update(treeRoot.attrib)
-			del(self.annotationDocument['{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation'])
-			tierNumber = 0
-			for elem in treeRoot:
-				if elem.tag == 'HEADER':
-					self.header.update(elem.attrib)
-					for elem1 in elem:
-						if elem1.tag == 'MEDIA_DESCRIPTOR':
-							self.media_descriptors.append(elem1.attrib)
-						elif elem1.tag == 'LINKED_FILE_DESCRIPTOR':
-							self.linked_file_descriptors.append(elem1.attrib)
-						elif elem1.tag == 'PROPERTY':
-							self.properties.append((elem1.text, elem1.attrib))
-				elif elem.tag == 'TIME_ORDER':
-					for elem1 in elem:
-						if int(elem1.attrib['TIME_SLOT_ID'][2:])>self.new_time:
-							self.new_time = int(elem1.attrib['TIME_SLOT_ID'][2:])
-						self.timeslots[elem1.attrib['TIME_SLOT_ID']] = int(elem1.attrib['TIME_VALUE'])
-				elif elem.tag == 'TIER':
-					tierId = elem.attrib['TIER_ID']
-					align = {}
-					ref = {}
-					for elem1 in elem:
-						if elem1.tag == 'ANNOTATION':
-							for elem2 in elem1:
-								if elem2.tag == 'ALIGNABLE_ANNOTATION':
-									annotID = elem2.attrib['ANNOTATION_ID']
-									if int(annotID[1:])>self.new_ann:
-										self.new_ann = int(annotID[1:])
-									annotStart = elem2.attrib['TIME_SLOT_REF1']
-									annotEnd = elem2.attrib['TIME_SLOT_REF2']
-									svg_ref = None if 'SVG_REF' not in elem2.attrib else elem2.attrib['SVG_REF']
-									align[annotID] = (annotStart, annotEnd, '' if list(elem2)[0].text is None else list(elem2)[0].text, svg_ref)
-								elif elem2.tag == 'REF_ANNOTATION':
-									annotRef = elem2.attrib['ANNOTATION_REF']
-									previous = None if 'PREVIOUS_ANNOTATION' not in elem2.attrib else elem2.attrib['PREVIOUS_ANNOTATION']
-									annotId = elem2.attrib['ANNOTATION_ID']
-									if int(annotID[1:])>self.new_ann:
-										self.new_ann = int(annotID[1:])
-									svg_ref = None if 'SVG_REF' not in elem2.attrib else elem2.attrib['SVG_REF']
-									ref[annotId] = (annotRef, '' if list(elem2)[0].text is None else list(elem2)[0].text, previous, svg_ref) 
-					self.tiers[tierId] = (align, ref, elem.attrib, tierNumber)
-					tierNumber += 1
-				elif elem.tag == 'LINGUISTIC_TYPE':
-					self.linguistic_types[elem.attrib['LINGUISTIC_TYPE_ID']] = elem.attrib
-				elif elem.tag == 'LOCALE':
-					self.locales.append(elem.attrib)
-				elif elem.tag == 'CONSTRAINT':
-					self.constraints[elem.attrib['STEREOTYPE']] = elem.attrib['DESCRIPTION']
-				elif elem.tag == 'CONTROLLED_VOCABULARY':
-					vcId = elem.attrib['CV_ID']
-					descr = elem.attrib['DESCRIPTION']
-					ext_ref = None if 'EXT_REF' not in elem.attrib else elem.attrib['EXT_REF']
-					entries = {}
-					for elem1 in elem:
-						if elem1.tag == 'CV_ENTRY':
-							entries[elem1.attrib['DESCRIPTION']] = (elem1.attrib, elem1.text)
-					self.controlled_vocabularies[vcId] = (descr, entries, ext_ref)
-				elif elem.tag == 'LEXICON_REF':
-					self.lexicon_refs.append(elem.attrib)
-				elif elem.tag == 'EXTERNAL_REF':
-					self.external_refs.append((elem.attrib['EXT_REF_ID'], elem.attrib['TYPE'], elem.attrib['VALUE']))
+			EafIO.parseEaf(filePath, self)
 
-
-	def tofile(self, filepath):
+	def tofile(self, filePath):
 		"""Exports the eaf object to a file given by the path"""
-		rmNone = lambda x: dict((k, str(v).decode('UTF-8')) for k, v in x.iteritems() if v is not None)
-		ANNOTATION_DOCUMENT = ElementTree.Element('ANNOTATION_DOCUMENT', self.annotationDocument)
-		
-		HEADER = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'HEADER', self.header)
-		for m in self.media_descriptors:
-			ElementTree.SubElement(HEADER, 'MEDIA_DESCRIPTOR', rmNone(m))
-		for m in self.properties:
-			ElementTree.SubElement(HEADER, 'PROPERTY', rmNone(m[1])).text = str(m[0]).decode('UTF-8')
-		for m in self.linked_file_descriptors:
-			ElementTree.SubElement(HEADER, 'LINKED_FILE_DESCRIPTOR', rmNone(m))
-
-		TIME_ORDER = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'TIME_ORDER')
-		for t in sorted(self.timeslots.iteritems(), key=lambda x: int(x[0][2:])):
-			ElementTree.SubElement(TIME_ORDER, 'TIME_SLOT', rmNone({'TIME_SLOT_ID': t[0], 'TIME_VALUE': t[1]}))
-
-		for t in self.tiers.iteritems():
-			tier = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'TIER', rmNone(t[1][2]))
-			for a in t[1][0].iteritems():
-				ann = ElementTree.SubElement(tier, 'ANNOTATION')
-				alan = ElementTree.SubElement(ann, 'ALIGNABLE_ANNOTATION', rmNone({'ANNOTATION_ID': a[0], 'TIME_SLOT_REF1': a[1][0], 'TIME_SLOT_REF2': a[1][1], 'SVG_REF': a[1][3]}))
-				ElementTree.SubElement(alan, 'ANNOTATION_VALUE').text = str(a[1][2]).decode('UTF-8')
-			for a in t[1][1].iteritems():
-				ann = ElementTree.SubElement(tier, 'ANNOTATION')
-				rean = ElementTree.SubElement(ann, 'REF_ANNOTATION', rmNone({'ANNOTATION_ID': a[0], 'ANNOTATION_REF': a[1][0], 'PREVIOUS_ANNOTATION': a[1][2], 'SVG_REF': a[1][3]}))
-				ElementTree.SubElement(rean, 'ANNOTATION_VALUE').text = str(a[1][1]).decode('UTF-8')
-
-		for l in self.linguistic_types.itervalues():
-			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LINGUISTIC_TYPE', rmNone(l))
-		
-		for l in self.locales:
-			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LOCALE', l)
-
-		for l in self.constraints.iteritems():
-			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'CONSTRAINT', rmNone({'STEREOTYPE':l[0], 'DESCRIPTION':l[1]}))
-
-		for l in self.controlled_vocabularies.iteritems():
-			cv = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'CONTROLLED_VOCABULARY', rmNone({'CV_ID':l[0], 'DESCRIPTION':l[1][0], 'EXT_REF':l[1][2]}))
-			for c in l[1][1].itervalues():
-				ElementTree.SubElement(cv, 'CV_ENTRY', rmNone(c[0])).text = str(c[1]).decode('UTF-8')
-		
-		for r in self.external_refs:
-			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'EXTERNAL_REF', rmNone({'EXT_REF_ID':r[0], 'TYPE':r[1], 'VALUE':r[2]}))
-		
-		for l in self.lexicon_refs:
-			ElementTree.SubElement(ANNOTATION_DOCUMENT, 'LEXICON_REF', l)
-	
-		def indent(el, level=0):
-			i = '\n' + level*'\t'
-			if len(el):
-				if not el.text or not el.text.strip():
-					el.text = i+'\t'
-				if not el.tail or not el.tail.strip():
-					el.tail = i
-				for elem in el:
-					indent(elem, level+1)
-				if not el.tail or not el.tail.strip():
-					el.tail = i
-			else:
-				if level and (not el.tail or not el.tail.strip()):
-					el.tail = i
-
-		indent(ANNOTATION_DOCUMENT)
-		ElementTree.ElementTree(ANNOTATION_DOCUMENT).write(filepath, xml_declaration=True, encoding='UTF-8')	
+		EafIO.toEaf(filePath, self)
 
 	def toTextGrid(self, filePath, excludedTiers=[]):
 		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. returns 0 when succesfull"""
@@ -346,15 +222,6 @@ class Eaf:
 			warnings.warn('removeAllAnnotationsFromTier: Tier non existent!')
 			return 1
 
-	def updatePrevAnnotationForAnnotation(self, idTier, idAnn, idPrevAnn=None):
-		"""Updates the previous annotation value in an annotation in the given tier, returns 0 if succesfull"""
-		try:
-			self.tiers[idTier][1][idAnn][2] = idPrevAnn
-			return 0
-		except KeyError: 
-			warnings.warn('updatePrevAnnotationForAnnotation: Tier or annotation non existent!')
-			return 1
-
 	def insertAnnotation(self, idTier, start, end, value='', svg_ref=None):
 		"""Add an annotation in the given tier, returns 0 if succesfull"""
 		try:
@@ -364,6 +231,25 @@ class Eaf:
 			return 0
 		except KeyError:
 			warnings.warn('insertAnnotation: Tier non existent')
+			return 1
+	
+	def removeAnnotation(self, time, tier, clean=True):
+		"""Removes an annotation at the given time point in the given tier, returns 0 if succesfull"""
+		try:
+			for b in [a for a in self.tiers[tier][0].iteritems() if a[1][0]>=time and a[1][1]<=time]:
+				del(self.tiers[tier][0][b[0]])
+				return 0
+		except KeyError:
+			warnings.warn('removeAnnotation: Tier non existent')
+		return 1
+
+	def insertRefAnnotation(self, idTier, ref, value, prev, svg_ref=None):
+		"""Adds a reference annotation to the given tier, 0 if succesfull"""
+		try:
+			self.tiers[idTier][1][self.generateAnnotationId()] = (ref, value, prev, svg_ref)
+			return 0
+		except KeyError:
+			warnings.warn('insertRefAnnotation: Tier non existent')
 			return 1
 
 	def getRefAnnotationDataForTier(self, idTier):
@@ -396,20 +282,38 @@ class Eaf:
 ###HELPER FUNCTIONS
 	def generateAnnotationId(self):
 		"""Helper function to generate the newest annotation id"""
-		new = 1
-		anns = {int(ann[1:]) for tier in self.tiers.itervalues() for ann in tier[0].iterkeys()}
-		if len(anns) > 0:
-			newann = set(xrange(1, max(anns))).difference(anns)
-			new = max(anns)+1 if len(newann)==0 else sorted(newann)[0]
+		if self.naiveGenAnn:
+			new = self.lastAnn+1
+			self.lastAnn = new
+		else:
+			new = 1
+			anns = {int(ann[1:]) for tier in self.tiers.itervalues() for ann in tier[0].iterkeys()}
+			if len(anns) > 0:
+				newann = set(xrange(1, max(anns))).difference(anns)
+				if len(newann) == 0:
+					new = max(anns)+1
+					self.naiveGenAnn = True
+					self.lastAnn = new
+				else:
+					new = sorted(newann)[0]
 		return 'a%d' % new
 
 	def generateTsId(self, time=None):
 		"""Helper function te generate the newest timeslot id"""
-		new = 1
-		tss = {int(x[2:]) for x in self.timeslots.iterkeys()}
-		if len(tss) > 0:
-			newts = set(xrange(1, max(tss))).difference(tss)
-			new = max(tss)+1 if len(newts)==0 else sorted(newts)[0]
+		if self.naiveGenTS:
+			new = self.lastTS+1
+			self.lastTS = new
+		else:
+			new = 1
+			tss = {int(x[2:]) for x in self.timeslots.iterkeys()}
+			if len(tss) > 0:
+				newts = set(xrange(1, max(tss))).difference(tss)
+				if len(newts) == 0:
+					new = max(tss)+1
+					self.naiveGenTS = True
+					self.lastTS = new
+				else:
+					new = sorted(newts)[0]
 		ts = 'ts%d' % new
 		self.timeslots[ts] = time
 		return ts
@@ -420,6 +324,8 @@ class Eaf:
 		tsAvail = set(self.timeslots.iterkeys())
 		for a in tsInTier.symmetric_difference(tsAvail):
 			del(self.timeslots[a])
+		self.naiveGenTS = False
+		self.naiveGenAnn = False
 
 ###ADVANCED FUNCTIONS
 	def generateAnnotationConcat(self, tiers, start, end):
