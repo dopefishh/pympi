@@ -23,10 +23,12 @@ Then you can just run for example:
 >>> help(Elan.Eaf)
 >>> help(Praat.TextGrid)
 
-KNOWN BUGS
+TODO
 ==========
 
 HISTORY
 =======
+2013-12-02
+	- IO is now in a different file, the old tofile is removed because the new one is much better.
 2013-11-15
-	- Rewritten the tofile function, the old function is a bit faster but less reliable. The old function can still be used by using tofileOLD()
+	- Rewritten the tofile function, the old function is a bit faster but less reliable. The old function can still be used by using tofileOLD().
