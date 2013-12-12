@@ -13,7 +13,7 @@ class Eaf:
 	fileheader              - String of the header(xml version etc).
 	header                  - Dict of the header TAG entries.
 	media_descriptors       - List of all linked files: [{attrib}]
-	properties              - List of all properties: [{attrib}]
+	properties              - List of all properties: [(value, {attrib})]
 	linked_file_descriptors - List of all secondary linked files: [{attrib}].
 	timeslots               - Timeslot data: {TimslotID -> time(ms)}
 	tiers                   - Tier data: {TierName -> (alignedAnnotations, referenceAnnotations, attributes, ordinal)}, 
@@ -30,8 +30,8 @@ class Eaf:
 	"""
 
 ###IO OPERATIONS
-	def __init__(self, filePath=None, author='Elan.py', deflingtype='default-lt'):
-		"""Constructor, builds an elan object from file(if given) or an empty one"""
+	def __init__(self, filePath=None, author='Elan.py', elan_new=True):
+		"""Constructor, builds an elan object from file(if given) or an empty one, if elan_new is off then a true minimal file is created if it's on then default entries are added"""
 		self.naiveGenAnn = False
 		self.naiveGenTS = False
 		now = localtime()
@@ -47,7 +47,13 @@ class Eaf:
 		self.new_time, self.new_ann = 0, 0
 
 		if filePath is None:
-			self.addLinguisticType(deflingtype, None)
+			self.addLinguisticType('default-lt', None)
+			if elan_new=True:
+				self.constraints["Time_Subdivision"] = "Time subdivision of parent annotation's time interval, no time gaps allowed within this interval"
+				self.constraints["Symbolic_Subdivision"] = "Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered"
+				self.constraints["Symbolic_Association"] = "1-1 association with a parent annotation"
+				self.constraints["Included_In"] = "Time alignable annotations within the parent annotation's time interval, gaps are allowed"
+				self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
 		else:
 			EafIO.parseEaf(filePath, self)
 
@@ -91,6 +97,13 @@ class Eaf:
 	def getLinkedFiles(self):
 		"""Gives a list of all media files"""
 		return self.media_descriptors
+
+	def addLinkedFile(self, filePath, relpath=None, mimetype=None, time_origin=None, exfrom=None):
+		"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav"""
+		if mimetype is None:
+			mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg'}
+			mimetype = mimes[filePath.split('.')[-1]]
+		self.media_descriptors.append({'MEDIA_URL':filepath, 'RELATIVE_MEDIA_URL':relpath, 'MIME_TYPE':mimetype, 'TIME_ORIGIN':time_origin, 'EXTRACTED_FROM':exfrom})
 
 ###TIER OPERATIONS
 	def copyTier(self, eafObj, tierName):
@@ -489,7 +502,7 @@ class Eaf:
 			warnings.warn('removeLinguisticType: Linguistic type non existent!')
 			return 1
 
-	def addLinguisticType(self, lingtype, constraints, timealignable=False, graphicreferences=False, extref=None):
+	def addLinguisticType(self, lingtype, constraints, timealignable=True, graphicreferences=False, extref=None):
 		"""Adds a linguistic type, if it already exists the ling type is updated"""
 		self.linguistic_types[lingtype] = {'LINGUISTIC_TYPE_ID':lingtype, 'TIME_ALIGNABLE':str(timealignable).lower(), 'GRAPHIC_REFERENCES':str(graphicreferences).lower(), 'CONSTRAINTS':constraints}
 		if extref is not None:
