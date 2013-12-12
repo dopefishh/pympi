@@ -54,6 +54,7 @@ class Eaf:
 				self.constraints["Symbolic_Association"] = "1-1 association with a parent annotation"
 				self.constraints["Included_In"] = "Time alignable annotations within the parent annotation's time interval, gaps are allowed"
 				self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
+				self.addTier('default')
 		else:
 			EafIO.parseEaf(filePath, self)
 
