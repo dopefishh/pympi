@@ -48,7 +48,7 @@ class Eaf:
 
 		if filePath is None:
 			self.addLinguisticType('default-lt', None)
-			if elan_new=True:
+			if elan_new:
 				self.constraints["Time_Subdivision"] = "Time subdivision of parent annotation's time interval, no time gaps allowed within this interval"
 				self.constraints["Symbolic_Subdivision"] = "Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered"
 				self.constraints["Symbolic_Association"] = "1-1 association with a parent annotation"
