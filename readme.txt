@@ -28,6 +28,8 @@ TODO
 
 HISTORY
 =======
+2014-01-27
+	- Added documentation via pdoc in html and cleaned up some documentation in EafIO.py
 2013-12-02
 	- IO is now in a different file, the old tofile is removed because the new one is much better.
 2013-11-15
