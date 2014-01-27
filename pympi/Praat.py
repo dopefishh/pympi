@@ -36,8 +36,8 @@ class TextGrid:
 
 	def __update(self):
 		"""Update the internal values"""
-		self.xmin = 0 if len(self.tiers) is 0 else min(t.xmin for t in self.tiers.itervalues())
-		self.xmax = 0 if len(self.tiers) is 0 else max(t.xmax for t in self.tiers.itervalues())
+		self.xmin = 0 if len(self.tiers) == 0 else min(tier.xmin for tier in self.tiers.itervalues())
+		self.xmax = 0 if len(self.tiers) == 0 else max(tier.xmax for tier in self.tiers.itervalues())
 		self.tierNum = len(self.tiers)
 
 	def addTier(self, name, tierType='IntervalTier', number=None):
@@ -121,8 +121,10 @@ class TextGrid:
 
 	def tofile(self, filepath):
 		"""Writes the object to a file given by the filepath"""
-		self.__update()
 		with open(filepath, 'w') as f:
+			for t in self.tiers.itervalues():
+				t.update()
+			self.__update()
 			f.write(('File Type = "ooTextFile\n'+
 					'Object class = "TextGrid"\n\n'+
 					'xmin = %f\n'+
@@ -206,15 +208,15 @@ class Tier:
 			else:
 				raise Exception('Unknown tiertype: %s' % self.tierType)
 
-	def __update(self):
+	def update(self):
 		"""Update the internal values"""
 		self.intervals.sort()
 		if self.tierType is 'TextTier':
-			self.xmin = min(i[0] for i in self.intervals)
-			self.xmax = max(i[0] for i in self.intervals)
+			self.xmin = min(self.intervals)[0]
+			self.xmax = max(self.intervals)[0]
 		elif self.tierType is 'IntervalTier':
-			self.xmin = min(i[0] for i in self.intervals)
-			self.xmax = max(i[1] for i in self.intervals)
+			self.xmin = min(self.intervals)[0]
+			self.xmax = max(self.intervals)[1]
 
 	def addPoint(self, point, value, check=True):
 		"""Adds a point to the tier"""
