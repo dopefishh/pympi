@@ -72,6 +72,7 @@ def parseEaf(filePath, eafObj):
 			eafObj.external_refs.append((elem.attrib['EXT_REF_ID'], elem.attrib['TYPE'], elem.attrib['VALUE']))
 
 def indent(el, level=0):
+	"""Pretty prints the xml"""
 	i = '\n' + level*'\t'
 	if len(el):
 		if not el.text or not el.text.strip():
