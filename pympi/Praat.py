@@ -148,7 +148,7 @@ class TextGrid:
 						f.write('%sintervals [%d]:\n' % (' '*8, it+1))
 						f.write('%sxmin = %f\n' % (' '*12, ints[it][0]))
 						f.write('%sxmax = %f\n' % (' '*12, ints[it][1]))
-						f.write('%stext = "%s"\n' % (' '*12, ints[it][2]))
+						f.write('%stext = "%s"\n' % (' '*12, ints[it][2].encode('utf-8').replace('"', '')))
 
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
