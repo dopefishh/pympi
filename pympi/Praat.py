@@ -4,9 +4,7 @@
 import warnings
 
 class TextGrid:
-	"""Class to read and write in TextGrid files, note all the times are in seconds"""
-	
-	"""
+	"""Class to read and write in TextGrid files, note all the times are in seconds
 	xmin    - maximum x value
 	xmax    - maximum y value
 	tierNum - number of tiers currently present

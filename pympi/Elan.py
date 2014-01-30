@@ -73,6 +73,8 @@ class Eaf:
 		for tier in [a for a in self.tiers if a not in excludedTiers]:
 			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
+				if interval[0]==interval[1]:
+					continue
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
 		tgout.tofile(filePath)
 		return 0
