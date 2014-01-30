@@ -49,17 +49,17 @@ class Eaf:
 		if filePath is None:
 			self.addLinguisticType('default-lt', None)
 			if elan_new:
-				self.constraints["Time_Subdivision"] = "Time subdivision of parent annotation's time interval, no time gaps allowed within this interval"
-				self.constraints["Symbolic_Subdivision"] = "Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered"
-				self.constraints["Symbolic_Association"] = "1-1 association with a parent annotation"
-				self.constraints["Included_In"] = "Time alignable annotations within the parent annotation's time interval, gaps are allowed"
+				self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
+						'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
+						'Symbolic_Association':'1-1 association with a parent annotation',
+						'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
 				self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
 				self.addTier('default')
 		else:
 			EafIO.parseEaf(filePath, self)
 
-	def tofile(self, filePath):
-		"""Exports the eaf object to a file given by the path"""
+	def tofile(self, filePath, pretty=True):
+		"""Exports the eaf object to a file given by the path, if pretty is false no indentation is used"""
 		EafIO.toEaf(filePath, self)
 
 	def toTextGrid(self, filePath, excludedTiers=[]):
@@ -70,7 +70,7 @@ class Eaf:
 			warnings.warn('Please install the pympi.Praat module from the pympi module found at https://github.com/dopefishh/pympi')
 			return 1
 		tgout = TextGrid()
-		for tier in [a for a in self.tiers.iterkeys() if a not in excludedTiers]:
+		for tier in [a for a in self.tiers if a not in excludedTiers]:
 			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
@@ -83,7 +83,7 @@ class Eaf:
 		eafOut = deepcopy(self)
 		for tier in eafOut.tiers.itervalues():
 			rems = []
-			for ann in tier[0].iterkeys():
+			for ann in tier[0]:
 				if eafOut.timeslots[tier[0][ann][1]] > end or eafOut.timeslots[tier[0][ann][0]] < start:
 					rems.append(ann)
 			for r in rems:
@@ -167,7 +167,7 @@ class Eaf:
 	def childTiersFor(self, idTier):
 		"""Returns a list of all the children of the given tier, None if the tier doesn't exist"""
 		try:
-			return [m for m in self.tiers.iterkeys() if 'PARENT_REF' in self.tiers[m][2] and self.tiers[m][2]['PARENT_REF']==idTier]
+			return [m for m in self.tiers if 'PARENT_REF' in self.tiers[m][2] and self.tiers[m][2]['PARENT_REF']==idTier]
 		except KeyError:
 			warnings.warn('childTierFor: Tier non existent!')
 			return None
@@ -203,7 +203,7 @@ class Eaf:
 		"""Returns the annotation data for the given tier in the format: (start, end, value)  None if the tier doesn't exist"""
 		try:
 			a = self.tiers[idTier][0]
-			return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2]) for b in a.iterkeys()]
+			return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2]) for b in a]
 		except KeyError:
 			warnings.warn('getAnnotationDataForTier: Tier non existent!')
 			return None
@@ -301,7 +301,7 @@ class Eaf:
 			self.lastAnn = new
 		else:
 			new = 1
-			anns = {int(ann[1:]) for tier in self.tiers.itervalues() for ann in tier[0].iterkeys()}
+			anns = {int(ann[1:]) for tier in self.tiers.itervalues() for ann in tier[0]}
 			if len(anns) > 0:
 				newann = set(xrange(1, max(anns))).difference(anns)
 				if len(newann) == 0:
@@ -319,7 +319,7 @@ class Eaf:
 			self.lastTS = new
 		else:
 			new = 1
-			tss = {int(x[2:]) for x in self.timeslots.iterkeys()}
+			tss = {int(x[2:]) for x in self.timeslots}
 			if len(tss) > 0:
 				newts = set(xrange(1, max(tss))).difference(tss)
 				if len(newts) == 0:
@@ -335,7 +335,7 @@ class Eaf:
 	def cleanTimeSlots(self):
 		"""Removes all the unused timeslots"""
 		tsInTier = set(sum([a[0:2] for tier in self.tiers.itervalues() for a in tier[0].itervalues()], ()))
-		tsAvail = set(self.timeslots.iterkeys())
+		tsAvail = set(self.timeslots)
 		for a in tsInTier.symmetric_difference(tsAvail):
 			del(self.timeslots[a])
 		self.naiveGenTS = False
@@ -492,7 +492,7 @@ class Eaf:
 
 	def getTierIdsForLinguisticType(self, lingType, parent=None):
 		"""Returns all the tier id's with the given linguistic type"""
-		return [t for t in self.tiers.iterkeys() if self.tiers[t][2]['LINGUISTIC_TYPE_REF']==lingType and (parent is None or self.tiers[t][2]['PARENT_REF']==parent)]
+		return [t for t in self.tiers if self.tiers[t][2]['LINGUISTIC_TYPE_REF']==lingType and (parent is None or self.tiers[t][2]['PARENT_REF']==parent)]
 
 	def removeLinguisticType(self, lingType):
 		"""Removes a linguistic type, returns 0 if succesfull"""
