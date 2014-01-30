@@ -924,9 +924,7 @@ table {
 import warnings
 
 class TextGrid:
-	"""Class to read and write in TextGrid files, note all the times are in seconds"""
-	
-	"""
+	"""Class to read and write in TextGrid files, note all the times are in seconds
 	xmin    - maximum x value
 	xmax    - maximum y value
 	tierNum - number of tiers currently present
@@ -956,8 +954,8 @@ class TextGrid:
 
 	def __update(self):
 		"""Update the internal values"""
-		self.xmin = 0 if len(self.tiers) is 0 else min(t.xmin for t in self.tiers.itervalues())
-		self.xmax = 0 if len(self.tiers) is 0 else max(t.xmax for t in self.tiers.itervalues())
+		self.xmin = 0 if len(self.tiers) == 0 else min(tier.xmin for tier in self.tiers.itervalues())
+		self.xmax = 0 if len(self.tiers) == 0 else max(tier.xmax for tier in self.tiers.itervalues())
 		self.tierNum = len(self.tiers)
 
 	def addTier(self, name, tierType='IntervalTier', number=None):
@@ -1041,8 +1039,10 @@ class TextGrid:
 
 	def tofile(self, filepath):
 		"""Writes the object to a file given by the filepath"""
-		self.__update()
 		with open(filepath, 'w') as f:
+			for t in self.tiers.itervalues():
+				t.update()
+			self.__update()
 			f.write(('File Type = "ooTextFile\n'+
 					'Object class = "TextGrid"\n\n'+
 					'xmin = %f\n'+
@@ -1068,7 +1068,7 @@ class TextGrid:
 						f.write('%sintervals [%d]:\n' % (' '*8, it+1))
 						f.write('%sxmin = %f\n' % (' '*12, ints[it][0]))
 						f.write('%sxmax = %f\n' % (' '*12, ints[it][1]))
-						f.write('%stext = "%s"\n' % (' '*12, ints[it][2]))
+						f.write('%stext = "%s"\n' % (' '*12, ints[it][2].encode('utf-8').replace('"', '')))
 
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
@@ -1126,15 +1126,15 @@ class Tier:
 			else:
 				raise Exception('Unknown tiertype: %s' % self.tierType)
 
-	def __update(self):
+	def update(self):
 		"""Update the internal values"""
 		self.intervals.sort()
 		if self.tierType is 'TextTier':
-			self.xmin = min(i[0] for i in self.intervals)
-			self.xmax = max(i[0] for i in self.intervals)
+			self.xmin = min(self.intervals)[0]
+			self.xmax = max(self.intervals)[0]
 		elif self.tierType is 'IntervalTier':
-			self.xmin = min(i[0] for i in self.intervals)
-			self.xmax = max(i[1] for i in self.intervals)
+			self.xmin = min(self.intervals)[0]
+			self.xmax = max(self.intervals)[1]
 
 	def addPoint(self, point, value, check=True):
 		"""Adds a point to the tier"""
@@ -1220,14 +1220,15 @@ class Tier:
       <ul>
           <li class="mono"><a href="#pympi.Praat.Tier.__init__">__init__</a></li>
           <li class="mono"><a href="#pympi.Praat.Tier.addInterval">addInterval</a></li>
-      </ul>
-      <ul>
           <li class="mono"><a href="#pympi.Praat.Tier.addPoint">addPoint</a></li>
-          <li class="mono"><a href="#pympi.Praat.Tier.clearIntervals">clearIntervals</a></li>
       </ul>
       <ul>
+          <li class="mono"><a href="#pympi.Praat.Tier.clearIntervals">clearIntervals</a></li>
           <li class="mono"><a href="#pympi.Praat.Tier.getIntervals">getIntervals</a></li>
+      </ul>
+      <ul>
           <li class="mono"><a href="#pympi.Praat.Tier.removeInterval">removeInterval</a></li>
+          <li class="mono"><a href="#pympi.Praat.Tier.update">update</a></li>
       </ul>
   </div>
 
@@ -1245,14 +1246,16 @@ class Tier:
         <p id="pympi.Praat.TextGrid" class="name">class <span class="ident">TextGrid</span></p>
         
   
-      <div class="desc"><p>Class to read and write in TextGrid files, note all the times are in seconds</p></div>
+      <div class="desc"><p>Class to read and write in TextGrid files, note all the times are in seconds
+xmin    - maximum x value
+xmax    - maximum y value
+tierNum - number of tiers currently present
+tiers   - dict of tiers</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.TextGrid', this);">Show source.</a></p>
     <div id="source-pympi.Praat.TextGrid" class="source">
       <pre><code>class TextGrid:
-	"""Class to read and write in TextGrid files, note all the times are in seconds"""
-	
-	"""
+	"""Class to read and write in TextGrid files, note all the times are in seconds
 	xmin    - maximum x value
 	xmax    - maximum y value
 	tierNum - number of tiers currently present
@@ -1282,8 +1285,8 @@ class Tier:
 
 	def __update(self):
 		"""Update the internal values"""
-		self.xmin = 0 if len(self.tiers) is 0 else min(t.xmin for t in self.tiers.itervalues())
-		self.xmax = 0 if len(self.tiers) is 0 else max(t.xmax for t in self.tiers.itervalues())
+		self.xmin = 0 if len(self.tiers) == 0 else min(tier.xmin for tier in self.tiers.itervalues())
+		self.xmax = 0 if len(self.tiers) == 0 else max(tier.xmax for tier in self.tiers.itervalues())
 		self.tierNum = len(self.tiers)
 
 	def addTier(self, name, tierType='IntervalTier', number=None):
@@ -1367,8 +1370,10 @@ class Tier:
 
 	def tofile(self, filepath):
 		"""Writes the object to a file given by the filepath"""
-		self.__update()
 		with open(filepath, 'w') as f:
+			for t in self.tiers.itervalues():
+				t.update()
+			self.__update()
 			f.write(('File Type = "ooTextFile\n'+
 					'Object class = "TextGrid"\n\n'+
 					'xmin = %f\n'+
@@ -1394,7 +1399,7 @@ class Tier:
 						f.write('%sintervals [%d]:\n' % (' '*8, it+1))
 						f.write('%sxmin = %f\n' % (' '*12, ints[it][0]))
 						f.write('%sxmax = %f\n' % (' '*12, ints[it][1]))
-						f.write('%stext = "%s"\n' % (' '*12, ints[it][2]))
+						f.write('%stext = "%s"\n' % (' '*12, ints[it][2].encode('utf-8').replace('"', '')))
 
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
@@ -1707,8 +1712,10 @@ class Tier:
     <div id="source-pympi.Praat.TextGrid.tofile" class="source">
       <pre><code>def tofile(self, filepath):
 	"""Writes the object to a file given by the filepath"""
-	self.__update()
 	with open(filepath, 'w') as f:
+		for t in self.tiers.itervalues():
+			t.update()
+		self.__update()
 		f.write(('File Type = "ooTextFile\n'+
 				'Object class = "TextGrid"\n\n'+
 				'xmin = %f\n'+
@@ -1734,7 +1741,7 @@ class Tier:
 					f.write('%sintervals [%d]:\n' % (' '*8, it+1))
 					f.write('%sxmin = %f\n' % (' '*12, ints[it][0]))
 					f.write('%sxmax = %f\n' % (' '*12, ints[it][1]))
-					f.write('%stext = "%s"\n' % (' '*12, ints[it][2]))
+					f.write('%stext = "%s"\n' % (' '*12, ints[it][2].encode('utf-8').replace('"', '')))
 </code></pre>
     </div>
 </div>
@@ -1793,15 +1800,15 @@ class Tier:
 			else:
 				raise Exception('Unknown tiertype: %s' % self.tierType)
 
-	def __update(self):
+	def update(self):
 		"""Update the internal values"""
 		self.intervals.sort()
 		if self.tierType is 'TextTier':
-			self.xmin = min(i[0] for i in self.intervals)
-			self.xmax = max(i[0] for i in self.intervals)
+			self.xmin = min(self.intervals)[0]
+			self.xmax = max(self.intervals)[0]
 		elif self.tierType is 'IntervalTier':
-			self.xmin = min(i[0] for i in self.intervals)
-			self.xmax = max(i[1] for i in self.intervals)
+			self.xmin = min(self.intervals)[0]
+			self.xmax = max(self.intervals)[1]
 
 	def addPoint(self, point, value, check=True):
 		"""Adds a point to the tier"""
@@ -2065,6 +2072,34 @@ class Tier:
 		for r in [i for i in self.intervals if i[0]<=time and i[1]>=time]:
 		self.intervals.remove(r)
 	return len(remove)
+</code></pre>
+    </div>
+</div>
+
+    </div>
+  
+                  
+    <div class="item">
+      <div class="name def" id="pympi.Praat.Tier.update">
+        <p>def <span class="ident">update</span>(</p><p>self)</p>
+      </div>
+      
+
+      
+  
+      <div class="desc"><p>Update the internal values</p></div>
+    <div class="source_cont">
+    <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.Tier.update', this);">Show source.</a></p>
+    <div id="source-pympi.Praat.Tier.update" class="source">
+      <pre><code>def update(self):
+	"""Update the internal values"""
+	self.intervals.sort()
+	if self.tierType is 'TextTier':
+		self.xmin = min(self.intervals)[0]
+		self.xmax = max(self.intervals)[0]
+	elif self.tierType is 'IntervalTier':
+		self.xmin = min(self.intervals)[0]
+		self.xmax = max(self.intervals)[1]
 </code></pre>
     </div>
 </div>

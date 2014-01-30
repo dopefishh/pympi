@@ -992,6 +992,7 @@ def parseEaf(filePath, eafObj):
 			eafObj.external_refs.append((elem.attrib['EXT_REF_ID'], elem.attrib['TYPE'], elem.attrib['VALUE']))
 
 def indent(el, level=0):
+	"""Pretty prints the xml"""
 	i = '\n' + level*'\t'
 	if len(el):
 		if not el.text or not el.text.strip():
@@ -1097,10 +1098,12 @@ def toEaf(filePath, eafObj, pretty=True):
 
       
   
+      <div class="desc"><p>Pretty prints the xml</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.EafIO.indent', this);">Show source.</a></p>
     <div id="source-pympi.EafIO.indent" class="source">
       <pre><code>def indent(el, level=0):
+	"""Pretty prints the xml"""
 	i = '\n' + level*'\t'
 	if len(el):
 		if not el.text or not el.text.strip():
