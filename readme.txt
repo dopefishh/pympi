@@ -28,6 +28,8 @@ TODO
 
 HISTORY
 =======
+2014-02-03
+	- Fixed the praat tofile function so that it writes silence intervals (that praat convention)
 2014-01-27
 	- Added documentation via pdoc in html and cleaned up some documentation in EafIO.py
 2013-12-02
