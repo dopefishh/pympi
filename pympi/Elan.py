@@ -30,10 +30,9 @@ class Eaf:
 	"""
 
 ###IO OPERATIONS
-	def __init__(self, filePath=None, author='Elan.py', elan_new=True):
-		"""Constructor, builds an elan object from file(if given) or an empty one, if elan_new is off then a true minimal file is created if it's on then default entries are added"""
-		self.naiveGenAnn = False
-		self.naiveGenTS = False
+	def __init__(self, filePath=None, author='Elan.py')
+		"""Constructor, builds an elan object from file(if given) or an empty one"""
+		self.naiveGenAnn, self.naiveGenTS = False, False
 		now = localtime()
 		self.annotationDocument = {
 				'AUTHOR':author, 
@@ -48,13 +47,12 @@ class Eaf:
 
 		if filePath is None:
 			self.addLinguisticType('default-lt', None)
-			if elan_new:
-				self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
-						'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
-						'Symbolic_Association':'1-1 association with a parent annotation',
-						'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
-				self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
-				self.addTier('default')
+			self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
+					'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
+					'Symbolic_Association':'1-1 association with a parent annotation',
+					'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
+			self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
+			self.addTier('default')
 		else:
 			EafIO.parseEaf(filePath, self)
 
@@ -62,17 +60,18 @@ class Eaf:
 		"""Exports the eaf object to a file given by the path, if pretty is false no indentation is used"""
 		EafIO.toEaf(filePath, self)
 
-	def toTextGrid(self, filePath, excludedTiers=[]):
-		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. returns 0 when succesfull"""
+	def toTextGrid(self, filePath, excludedTiers=[], includedTiers=[]):
+		"""Converts the object to praat's TextGrid format and leaves the excluded tiers behind and if specified includes only the given tiers, returns 0 if succesfull"""
 		try:
 			from pympi.Praat import TextGrid
 		except ImportError:
 			warnings.warn('Please install the pympi.Praat module from the pympi module found at https://github.com/dopefishh/pympi')
 			return 1
 		tgout = TextGrid()
-		for tier in [a for a in self.tiers if a not in excludedTiers]:
+		for tier in [a for a in self.tiers if not in excludedTiers and (not includedTiers or in includedTiers)]:
 			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
+				#Praat can't handle length 0 tiers in an intervaltier so they are skipped
 				if interval[0]==interval[1]:
 					continue
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
@@ -93,18 +92,14 @@ class Eaf:
 		return eafOut
 
 ###MEDIA OPERATIONS
-	def getTimeSeries(self):
-		"""Gives a list of all time secondary linked txt files"""
-		return [m for m in self.linked_file_descriptors if 'text/plain' in m['MIME_TYPE']]
-	
 	def getLinkedFiles(self):
 		"""Gives a list of all media files"""
 		return self.media_descriptors
 
 	def addLinkedFile(self, filePath, relpath=None, mimetype=None, time_origin=None, exfrom=None):
-		"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav"""
+		"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav and xml)"""
 		if mimetype is None:
-			mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg'}
+			mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg', 'xml':'text/xml'}
 			mimetype = mimes[filePath.split('.')[-1]]
 		self.media_descriptors.append({'MEDIA_URL':filepath, 'RELATIVE_MEDIA_URL':relpath, 'MIME_TYPE':mimetype, 'TIME_ORIGIN':time_origin, 'EXTRACTED_FROM':exfrom})
 
@@ -158,7 +153,7 @@ class Eaf:
 			warnings.warn('getIndexOfTier: Tier non existent!')
 			return -1
 
-	def getParameterDictForTier(self, idTier):
+	def getParametersForTier(self, idTier):
 		"""Returns a dictionary with all the parameters of the given tier, None if tier doesn't exist"""
 		try:
 			return self.tiers[idTier][2]
