@@ -30,7 +30,7 @@ class Eaf:
 	"""
 
 ###IO OPERATIONS
-	def __init__(self, filePath=None, author='Elan.py')
+	def __init__(self, filePath=None, author='Elan.py'):
 		"""Constructor, builds an elan object from file(if given) or an empty one"""
 		self.naiveGenAnn, self.naiveGenTS = False, False
 		now = localtime()
@@ -68,7 +68,7 @@ class Eaf:
 			warnings.warn('Please install the pympi.Praat module from the pympi module found at https://github.com/dopefishh/pympi')
 			return 1
 		tgout = TextGrid()
-		for tier in [a for a in self.tiers if not in excludedTiers and (not includedTiers or in includedTiers)]:
+		for tier in [a for a in self.tiers if not a in excludedTiers and (not includedTiers or a in includedTiers)]:
 			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
 				#Praat can't handle length 0 tiers in an intervaltier so they are skipped

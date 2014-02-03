@@ -1057,18 +1057,23 @@ class TextGrid:
 				f.write('%sname = "%s"\n' % (' '*8, tier.name))
 				f.write('%sxmin = %f\n' % (' '*8, tier.xmin))
 				f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
-				f.write('%sintervals: size = %d\n' % (' '*8, len(tier.getIntervals())))
-				ints = tier.getIntervals()
-				for it in range(len(ints)):
+				sorted(tier.getIntervals())
+				ints = []
+				for i in sorted(tier.getIntervals()):
+					if ints and ints[-1][1] != i[0]:
+						ints.append( (ints[-1][1], i[0], "") )
+					ints.append(i)
+				f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
+				for i, c in enumerate(ints):
 					if tier.tierType is 'TextTier':
-						f.write('%spoints [%d]:\n' % (' '*8, it+1))
-						f.write('%snumber = %f\n' % (' '*12, ints[it][0]))
-						f.write('%smark = "%s"\n' % (' '*12, ints[it][1]))
+						f.write('%spoints [%d]:\n' % (' '*8, i+1))
+						f.write('%snumber = %f\n' % (' '*12, c[0]))
+						f.write('%smark = "%s"\n' % (' '*12, c[1]))
 					elif tier.tierType is 'IntervalTier':
-						f.write('%sintervals [%d]:\n' % (' '*8, it+1))
-						f.write('%sxmin = %f\n' % (' '*12, ints[it][0]))
-						f.write('%sxmax = %f\n' % (' '*12, ints[it][1]))
-						f.write('%stext = "%s"\n' % (' '*12, ints[it][2].encode('utf-8').replace('"', '')))
+						f.write('%sintervals [%d]:\n' % (' '*8, i+1))
+						f.write('%sxmin = %f\n' % (' '*12, c[0]))
+						f.write('%sxmax = %f\n' % (' '*12, c[1]))
+						f.write('%stext = "%s"\n' % (' '*12, c[2].encode('utf-8').replace('"', '')))
 
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
@@ -1388,18 +1393,23 @@ tiers   - dict of tiers</p></div>
 				f.write('%sname = "%s"\n' % (' '*8, tier.name))
 				f.write('%sxmin = %f\n' % (' '*8, tier.xmin))
 				f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
-				f.write('%sintervals: size = %d\n' % (' '*8, len(tier.getIntervals())))
-				ints = tier.getIntervals()
-				for it in range(len(ints)):
+				sorted(tier.getIntervals())
+				ints = []
+				for i in sorted(tier.getIntervals()):
+					if ints and ints[-1][1] != i[0]:
+						ints.append( (ints[-1][1], i[0], "") )
+					ints.append(i)
+				f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
+				for i, c in enumerate(ints):
 					if tier.tierType is 'TextTier':
-						f.write('%spoints [%d]:\n' % (' '*8, it+1))
-						f.write('%snumber = %f\n' % (' '*12, ints[it][0]))
-						f.write('%smark = "%s"\n' % (' '*12, ints[it][1]))
+						f.write('%spoints [%d]:\n' % (' '*8, i+1))
+						f.write('%snumber = %f\n' % (' '*12, c[0]))
+						f.write('%smark = "%s"\n' % (' '*12, c[1]))
 					elif tier.tierType is 'IntervalTier':
-						f.write('%sintervals [%d]:\n' % (' '*8, it+1))
-						f.write('%sxmin = %f\n' % (' '*12, ints[it][0]))
-						f.write('%sxmax = %f\n' % (' '*12, ints[it][1]))
-						f.write('%stext = "%s"\n' % (' '*12, ints[it][2].encode('utf-8').replace('"', '')))
+						f.write('%sintervals [%d]:\n' % (' '*8, i+1))
+						f.write('%sxmin = %f\n' % (' '*12, c[0]))
+						f.write('%sxmax = %f\n' % (' '*12, c[1]))
+						f.write('%stext = "%s"\n' % (' '*12, c[2].encode('utf-8').replace('"', '')))
 
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
@@ -1730,18 +1740,23 @@ tiers   - dict of tiers</p></div>
 			f.write('%sname = "%s"\n' % (' '*8, tier.name))
 			f.write('%sxmin = %f\n' % (' '*8, tier.xmin))
 			f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
-			f.write('%sintervals: size = %d\n' % (' '*8, len(tier.getIntervals())))
-			ints = tier.getIntervals()
-			for it in range(len(ints)):
+			sorted(tier.getIntervals())
+			ints = []
+			for i in sorted(tier.getIntervals()):
+				if ints and ints[-1][1] != i[0]:
+					ints.append( (ints[-1][1], i[0], "") )
+				ints.append(i)
+			f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
+			for i, c in enumerate(ints):
 				if tier.tierType is 'TextTier':
-					f.write('%spoints [%d]:\n' % (' '*8, it+1))
-					f.write('%snumber = %f\n' % (' '*12, ints[it][0]))
-					f.write('%smark = "%s"\n' % (' '*12, ints[it][1]))
+					f.write('%spoints [%d]:\n' % (' '*8, i+1))
+					f.write('%snumber = %f\n' % (' '*12, c[0]))
+					f.write('%smark = "%s"\n' % (' '*12, c[1]))
 				elif tier.tierType is 'IntervalTier':
-					f.write('%sintervals [%d]:\n' % (' '*8, it+1))
-					f.write('%sxmin = %f\n' % (' '*12, ints[it][0]))
-					f.write('%sxmax = %f\n' % (' '*12, ints[it][1]))
-					f.write('%stext = "%s"\n' % (' '*12, ints[it][2].encode('utf-8').replace('"', '')))
+					f.write('%sintervals [%d]:\n' % (' '*8, i+1))
+					f.write('%sxmin = %f\n' % (' '*12, c[0]))
+					f.write('%sxmax = %f\n' % (' '*12, c[1]))
+					f.write('%stext = "%s"\n' % (' '*12, c[2].encode('utf-8').replace('"', '')))
 </code></pre>
     </div>
 </div>

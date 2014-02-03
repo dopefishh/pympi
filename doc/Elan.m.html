@@ -950,10 +950,9 @@ class Eaf:
 	"""
 
 ###IO OPERATIONS
-	def __init__(self, filePath=None, author='Elan.py', elan_new=True):
-		"""Constructor, builds an elan object from file(if given) or an empty one, if elan_new is off then a true minimal file is created if it's on then default entries are added"""
-		self.naiveGenAnn = False
-		self.naiveGenTS = False
+	def __init__(self, filePath=None, author='Elan.py'):
+		"""Constructor, builds an elan object from file(if given) or an empty one"""
+		self.naiveGenAnn, self.naiveGenTS = False, False
 		now = localtime()
 		self.annotationDocument = {
 				'AUTHOR':author, 
@@ -968,13 +967,12 @@ class Eaf:
 
 		if filePath is None:
 			self.addLinguisticType('default-lt', None)
-			if elan_new:
-				self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
-						'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
-						'Symbolic_Association':'1-1 association with a parent annotation',
-						'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
-				self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
-				self.addTier('default')
+			self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
+					'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
+					'Symbolic_Association':'1-1 association with a parent annotation',
+					'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
+			self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
+			self.addTier('default')
 		else:
 			EafIO.parseEaf(filePath, self)
 
@@ -982,17 +980,20 @@ class Eaf:
 		"""Exports the eaf object to a file given by the path, if pretty is false no indentation is used"""
 		EafIO.toEaf(filePath, self)
 
-	def toTextGrid(self, filePath, excludedTiers=[]):
-		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. returns 0 when succesfull"""
+	def toTextGrid(self, filePath, excludedTiers=[], includedTiers=[]):
+		"""Converts the object to praat's TextGrid format and leaves the excluded tiers behind and if specified includes only the given tiers, returns 0 if succesfull"""
 		try:
 			from pympi.Praat import TextGrid
 		except ImportError:
 			warnings.warn('Please install the pympi.Praat module from the pympi module found at https://github.com/dopefishh/pympi')
 			return 1
 		tgout = TextGrid()
-		for tier in [a for a in self.tiers if a not in excludedTiers]:
+		for tier in [a for a in self.tiers if not a in excludedTiers and (not includedTiers or a in includedTiers)]:
 			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
+				#Praat can't handle length 0 tiers in an intervaltier so they are skipped
+				if interval[0]==interval[1]:
+					continue
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
 		tgout.tofile(filePath)
 		return 0
@@ -1011,18 +1012,14 @@ class Eaf:
 		return eafOut
 
 ###MEDIA OPERATIONS
-	def getTimeSeries(self):
-		"""Gives a list of all time secondary linked txt files"""
-		return [m for m in self.linked_file_descriptors if 'text/plain' in m['MIME_TYPE']]
-	
 	def getLinkedFiles(self):
 		"""Gives a list of all media files"""
 		return self.media_descriptors
 
 	def addLinkedFile(self, filePath, relpath=None, mimetype=None, time_origin=None, exfrom=None):
-		"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav"""
+		"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav and xml)"""
 		if mimetype is None:
-			mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg'}
+			mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg', 'xml':'text/xml'}
 			mimetype = mimes[filePath.split('.')[-1]]
 		self.media_descriptors.append({'MEDIA_URL':filepath, 'RELATIVE_MEDIA_URL':relpath, 'MIME_TYPE':mimetype, 'TIME_ORIGIN':time_origin, 'EXTRACTED_FROM':exfrom})
 
@@ -1076,7 +1073,7 @@ class Eaf:
 			warnings.warn('getIndexOfTier: Tier non existent!')
 			return -1
 
-	def getParameterDictForTier(self, idTier):
+	def getParametersForTier(self, idTier):
 		"""Returns a dictionary with all the parameters of the given tier, None if tier doesn't exist"""
 		try:
 			return self.tiers[idTier][2]
@@ -1486,14 +1483,13 @@ class Eaf:
           <li class="mono"><a href="#pympi.Elan.Eaf.getLinkedFiles">getLinkedFiles</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.getLocaleForTier">getLocaleForTier</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.getParameterDictForLinguisticType">getParameterDictForLinguisticType</a></li>
-          <li class="mono"><a href="#pympi.Elan.Eaf.getParameterDictForTier">getParameterDictForTier</a></li>
+          <li class="mono"><a href="#pympi.Elan.Eaf.getParametersForTier">getParametersForTier</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.getParticipantForTier">getParticipantForTier</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.getRefAnnotationDataForTier">getRefAnnotationDataForTier</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.getTierIdsForLinguisticType">getTierIdsForLinguisticType</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.getTierNames">getTierNames</a></li>
       </ul>
       <ul>
-          <li class="mono"><a href="#pympi.Elan.Eaf.getTimeSeries">getTimeSeries</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.glueAnnotationsInTier">glueAnnotationsInTier</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.hasLinguisticType">hasLinguisticType</a></li>
           <li class="mono"><a href="#pympi.Elan.Eaf.insertAnnotation">insertAnnotation</a></li>
@@ -1574,10 +1570,9 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 	"""
 
 ###IO OPERATIONS
-	def __init__(self, filePath=None, author='Elan.py', elan_new=True):
-		"""Constructor, builds an elan object from file(if given) or an empty one, if elan_new is off then a true minimal file is created if it's on then default entries are added"""
-		self.naiveGenAnn = False
-		self.naiveGenTS = False
+	def __init__(self, filePath=None, author='Elan.py'):
+		"""Constructor, builds an elan object from file(if given) or an empty one"""
+		self.naiveGenAnn, self.naiveGenTS = False, False
 		now = localtime()
 		self.annotationDocument = {
 				'AUTHOR':author, 
@@ -1592,13 +1587,12 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 
 		if filePath is None:
 			self.addLinguisticType('default-lt', None)
-			if elan_new:
-				self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
-						'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
-						'Symbolic_Association':'1-1 association with a parent annotation',
-						'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
-				self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
-				self.addTier('default')
+			self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
+					'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
+					'Symbolic_Association':'1-1 association with a parent annotation',
+					'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
+			self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
+			self.addTier('default')
 		else:
 			EafIO.parseEaf(filePath, self)
 
@@ -1606,17 +1600,20 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 		"""Exports the eaf object to a file given by the path, if pretty is false no indentation is used"""
 		EafIO.toEaf(filePath, self)
 
-	def toTextGrid(self, filePath, excludedTiers=[]):
-		"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. returns 0 when succesfull"""
+	def toTextGrid(self, filePath, excludedTiers=[], includedTiers=[]):
+		"""Converts the object to praat's TextGrid format and leaves the excluded tiers behind and if specified includes only the given tiers, returns 0 if succesfull"""
 		try:
 			from pympi.Praat import TextGrid
 		except ImportError:
 			warnings.warn('Please install the pympi.Praat module from the pympi module found at https://github.com/dopefishh/pympi')
 			return 1
 		tgout = TextGrid()
-		for tier in [a for a in self.tiers if a not in excludedTiers]:
+		for tier in [a for a in self.tiers if not a in excludedTiers and (not includedTiers or a in includedTiers)]:
 			currentTier = tgout.addTier(tier)
 			for interval in self.getAnnotationDataForTier(tier):
+				#Praat can't handle length 0 tiers in an intervaltier so they are skipped
+				if interval[0]==interval[1]:
+					continue
 				currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
 		tgout.tofile(filePath)
 		return 0
@@ -1635,18 +1632,14 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 		return eafOut
 
 ###MEDIA OPERATIONS
-	def getTimeSeries(self):
-		"""Gives a list of all time secondary linked txt files"""
-		return [m for m in self.linked_file_descriptors if 'text/plain' in m['MIME_TYPE']]
-	
 	def getLinkedFiles(self):
 		"""Gives a list of all media files"""
 		return self.media_descriptors
 
 	def addLinkedFile(self, filePath, relpath=None, mimetype=None, time_origin=None, exfrom=None):
-		"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav"""
+		"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav and xml)"""
 		if mimetype is None:
-			mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg'}
+			mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg', 'xml':'text/xml'}
 			mimetype = mimes[filePath.split('.')[-1]]
 		self.media_descriptors.append({'MEDIA_URL':filepath, 'RELATIVE_MEDIA_URL':relpath, 'MIME_TYPE':mimetype, 'TIME_ORIGIN':time_origin, 'EXTRACTED_FROM':exfrom})
 
@@ -1700,7 +1693,7 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 			warnings.warn('getIndexOfTier: Tier non existent!')
 			return -1
 
-	def getParameterDictForTier(self, idTier):
+	def getParametersForTier(self, idTier):
 		"""Returns a dictionary with all the parameters of the given tier, None if tier doesn't exist"""
 		try:
 			return self.tiers[idTier][2]
@@ -2085,44 +2078,23 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 </div>
 
                   </div>
-                  <div class="item">
-                    <p id="pympi.Elan.Eaf.naiveGenAnn" class="name">var <span class="ident">naiveGenAnn</span></p>
-                    
-
-                    
-  
-    <div class="source_cont">
-</div>
-
-                  </div>
-                  <div class="item">
-                    <p id="pympi.Elan.Eaf.naiveGenTS" class="name">var <span class="ident">naiveGenTS</span></p>
-                    
-
-                    
-  
-    <div class="source_cont">
-</div>
-
-                  </div>
               <h4>Methods</h4>
                   
     <div class="item">
       <div class="name def" id="pympi.Elan.Eaf.__init__">
-        <p>def <span class="ident">__init__</span>(</p><p>self, filePath=None, author='Elan.py', elan_new=True)</p>
+        <p>def <span class="ident">__init__</span>(</p><p>self, filePath=None, author='Elan.py')</p>
       </div>
       
 
       
   
-      <div class="desc"><p>Constructor, builds an elan object from file(if given) or an empty one, if elan_new is off then a true minimal file is created if it's on then default entries are added</p></div>
+      <div class="desc"><p>Constructor, builds an elan object from file(if given) or an empty one</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Elan.Eaf.__init__', this);">Show source.</a></p>
     <div id="source-pympi.Elan.Eaf.__init__" class="source">
-      <pre><code>def __init__(self, filePath=None, author='Elan.py', elan_new=True):
-	"""Constructor, builds an elan object from file(if given) or an empty one, if elan_new is off then a true minimal file is created if it's on then default entries are added"""
-	self.naiveGenAnn = False
-	self.naiveGenTS = False
+      <pre><code>def __init__(self, filePath=None, author='Elan.py'):
+	"""Constructor, builds an elan object from file(if given) or an empty one"""
+	self.naiveGenAnn, self.naiveGenTS = False, False
 	now = localtime()
 	self.annotationDocument = {
 			'AUTHOR':author, 
@@ -2136,13 +2108,12 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 	self.new_time, self.new_ann = 0, 0
 	if filePath is None:
 		self.addLinguisticType('default-lt', None)
-		if elan_new:
-			self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
-					'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
-					'Symbolic_Association':'1-1 association with a parent annotation',
-					'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
-			self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
-			self.addTier('default')
+		self.constraints = {'Time_Subdivision':'Time subdivision of parent annotation\'s time interval, no time gaps allowed within this interval',
+				'Symbolic_Subdivision':'Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered',
+				'Symbolic_Association':'1-1 association with a parent annotation',
+				'Included_In':'Time alignable annotations within the parent annotation\'s time interval, gaps are allowed'}
+		self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
+		self.addTier('default')
 	else:
 		EafIO.parseEaf(filePath, self)
 </code></pre>
@@ -2211,14 +2182,14 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 
       
   
-      <div class="desc"><p>Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav</p></div>
+      <div class="desc"><p>Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav and xml)</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Elan.Eaf.addLinkedFile', this);">Show source.</a></p>
     <div id="source-pympi.Elan.Eaf.addLinkedFile" class="source">
       <pre><code>def addLinkedFile(self, filePath, relpath=None, mimetype=None, time_origin=None, exfrom=None):
-	"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav"""
+	"""Adds the linked file, if the mimetype is not given it tries to find it(only words for mpg and wav and xml)"""
 	if mimetype is None:
-		mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg'}
+		mimes = {'wav':'audio/x-wav', 'mpg':'video/mpeg', 'mpeg':'video/mpg', 'xml':'text/xml'}
 		mimetype = mimes[filePath.split('.')[-1]]
 	self.media_descriptors.append({'MEDIA_URL':filepath, 'RELATIVE_MEDIA_URL':relpath, 'MIME_TYPE':mimetype, 'TIME_ORIGIN':time_origin, 'EXTRACTED_FROM':exfrom})
 </code></pre>
@@ -2848,8 +2819,8 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
   
                   
     <div class="item">
-      <div class="name def" id="pympi.Elan.Eaf.getParameterDictForTier">
-        <p>def <span class="ident">getParameterDictForTier</span>(</p><p>self, idTier)</p>
+      <div class="name def" id="pympi.Elan.Eaf.getParametersForTier">
+        <p>def <span class="ident">getParametersForTier</span>(</p><p>self, idTier)</p>
       </div>
       
 
@@ -2857,9 +2828,9 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
   
       <div class="desc"><p>Returns a dictionary with all the parameters of the given tier, None if tier doesn't exist</p></div>
     <div class="source_cont">
-    <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Elan.Eaf.getParameterDictForTier', this);">Show source.</a></p>
-    <div id="source-pympi.Elan.Eaf.getParameterDictForTier" class="source">
-      <pre><code>def getParameterDictForTier(self, idTier):
+    <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Elan.Eaf.getParametersForTier', this);">Show source.</a></p>
+    <div id="source-pympi.Elan.Eaf.getParametersForTier" class="source">
+      <pre><code>def getParametersForTier(self, idTier):
 	"""Returns a dictionary with all the parameters of the given tier, None if tier doesn't exist"""
 	try:
 		return self.tiers[idTier][2]
@@ -2963,28 +2934,6 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
       <pre><code>def getTierNames(self):
 	"""Returns a list of tiernames"""
 	return self.tiers.keys()
-</code></pre>
-    </div>
-</div>
-
-    </div>
-  
-                  
-    <div class="item">
-      <div class="name def" id="pympi.Elan.Eaf.getTimeSeries">
-        <p>def <span class="ident">getTimeSeries</span>(</p><p>self)</p>
-      </div>
-      
-
-      
-  
-      <div class="desc"><p>Gives a list of all time secondary linked txt files</p></div>
-    <div class="source_cont">
-    <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Elan.Eaf.getTimeSeries', this);">Show source.</a></p>
-    <div id="source-pympi.Elan.Eaf.getTimeSeries" class="source">
-      <pre><code>def getTimeSeries(self):
-	"""Gives a list of all time secondary linked txt files"""
-	return [m for m in self.linked_file_descriptors if 'text/plain' in m['MIME_TYPE']]
 </code></pre>
     </div>
 </div>
@@ -3347,27 +3296,30 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
                   
     <div class="item">
       <div class="name def" id="pympi.Elan.Eaf.toTextGrid">
-        <p>def <span class="ident">toTextGrid</span>(</p><p>self, filePath, excludedTiers=[])</p>
+        <p>def <span class="ident">toTextGrid</span>(</p><p>self, filePath, excludedTiers=[], includedTiers=[])</p>
       </div>
       
 
       
   
-      <div class="desc"><p>Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. returns 0 when succesfull</p></div>
+      <div class="desc"><p>Converts the object to praat's TextGrid format and leaves the excluded tiers behind and if specified includes only the given tiers, returns 0 if succesfull</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Elan.Eaf.toTextGrid', this);">Show source.</a></p>
     <div id="source-pympi.Elan.Eaf.toTextGrid" class="source">
-      <pre><code>def toTextGrid(self, filePath, excludedTiers=[]):
-	"""Converts the object to praat's TextGrid format and leaves the excludedTiers(optional) behind. returns 0 when succesfull"""
+      <pre><code>def toTextGrid(self, filePath, excludedTiers=[], includedTiers=[]):
+	"""Converts the object to praat's TextGrid format and leaves the excluded tiers behind and if specified includes only the given tiers, returns 0 if succesfull"""
 	try:
 		from pympi.Praat import TextGrid
 	except ImportError:
 		warnings.warn('Please install the pympi.Praat module from the pympi module found at https://github.com/dopefishh/pympi')
 		return 1
 	tgout = TextGrid()
-	for tier in [a for a in self.tiers if a not in excludedTiers]:
+	for tier in [a for a in self.tiers if not a in excludedTiers and (not includedTiers or a in includedTiers)]:
 		currentTier = tgout.addTier(tier)
 		for interval in self.getAnnotationDataForTier(tier):
+			#Praat can't handle length 0 tiers in an intervaltier so they are skipped
+			if interval[0]==interval[1]:
+				continue
 			currentTier.addInterval(interval[0]/1000.0, interval[1]/1000.0, interval[2])
 	tgout.tofile(filePath)
 	return 0
