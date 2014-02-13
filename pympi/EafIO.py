@@ -95,10 +95,11 @@ def toEaf(filePath, eafObj, pretty=True):
 	HEADER = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'HEADER', eafObj.header)
 	for m in eafObj.media_descriptors:
 		ElementTree.SubElement(HEADER, 'MEDIA_DESCRIPTOR', rmNone(m))
-	for m in eafObj.properties:
-		ElementTree.SubElement(HEADER, 'PROPERTY', rmNone(m[1])).text = unicode(m[0])
 	for m in eafObj.linked_file_descriptors:
 		ElementTree.SubElement(HEADER, 'LINKED_FILE_DESCRIPTOR', rmNone(m))
+	for m in eafObj.properties:
+		ElementTree.SubElement(HEADER, 'PROPERTY', rmNone(m[1])).text = unicode(m[0])
+
 
 	TIME_ORDER = ElementTree.SubElement(ANNOTATION_DOCUMENT, 'TIME_ORDER')
 	for t in sorted(eafObj.timeslots.iteritems(), key=lambda x: int(x[0][2:])):
