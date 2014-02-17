@@ -4,10 +4,14 @@ pympi version 0.6
 
 Contents
 ========
-- ./pympi/Praat.py - A python class to read, write, edit and create praat's TextGrid files.
-- ./pympi/Elan.py - A python class to edit and create ELAN's eaf files.
-- ./pympi/EafIO.py - A python class to write and read ELAN's eaf files.
-- ./test/* - In the test folder there is a case example of the fto function(gaps and overlaps)
+- ./pympi/Praat.py 
+    - A python class to read, write, edit and create praat's TextGrid files.
+- ./pympi/Elan.py 
+	- A python class to edit and create ELAN's eaf files.
+- ./pympi/EafIO.py 
+	- A python class to write and read ELAN's eaf files.
+- ./test/* 
+	- In the test folder there is a case example of the fto function(gaps and overlaps)
 
 Installation
 ============
