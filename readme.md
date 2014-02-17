@@ -1,6 +1,4 @@
-pympi version 0.6
-2014-02-17
-
+# pympi version 0.6, 2014-02-17
 
 Contents
 ========
