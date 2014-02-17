@@ -17,6 +17,9 @@ Installation
 ============
 Run:
 `# python setup.py install`
+If you don't have super user right you can install it in your home directory by running:
+`$ python setup.py install --prefix=/home/user/bin`
+and then add `export PYTHONPATH=~/home/user/bin/lib/python2.7/site-packages` to your ~/.bashrc
 
 Then you can just run for example:
 ```
