@@ -1,4 +1,4 @@
-pympi version 0.5
+pympi version 0.6
 2013-11-18
 ==========
 
@@ -28,6 +28,9 @@ TODO
 
 HISTORY
 =======
+2014-02-17
+	- Started branching
+	- Fixed a few bugs
 2014-02-03
 	- Fixed the praat tofile function so that it writes silence intervals (that praat convention)
 2014-01-27
