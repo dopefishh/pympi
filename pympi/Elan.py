@@ -121,7 +121,7 @@ class Eaf:
 		"""Adds a tier giving a id and type and optional extra data"""
 		if ling not in self.linguistic_types:
 			warnings.warn('addTier: Linguistic type non existent, choosing the first')
-			ling = linguistic_types.keys()[0]
+			ling = self.linguistic_types.keys()[0]
 		if tierDict is None:
 			self.tiers[tierId] = ({}, {}, {'TIER_ID':tierId, 'LINGUISTIC_TYPE_REF':ling, 'PARENT_REF':parent, 'PARTICIPANT':part, 'DEFAULT_LOCALE':locale, 'ANNOTATOR':ann}, len(self.tiers))
 		else:
