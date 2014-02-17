@@ -119,7 +119,7 @@ class Eaf:
 
 	def addTier(self, tierId, ling='default-lt', parent=None, locale=None, part=None, ann=None, tierDict=None):
 		"""Adds a tier giving a id and type and optional extra data"""
-		if ling not in linguistic_types:
+		if ling not in self.linguistic_types:
 			warnings.warn('addTier: Linguistic type non existent, choosing the first')
 			ling = linguistic_types.keys()[0]
 		if tierDict is None:
