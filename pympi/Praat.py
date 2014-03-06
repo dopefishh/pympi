@@ -137,9 +137,11 @@ class TextGrid:
 				f.write('%sname = "%s"\n' % (' '*8, tier.name))
 				f.write('%sxmin = %f\n' % (' '*8, tier.xmin))
 				f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
-				sorted(tier.getIntervals())
+				srtint = sorted(tier.getIntervals())
 				ints = []
-				for i in sorted(tier.getIntervals()):
+				if srtint and srtint[0]!=0:
+					ints.append( (0.0, srtint[0][0], "") )
+				for i in srtint:
 					if ints and ints[-1][1] != i[0]:
 						ints.append( (ints[-1][1], i[0], "") )
 					ints.append(i)
@@ -158,9 +160,9 @@ class TextGrid:
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
 		try:
-			from Elan import Eaf
+			from pympi.Elan import Eaf
 		except ImportError:
-			warnings.warn('toEaf: Please install the Eaf module from the Elan.py file found at https://github.com/dopefishh/pympi')
+			warnings.warn('toEaf: Please install the pympi.Elan.Eaf module from the pympi package found at https://github.com/dopefishh/pympi')
 			return 1
 		eafOut = Eaf()
 		for tier in self.tiers:
@@ -214,10 +216,10 @@ class Tier:
 	def update(self):
 		"""Update the internal values"""
 		self.intervals.sort()
-		if self.tierType is 'TextTier':
+		if self.tierType is 'TextTier' and self.intervals:
 			self.xmin = min(self.intervals)[0]
 			self.xmax = max(self.intervals)[0]
-		elif self.tierType is 'IntervalTier':
+		elif self.tierType is 'IntervalTier' and self.intervals:
 			self.xmin = min(self.intervals)[0]
 			self.xmax = max(self.intervals)[1]
 
