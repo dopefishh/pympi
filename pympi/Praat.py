@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import warnings
+import codecs
 
 class TextGrid:
 	"""Class to read and write in TextGrid files, note all the times are in seconds
@@ -10,7 +11,7 @@ class TextGrid:
 	tierNum - number of tiers currently present
 	tiers   - dict of tiers
 	"""
-	def __init__(self, filePath=None):
+	def __init__(self, filePath=None, codec='ascii'):
 		"""Constructor, if the filepath is not given an empty TextGrid is created"""
 		self.tiers = dict()
 		if filePath is None:
@@ -18,7 +19,7 @@ class TextGrid:
 			self.xmax = 0
 			self.tierNum = 0
 		else:
-			with open(filePath, 'r') as f:
+			with codecs.open(filePath, 'r', codec) as f:
 				lines = f.readlines()
 				self.xmin = float(lines[3][7:-1])
 				self.xmax = float(lines[4][7:-1])
@@ -119,7 +120,7 @@ class TextGrid:
 
 	def tofile(self, filepath):
 		"""Writes the object to a file given by the filepath"""
-		with open(filepath, 'w') as f:
+		with codecs.open(filepath, 'w', 'utf-16') as f:
 			for t in self.tiers.itervalues():
 				t.update()
 			self.__update()
@@ -139,7 +140,7 @@ class TextGrid:
 				f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
 				srtint = sorted(tier.getIntervals())
 				ints = []
-				if srtint and srtint[0]!=0:
+				if srtint and srtint[0][0]>0.0:
 					ints.append( (0.0, srtint[0][0], "") )
 				for i in srtint:
 					if ints and ints[-1][1] != i[0]:
@@ -147,15 +148,15 @@ class TextGrid:
 					ints.append(i)
 				f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
 				for i, c in enumerate(ints):
-					if tier.tierType is 'TextTier':
+					if tier.tierType == 'TextTier':
 						f.write('%spoints [%d]:\n' % (' '*8, i+1))
 						f.write('%snumber = %f\n' % (' '*12, c[0]))
 						f.write('%smark = "%s"\n' % (' '*12, c[1]))
-					elif tier.tierType is 'IntervalTier':
+					elif tier.tierType == 'IntervalTier':
 						f.write('%sintervals [%d]:\n' % (' '*8, i+1))
 						f.write('%sxmin = %f\n' % (' '*12, c[0]))
 						f.write('%sxmax = %f\n' % (' '*12, c[1]))
-						f.write('%stext = "%s"\n' % (' '*12, c[2].encode('utf-8').replace('"', '')))
+						f.write('%stext = "%s"\n' % (' '*12, c[2].replace('"', '')))
 
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
