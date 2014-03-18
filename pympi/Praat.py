@@ -143,6 +143,8 @@ class TextGrid:
 				if srtint and srtint[0][0]>0.0:
 					ints.append( (0.0, srtint[0][0], "") )
 				for i in srtint:
+					if i[1]-i[0]==0:
+						continue
 					if ints and ints[-1][1] != i[0]:
 						ints.append( (ints[-1][1], i[0], "") )
 					ints.append(i)
