@@ -1,4 +1,4 @@
-# pympi version 0.6, 2014-02-17
+# pympi version 0.7, 2014-03-24
 
 Contents
 ========
@@ -8,8 +8,6 @@ Contents
 	- A python class to edit and create ELAN's eaf files.
 - ./pympi/EafIO.py 
 	- A python class to write and read ELAN's eaf files.
-- ./test/* 
-	- In the test folder there is a case example of the fto function(gaps and overlaps)
 
 Installation
 ============
@@ -28,6 +26,8 @@ Then you can just run for example:
 
 History
 =======
+- 2014-03-24
+	- Fixed a lot of TextGrid bugs and have written a better parser using more regexp
 - 2014-02-17
 	- Started branching
 	- Fixed a few bugs
