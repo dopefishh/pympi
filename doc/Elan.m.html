@@ -1039,6 +1039,9 @@ class Eaf:
 
 	def addTier(self, tierId, ling='default-lt', parent=None, locale=None, part=None, ann=None, tierDict=None):
 		"""Adds a tier giving a id and type and optional extra data"""
+		if ling not in self.linguistic_types:
+			warnings.warn('addTier: Linguistic type non existent, choosing the first')
+			ling = self.linguistic_types.keys()[0]
 		if tierDict is None:
 			self.tiers[tierId] = ({}, {}, {'TIER_ID':tierId, 'LINGUISTIC_TYPE_REF':ling, 'PARENT_REF':parent, 'PARTICIPANT':part, 'DEFAULT_LOCALE':locale, 'ANNOTATOR':ann}, len(self.tiers))
 		else:
@@ -1659,6 +1662,9 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
 
 	def addTier(self, tierId, ling='default-lt', parent=None, locale=None, part=None, ann=None, tierDict=None):
 		"""Adds a tier giving a id and type and optional extra data"""
+		if ling not in self.linguistic_types:
+			warnings.warn('addTier: Linguistic type non existent, choosing the first')
+			ling = self.linguistic_types.keys()[0]
 		if tierDict is None:
 			self.tiers[tierId] = ({}, {}, {'TIER_ID':tierId, 'LINGUISTIC_TYPE_REF':ling, 'PARENT_REF':parent, 'PARTICIPANT':part, 'DEFAULT_LOCALE':locale, 'ANNOTATOR':ann}, len(self.tiers))
 		else:
@@ -2213,6 +2219,9 @@ lexicon_refs            - Lexicon refs [{attribs}]</p></div>
     <div id="source-pympi.Elan.Eaf.addTier" class="source">
       <pre><code>def addTier(self, tierId, ling='default-lt', parent=None, locale=None, part=None, ann=None, tierDict=None):
 	"""Adds a tier giving a id and type and optional extra data"""
+	if ling not in self.linguistic_types:
+		warnings.warn('addTier: Linguistic type non existent, choosing the first')
+		ling = self.linguistic_types.keys()[0]
 	if tierDict is None:
 		self.tiers[tierId] = ({}, {}, {'TIER_ID':tierId, 'LINGUISTIC_TYPE_REF':ling, 'PARENT_REF':parent, 'PARTICIPANT':part, 'DEFAULT_LOCALE':locale, 'ANNOTATOR':ann}, len(self.tiers))
 	else:
