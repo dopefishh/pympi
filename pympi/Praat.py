@@ -1,8 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import warnings
 import codecs
+import re
+import warnings
+
+rexmin = re.compile(r'xmin = ([0-9.]*)')
+rexmax = re.compile(r'xmax = ([0-9.]*)')
+retext = re.compile(r'text = "(.*)"')
+remark = re.compile(r'mark = "(.*)"')
+resize = re.compile(r'size = ([0-9]*)')
+renumb = re.compile(r'number = ([0-9.]*)')
+reitem = re.compile(r'item \[([0-9]*)\]')
+retype = re.compile(r'class = "(.*)"')
+rename = re.compile(r'name = "(.*)"')
 
 class TextGrid:
 	"""Class to read and write in TextGrid files, note all the times are in seconds
@@ -20,18 +31,19 @@ class TextGrid:
 			self.tierNum = 0
 		else:
 			with codecs.open(filePath, 'r', codec) as f:
-				lines = f.readlines()
-				self.xmin = float(lines[3][7:-1])
-				self.xmax = float(lines[4][7:-1])
-				self.tierNum = int(lines[6][7:-1])
+				lines = [line for line in f.readlines() if line]
+				self.xmin = float(rexmin.search(lines[3]).group(1))
+				self.xmax = float(rexmax.search(lines[4]).group(1))
+				self.tierNum = int(resize.search(lines[6]).group(1))
 				lines = lines[8:]
 				for currentTier in range(self.tierNum):
-					number = int(lines[0].strip()[6:-2])
-					tierType = lines[1].strip()[9:-1]
-					name = lines[2].strip()[8:-1]
-					numinterval = int(lines[5].strip()[18:])
-					self.tiers[name] = Tier(name, number, tierType, lines[:6+4*numinterval])
-					lines = lines[6+4*numinterval:]
+					number = int(reitem.search(lines[0]).group(1))
+					tierType = retype.search(lines[1]).group(1)
+					name = rename.search(lines[2]).group(1)
+					numinterval = int(resize.search(lines[5]).group(1))
+					lpitem = 3 if tierType == 'TextTier' else 4
+					self.tiers[name] = Tier(name, number, tierType, lines[:6+lpitem*numinterval])
+					lines = lines[6+lpitem*numinterval:]
 
 	def __update(self):
 		"""Update the internal values"""
@@ -143,9 +155,10 @@ class TextGrid:
 				if srtint and srtint[0][0]>0.0:
 					ints.append( (0.0, srtint[0][0], "") )
 				for i in srtint:
+					#Skip empty annotations
 					if i[1]-i[0]==0:
 						continue
-					if ints and ints[-1][1] != i[0]:
+					if ints and ints[-1][1] < i[0]:
 						ints.append( (ints[-1][1], i[0], "") )
 					ints.append(i)
 				f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
@@ -153,12 +166,12 @@ class TextGrid:
 					if tier.tierType == 'TextTier':
 						f.write('%spoints [%d]:\n' % (' '*8, i+1))
 						f.write('%snumber = %f\n' % (' '*12, c[0]))
-						f.write('%smark = "%s"\n' % (' '*12, c[1]))
+						f.write('%smark = "%s"\n' % (' '*12, c[1].replace('"', '""')))
 					elif tier.tierType == 'IntervalTier':
 						f.write('%sintervals [%d]:\n' % (' '*8, i+1))
 						f.write('%sxmin = %f\n' % (' '*12, c[0]))
 						f.write('%sxmax = %f\n' % (' '*12, c[1]))
-						f.write('%stext = "%s"\n' % (' '*12, c[2].replace('"', '')))
+						f.write('%stext = "%s"\n' % (' '*12, c[2].replace('"', '""')))
 
 	def toEaf(self, filepath):
 		"""Converts the object to elan's eaf format, pointtiers not converted, returns 0 if succesfull"""
@@ -187,6 +200,7 @@ class Tier:
 	xmax      - maximum x value
 	"""
 
+
 	def __init__(self, name, number, tierType, lines=None):
 		"""Constructor, if no lines are given a empty tier is created"""
 		self.name = name
@@ -196,22 +210,22 @@ class Tier:
 		if lines is None:
 			self.xmin, self.xmax = 0, 0
 		else:
-			self.xmin = float(lines[3].strip()[7:])
-			self.xmax = float(lines[4].strip()[7:])
-			numInt = int(lines[5].strip().split('=')[1].strip())
+			self.xmin = float(rexmin.search(lines[3]).group(1))
+			self.xmax = float(rexmax.search(lines[4]).group(1))
+			numInt = int(resize.search(lines[5]).group(1))
 			lines = lines[6:]
 			if self.tierType == 'IntervalTier':
 				for i in range(numInt):
 					data = lines[4*i+1:4*i+1+3]
-					xmin = float(data[0].strip()[7:])
-					xmax = float(data[1].strip()[7:])
-					xtxt = data[2].strip()[8:-1]
+					xmin = float(rexmin.search(data[0]).group(1))
+					xmax = float(rexmax.search(data[1]).group(1))
+					xtxt = retext.search(data[2]).group(1).replace('""', '"')
 					self.intervals.append((xmin, xmax, xtxt))
 			elif self.tierType == 'TextTier':
 				for i in range(numInt):
 					data = lines[3*i+1:4*i+3]
-					number = float(data[0].strip()[7:])
-					mark = data[1].strip()[8:-1]
+					number = float(renumb.search(data[0]).group(1))
+					mark = remark.search(data[1]).group(1).replace('""', '"')
 					self.intervals.append((number, mark))
 			else:
 				raise Exception('Unknown tiertype: %s' % self.tierType)
