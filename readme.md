@@ -26,7 +26,7 @@ Then you can just run for example:
 
 TODO
 ====
-parent tiers and annotations
+nothing currently
 
 History
 =======
