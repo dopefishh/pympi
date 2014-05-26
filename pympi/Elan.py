@@ -40,7 +40,7 @@ class Eaf:
         author   -- The author used in the xml tag<br />
         """
         self.naiveGenAnn, self.naiveGenTS = False, False
-        now = localtime()
+        now = time.localtime()
         self.annotationDocument = {
             'AUTHOR': author,
             'DATE': time.strftime("%Y-%m-%dT%H:%M:%S%z"),
