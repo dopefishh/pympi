@@ -363,7 +363,6 @@ class Tier:
         time -- Time"""
         for r in [i for i in self.intervals if i[0] <= time and i[1] >= time]:
             self.intervals.remove(r)
-        return len(remove)
 
     def getIntervals(self):
         """Give a list of intervals in (begin, end, text) format"""
