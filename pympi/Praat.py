@@ -341,10 +341,9 @@ class Tier:
         value      -- Value<br />
         check      -- Flag for overlap checking<br />
         threshhold -- Threshhold for checking overlap"""
-        if self.tierType == 'IntervalTier':
-            warnings.warn(('addInterval: Wrong tier type... Tier should be a ' +
-                          'IntervalTier the tier is a' + 
-                          '"{}"').format(self.tierType))
+        if self.tierType != 'IntervalTier':
+            warnings.warn('addInterval: Wrong tier type... Tier should be a ' +
+                          'IntervalTier the tier is a')
             return 1
         if check is False or len(
                 [i for i in self.intervals
