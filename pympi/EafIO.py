@@ -2,14 +2,13 @@
 
 from xml.etree import ElementTree
 import sys
-import warnings
 
 
 def parseEaf(filePath, eafObj):
     """
-    Parse an elan file<br />
-<br />
-    filePath -- Filepath to parse from - for stdin<br />
+    Parse an elan file
+
+    filePath -- Filepath to parse from - for stdin
     eafObj   -- Object to put the data in"""
     if filePath == "-":
         filePath = sys.stdin
@@ -101,8 +100,8 @@ def parseEaf(filePath, eafObj):
 
 def indent(el, level=0):
     """
-    Pretty prints the xml<br />
-    <br />
+    Pretty prints the xml
+
     level -- Level of indenting, only used internally"""
     i = '\n' + level*'\t'
     if len(el):
@@ -121,10 +120,10 @@ def indent(el, level=0):
 
 def toEaf(filePath, eafObj, pretty=True):
     """
-    Write an elan object to a file<br />
-<br />
-    filePath -- Filpath to write to - for stdout<br />
-    eafObj   -- The elan object<br />
+    Write an elan object to a file
+
+    filePath -- Filpath to write to - for stdout
+    eafObj   -- The elan object
     pretty   -- Use pretty indentation in xml"""
     rmNone = lambda x:\
         dict((k, unicode(v)) for k, v in x.iteritems() if v is not None)

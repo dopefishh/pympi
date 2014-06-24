@@ -8,39 +8,38 @@ import warnings
 class Eaf:
     """
     Class to work with elan files
-    <br />
-    annotationDocument      - Dict of all annotationdocument TAG entries.<br />
-    header                  - Dict of the header TAG entries.<br />
-    media_descriptors       - List of all linked files: [{attrib}]<br />
-    properties              - List of all properties: [(value, {attrib})]<br />
-    linked_file_descriptors - List of all secondary linked files: [{attrib}].<br />
-    timeslots               - Timeslot data: {TimslotID -> time(ms)}<br />
-    tiers                   - Tier data: {TierName -><br />
-            (alignedAnnotations, referenceAnnotations, attributes, ordinal)},<br />
-                              alignedAnnotations: [{annotationId -><br />
-            (beginTs, endTs, value, svg_ref)}]<br />
-                              referenceAnnotations: [{annotationId -><br />
-            (reference, value, previous, svg_ref)}]<br />
-    linguistic_types        - Linguistic type data [{id -> attrib}]<br />
-    locales                 - List of locale data: [{attrib}]<br />
-    constraints             - Constraint data: {stereotype -> description}<br />
-    controlled_vocabularies - Controlled vocabulary data: {id -><br />
-            (description, entries, ext_ref)}<br />
-                                entry: {description -> (attrib, value)}<br />
-    external refs           - External refs [extref]<br />
-                                extref: [id, type, value]<br />
-    lexicon_refs            - Lexicon refs [{attribs}]<br />
+
+    annotationDocument      - Dict of all annotationdocument TAG entries.
+    header                  - Dict of the header TAG entries.
+    media_descriptors       - List of all linked files: [{attrib}]
+    properties              - List of all properties: [(value, {attrib})]
+    linked_file_descriptors - List of all secondary linked files: [{attrib}].
+    timeslots               - Timeslot data: {TimslotID -> time(ms)}
+    tiers                   - Tier data: {TierName ->
+            (alignedAnnotations, referenceAnnotations, attributes, ordinal)},
+                              alignedAnnotations: [{annotationId ->
+            (beginTs, endTs, value, svg_ref)}]
+                              referenceAnnotations: [{annotationId ->
+            (reference, value, previous, svg_ref)}]
+    linguistic_types        - Linguistic type data [{id -> attrib}]
+    locales                 - List of locale data: [{attrib}]
+    constraints             - Constraint data: {stereotype -> description}
+    controlled_vocabularies - Controlled vocabulary data: {id ->
+            (description, entries, ext_ref)}
+                                entry: {description -> (attrib, value)}
+    external refs           - External refs [extref]
+                                extref: [id, type, value]
+    lexicon_refs            - Lexicon refs [{attribs}]
     """
 
     def __init__(self, filePath=None, author='Elan.py'):
         """
-        Constructor, builds an elan object from file or an empty one<br />
-<br />
-        filepath -- The path to load the file from<br />
-        author   -- The author used in the xml tag<br />
+        Constructor, builds an elan object from file or an empty one
+
+        filepath -- The path to load the file from
+        author   -- The author used in the xml tag
         """
         self.naiveGenAnn, self.naiveGenTS = False, False
-        now = time.localtime()
         self.annotationDocument = {
             'AUTHOR': author,
             'DATE': time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -84,18 +83,18 @@ class Eaf:
 
     def tofile(self, filePath, pretty=True):
         """
-        Exports the eaf object to a file with or without pretty printing<br />
-<br />
-        filePath -- The output file path - for stdout<br />
+        Exports the eaf object to a file with or without pretty printing
+
+        filePath -- The output file path - for stdout
         pretty   -- Flag for pretty indented output"""
         EafIO.toEaf(filePath, self)
 
     def toTextGrid(self, filePath, excludedTiers=[], includedTiers=[]):
         """
-        Convert the elan file to praat's TextGrid, returns 0 if succesfull<br />
-<br />
-        filePath      -- The output file path - for stdout<br />
-        excludedTiers -- Tiers to exclude<br />
+        Convert the elan file to praat's TextGrid, returns 0 if succesfull
+
+        filePath      -- The output file path - for stdout
+        excludedTiers -- Tiers to exclude
         includedTiers -- Tiers to include if empty all tiers are included"""
         try:
             from pympi.Praat import TextGrid
@@ -120,9 +119,9 @@ class Eaf:
 
     def extract(self, start, end):
         """
-        Extracts a timeframe from the eaf file and returns it<br />
-<br />
-        start -- Starting time<br />
+        Extracts a timeframe from the eaf file and returns it
+
+        start -- Starting time
         end   -- Ending time"""
         from copy import deepcopy
         eafOut = deepcopy(self)
@@ -143,30 +142,29 @@ class Eaf:
     def addLinkedFile(self, filePath, relpath=None, mimetype=None,
                       time_origin=None, exfrom=None):
         """Adds the linked file to the object
-<br />
-        filePath    -- Path of the file to link<br />
-        relpath     -- Relative filepath<br />
-        mimetype    -- MIME-type, if none it tries to guess it<br />
-        time_origin -- Time origin for media files<br />
+
+        filePath    -- Path of the file to link
+        relpath     -- Relative filepath
+        mimetype    -- MIME-type, if none it tries to guess it
+        time_origin -- Time origin for media files
         exfrom      -- Extracted from"""
         if mimetype is None:
             mimes = {'wav': 'audio/x-wav', 'mpg': 'video/mpeg',
                      'mpeg': 'video/mpg', 'xml': 'text/xml'}
             mimetype = mimes[filePath.split('.')[-1]]
         self.media_descriptors.append({
-            'MEDIA_URL': filepath, 'RELATIVE_MEDIA_URL': relpath,
+            'MEDIA_URL': filePath, 'RELATIVE_MEDIA_URL': relpath,
             'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
             'EXTRACTED_FROM': exfrom})
 
     def copyTier(self, eafObj, tierName):
         """
-        Copies the tier to this object<br />
-<br />
-        eafObj   -- Elan object<br />
+        Copies the tier to this object
+
+        eafObj   -- Elan object
         tierName -- Tier name"""
         eafObj.removeTier(tierName)
         try:
-            t = self.tiers[tierName][3]
             eafObj.addTier(tierName, tierDict=self.tiers[tierName][3])
             for ann in self.getAnnotationDataForTier(tierName):
                 eafObj.insertAnnotation(tierName, ann[0], ann[1], ann[2])
@@ -178,15 +176,15 @@ class Eaf:
     def addTier(self, tierId, ling='default-lt', parent=None, locale=None,
                 part=None, ann=None, tierDict=None):
         """
-        Add a tier to the object<br />
-<br />
-        tierId   -- Name of the tier<br />
-        ling     -- Linguistic type<br />
-        parent   -- ID of parent tier<br />
-        locale   -- Locale used<br />
-        part     -- Participant<br />
-        ann      -- Annotator<br />
-        tierDict -- Tier dict to use the quick function, when this is not None<br />
+        Add a tier to the object
+
+        tierId   -- Name of the tier
+        ling     -- Linguistic type
+        parent   -- ID of parent tier
+        locale   -- Locale used
+        part     -- Participant
+        ann      -- Annotator
+        tierDict -- Tier dict to use the quick function, when this is not None
                     it will ignore all other options"""
         if ling not in self.linguistic_types:
             warnings.warn(
@@ -205,8 +203,8 @@ class Eaf:
 
     def removeTiers(self, tiers):
         """
-        Remove tiers<br />
-<br />
+        Remove tiers
+
         tiers -- List of names of tiers to remove"""
         for a in tiers:
             self.removeTier(a, check=False, clean=False)
@@ -214,9 +212,9 @@ class Eaf:
 
     def removeTier(self, idTier, clean=True):
         """
-        Remove tier<br />
-<br />
-        idTier -- Name of the tier<br />
+        Remove tier
+
+        idTier -- Name of the tier
         clean  -- Flag to also clean up the timeslot id's(takes time)"""
         try:
             del(self.tiers[idTier])
@@ -234,8 +232,8 @@ class Eaf:
 
     def getParametersForTier(self, idTier):
         """
-        Gives the tierdict that is usable in the addTier function<br />
-<br />
+        Gives the tierdict that is usable in the addTier function
+
         idTier -- Name of the tier"""
         try:
             return self.tiers[idTier][2]
@@ -245,8 +243,8 @@ class Eaf:
 
     def childTiersFor(self, idTier):
         """
-        Gives all children tiers<br />
-<br />
+        Gives all children tiers
+
         idTier -- Parent tier"""
         try:
             return [m for m in self.tiers
@@ -258,8 +256,8 @@ class Eaf:
 
     def getAnnotationDataForTier(self, idTier):
         """
-        Gives a list of annotations in the format (start, end, value)<br />
-<br />
+        Gives a list of annotations in the format (start, end, value)
+
         idTier -- Name of the tier"""
         try:
             a = self.tiers[idTier][0]
@@ -271,9 +269,9 @@ class Eaf:
 
     def getAnnotationDataAtTime(self, idTier, time):
         """
-        Gives the annotation at time<br />
-<br />
-        idTier -- Name of the tier<br />
+        Gives the annotation at time
+
+        idTier -- Name of the tier
         time   -- Time"""
         try:
             anns = self.tiers[idTier][0]
@@ -288,10 +286,10 @@ class Eaf:
 
     def getAnnotationDatasBetweenTimes(self, idTier, start, end):
         """
-        Gives a list of annotations that occur between times<br />
-<br />
-        idTier -- Name of the tier<br />
-        start  -- Start time<br />
+        Gives a list of annotations that occur between times
+
+        idTier -- Name of the tier
+        start  -- Start time
         end    -- End time"""
         try:
             anns = self.tiers[idTier][0]
@@ -305,8 +303,8 @@ class Eaf:
 
     def removeAllAnnotationsFromTier(self, idTier):
         """
-        Remove all annotations from a tier<br />
-<br />
+        Remove all annotations from a tier
+
         idTier -- Name of the tier"""
         try:
             self.tiers[idTier][0], self.tiers[idTier][1] = {}, {}
@@ -318,12 +316,12 @@ class Eaf:
 
     def insertAnnotation(self, idTier, start, end, value='', svg_ref=None):
         """
-        Insert an annotation in a tier<br />
-<br />
-        idTier  -- Name of the tier<br />
-        start   -- Start time of the annotation<br />
-        end     -- End time of the annotation<br />
-        value   -- Value of the annotation<br />
+        Insert an annotation in a tier
+
+        idTier  -- Name of the tier
+        start   -- Start time of the annotation
+        end     -- End time of the annotation
+        value   -- Value of the annotation
         svg_ref -- SVG reference"""
         try:
             startTs = self.generateTsId(start)
@@ -337,15 +335,15 @@ class Eaf:
 
     def removeAnnotation(self, idTier, time, clean=True):
         """
-        Remove an annotation at time<br />
-<br />
-        idTier -- Name of the tier<br />
-        time   -- Time<br />
+        Remove an annotation at time
+
+        idTier -- Name of the tier
+        time   -- Time
         clean  -- Flag to clean timeslots(this takes time)"""
         try:
-            for b in [a for a in self.tiers[tier][0].iteritems() if
+            for b in [a for a in self.tiers[idTier][0].iteritems() if
                       a[1][0] >= time and a[1][1] <= time]:
-                del(self.tiers[tier][0][b[0]])
+                del(self.tiers[idTier][0][b[0]])
             if clean:
                 self.cleanTimeSlots()
             return 0
@@ -355,12 +353,12 @@ class Eaf:
 
     def insertRefAnnotation(self, idTier, ref, value, prev, svg_ref=None):
         """
-        Insert a ref annotation in a tier<br />
-<br />
-        idTier  -- Name of the tier<br />
-        ref     -- Reference<br />
-        value   -- Value of the annotation<br />
-        prev    -- Previous annotation<br />
+        Insert a ref annotation in a tier
+
+        idTier  -- Name of the tier
+        ref     -- Reference
+        value   -- Value of the annotation
+        prev    -- Previous annotation
         svg_ref -- SVG reference"""
         try:
             self.tiers[idTier][1][self.generateAnnotationId()] =\
@@ -372,8 +370,8 @@ class Eaf:
 
     def getRefAnnotationDataForTier(self, idTier):
         """"
-        Give a list of all reference annotations<br />
-<br />
+        Give a list of all reference annotations
+
         idTier -- Name of the tier"""
         try:
             return self.tiers[idTier][1]
@@ -383,8 +381,8 @@ class Eaf:
 
     def removeControlledVocabulary(self, cv):
         """
-        Remove a controlled vocabulary<br />
-<br />
+        Remove a controlled vocabulary
+
         cv -- Controlled vocabulary ID"""
         try:
             del(self.controlled_vocabularies[cv])
@@ -445,20 +443,20 @@ class Eaf:
 
     def generateAnnotationConcat(self, tiers, start, end):
         """
-        Generate an concatenated annotation from annotations within a timeframe<br />
-<br />
-        tiers -- List of tiers<br />
-        start -- Start time<br />
+        Generate an concatenated annotation from annotations within a timeframe
+
+        tiers -- List of tiers
+        start -- Start time
         end   -- End time"""
         return '_'.join(set(d[2] for t in tiers if t in self.tiers for d in
                         self.getAnnotationDatasBetweenTimes(t, start, end)))
 
     def mergeTiers(self, tiers, tiernew=None, gaptresh=1):
         """
-        Merge tiers<br />
-<br />
-        tiers    -- List of tiers to merge<br />
-        tiernew  -- Name of the new tier, if None it will be generated<br />
+        Merge tiers
+
+        tiers    -- List of tiers to merge
+        tiernew  -- Name of the new tier, if None it will be generated
         gaptresh -- Treshhold to glue annotations in ms"""
         if len([t for t in tiers if t not in self.tiers]) > 0:
             warnings.warn('mergeTiers: One or more tiers non existent!')
@@ -495,32 +493,32 @@ class Eaf:
 
     def shiftAnnotations(self, time):
         """
-        Shift all annotations to the left or right, this creates a new object<br />
-<br />
+        Shift all annotations to the left or right, this creates a new object
+
         time -- Shift width in ms negative for right shift"""
         e = self.extract(
             -1*time, self.getFullTimeInterval()[1]) if time < 0 else\
             self.extract(0, self.getFullTimeInterval()[1]-time)
         for tier in e.tiers.itervalues():
             for ann in tier[0].itervalues():
-                e.timeslots[ann[0]] = e.timeslots[ann[0]]+offset
-                e.timeslots[ann[1]] = e.timeslots[ann[1]]+offset
+                e.timeslots[ann[0]] = e.timeslots[ann[0]]+time
+                e.timeslots[ann[1]] = e.timeslots[ann[1]]+time
         e.cleanTimeSlots()
         return e
 
     def filterAnnotations(self, tier, tierName=None, filtin=None, filtex=None):
         """
-        Filter annotations in tier<br />
-<br />
-        tier     -- Tier to filter<br />
-        tierName -- Tier to put the filtered annotations in<br />
-        filtin   -- Include everything in this list<br />
+        Filter annotations in tier
+
+        tier     -- Tier to filter
+        tierName -- Tier to put the filtered annotations in
+        filtin   -- Include everything in this list
         filtex   -- Exclude everything in this list"""
         if tier not in self.tiers:
             warnings.warn('filterAnnotations: Tier non existent!' + tier)
             return 1
         if tierName is None:
-            tierName = '%s_filter' % tier1
+            tierName = '%s_filter' % tier
         self.removeTier(tierName)
         self.addTier(tierName)
         for a in [b for b in self.getAnnotationDataForTier(tier)
@@ -532,12 +530,12 @@ class Eaf:
     def glueAnnotationsInTier(self, tier, tierName=None, treshhold=85,
                               filtin=None, filtex=None):
         """
-        Glue annotatotions together<br />
-<br />
-        tier      -- Tier to glue<br />
-        tierName  -- Name for the output tier<br />
-        treshhold -- Maximal gap to glue<br />
-        filtin    -- Include only this annotations<br />
+        Glue annotatotions together
+
+        tier      -- Tier to glue
+        tierName  -- Name for the output tier
+        treshhold -- Maximal gap to glue
+        filtin    -- Include only this annotations
         filtex    -- Exclude all this annotations"""
         if tier not in self.tiers:
             warnings.warn('glueAnnotationsInTier: Tier non existent!')
@@ -571,13 +569,14 @@ class Eaf:
         return (min(self.timeslots.itervalues()),
                 max(self.timeslots.itervalues()))
 
-    def createGapsAndOverlapsTier(self, tier1, tier2, tierNam=None, maxlen=-1):
+    def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None,
+                                  maxlen=-1):
         """
-        Create a tier with the gaps and overlaps<br />
-<br />
-        tier1   -- Name of the first tier<br />
-        tier2   -- Name of the second tier<br />
-        tierNam -- Name of the output tier<br />
+        Create a tier with the gaps and overlaps
+
+        tier1   -- Name of the first tier
+        tier2   -- Name of the second tier
+        tierNam -- Name of the output tier
         maxlen  -- Maximum length of the ftos"""
         if tier1 not in self.tiers or tier2 not in self.tiers:
             warnings.warn(
@@ -595,11 +594,11 @@ class Eaf:
     def getGapsAndOverlapsDuration(self, tier1, tier2, maxlen=-1,
                                    progressbar=False):
         """
-        Give gaps and overlaps in the format (type, start, end)<br />
-<br />
-        tier1       -- Name of the first tier<br />
-        tier2       -- Name of the second tier<br />
-        maxlen      -- Maximum length of the ftos<br />
+        Give gaps and overlaps in the format (type, start, end)
+
+        tier1       -- Name of the first tier
+        tier2       -- Name of the second tier
+        maxlen      -- Maximum length of the ftos
         progressbar -- Flag to display the progress"""
         if tier1 not in self.tiers or tier2 not in self.tiers:
             warnings.warn(
@@ -671,18 +670,18 @@ class Eaf:
 
     def createControlledVocabulary(self, cvEntries, cvId, description=''):
         """
-        Add a controlled vocabulary<br />
-<br />
-        cvEntries   -- Entries in the controlled vocabulary<br />
-        cvId        -- Name of the controlled vocabulary<br />
+        Add a controlled vocabulary
+
+        cvEntries   -- Entries in the controlled vocabulary
+        cvId        -- Name of the controlled vocabulary
         description -- Description"""
         self.controlledvocabularies[cvId] = (description, cvEntries)
 
     def getTierIdsForLinguisticType(self, lingType, parent=None):
         """
-        Give a list of all tiers matching a linguistic type<br />
-<br />
-        lingType -- The linguistic type<br />
+        Give a list of all tiers matching a linguistic type
+
+        lingType -- The linguistic type
         parent   -- Only match tiers from this parent"""
         return [t for t in self.tiers if
                 self.tiers[t][2]['LINGUISTIC_TYPE_REF'] == lingType and
@@ -690,8 +689,8 @@ class Eaf:
 
     def removeLinguisticType(self, lingType):
         """
-        Remove a linguistic type<br />
-<br />
+        Remove a linguistic type
+
         lingType -- Name of the linguistic type"""
         try:
             del(self.linguistic_types[lingType])
@@ -704,12 +703,12 @@ class Eaf:
     def addLinguisticType(self, lingtype, constraints, timealignable=True,
                           graphicreferences=False, extref=None):
         """
-        Add a linguistic type<br />
-<br />
-        lingtype          -- Name of the linguistic type<br />
-        constraints       -- Constraint names<br />
-        timealignable     -- Flag for time alignable<br />
-        graphicreferences -- Graphic references<br />
+        Add a linguistic type
+
+        lingtype          -- Name of the linguistic type
+        constraints       -- Constraint names
+        timealignable     -- Flag for time alignable
+        graphicreferences -- Graphic references
         extref            -- External references"""
         self.linguistic_types[lingtype] = {
             'LINGUISTIC_TYPE_ID': lingtype,

@@ -19,17 +19,17 @@ rename = re.compile(r'name = "(.*)"')
 
 class TextGrid:
     """Class to read and write in TextGrid files,
-<br />
-    note all the times are in seconds<br />
-    xmin    - maximum x value<br />
-    xmax    - maximum y value<br />
-    tierNum - number of tiers currently present<br />
-    tiers   - dict of tiers<br />
+
+    note all the times are in seconds
+    xmin    - maximum x value
+    xmax    - maximum y value
+    tierNum - number of tiers currently present
+    tiers   - dict of tiers
     """
     def __init__(self, filePath=None, codec='ascii'):
         """Constructor,
-<br />
-        filePath -- Filepath to read from - for stdin<br />
+
+        filePath -- Filepath to read from - for stdin
         codec    -- File encoding"""
         self.tiers = dict()
         if filePath is None:
@@ -67,10 +67,10 @@ class TextGrid:
 
     def addTier(self, name, tierType='IntervalTier', number=None):
         """
-        Add a tier<br />
-<br />
-        name     -- Name of the tier<br />
-        tierType -- Type of the tier<br />
+        Add a tier
+
+        name     -- Name of the tier
+        tierType -- Type of the tier
         number   -- Position of the tier"""
         if number is None:
             number = 1 if len(self.tiers) is 0 else\
@@ -81,20 +81,20 @@ class TextGrid:
 
     def removeTier(self, name):
         """
-        Remove a tier<br />
-<br />
+        Remove a tier
+
         name -- Name of the tier"""
         if name in self.tiers:
             del(self.tiers[name])
             return 0
         else:
-            warning.warn('removeTier: tier non existent')
+            warnings.warn('removeTier: tier non existent')
             return 1
 
     def getTier(self, name):
         """
-        Give a tier<br />
-<br />
+        Give a tier
+
         name -- Name of the tier"""
         try:
             return self.tiers[name]
@@ -108,10 +108,10 @@ class TextGrid:
 
 #    def getGapsAndOverlapsDuration(self, tier1, tier2):
 #        """
-#        Give a list of gaps and overlaps between tiers (type, begin, end)<br />
-#<br />
-#        tier1 -- Name of tier 1<br />
-#        tie<br />
+#        Give a list of gaps and overlaps between tiers (type, begin, end)
+#
+#        tier1 -- Name of tier 1
+#        tie
 #        """Gives the gaps and the overlaps between tiers in (type, begin, end)
 #        None if one of the tiers doesn't exist"""
 #        if tier1 not in self.tiers or tier2 not in self.tiers:
@@ -184,9 +184,9 @@ class TextGrid:
 
     def tofile(self, filepath, codec='utf-16'):
         """
-        Write the object to a file<br />
-<br />
-        filepath -- Path to write to - for stdout<br />
+        Write the object to a file
+
+        filepath -- Path to write to - for stdout
         codec    -- Encoding to write to"""
         if filepath == "-":
             f = sys.stdout
@@ -238,8 +238,8 @@ class TextGrid:
 
     def toEaf(self, filepath):
         """
-        Write to eaf<br />
-<br />
+        Write to eaf
+
         filepath -- Filepath to write to - for stdout"""
         try:
             from pympi.Elan import Eaf
@@ -260,21 +260,21 @@ class TextGrid:
 
 class Tier:
     """Class to represent a TextGrid tier: IntervalTier or TextTier
-<br />
-    name      - tier name<br />
-    intervals - list of intervals (start, [end,] value)<br />
-    number    - number of the tier<br />
-    tierType  - TextTier or IntervalTier<br />
-    xmin      - minimum x value<br />
-    xmax      - maximum x value<br />
+
+    name      - tier name
+    intervals - list of intervals (start, [end,] value)
+    number    - number of the tier
+    tierType  - TextTier or IntervalTier
+    xmin      - minimum x value
+    xmax      - maximum x value
     """
 
     def __init__(self, name, number, tierType, lines=None):
         """Constructor
-<br />
-        name     -- Name of the tier<br />
-        number   -- Number of the tier<br />
-        tierType -- Type of the tier<br />
+
+        name     -- Name of the tier
+        number   -- Number of the tier
+        tierType -- Type of the tier
         lines    -- Lines to parse the tier information from"""
         self.name = name
         self.intervals = list()
@@ -315,10 +315,10 @@ class Tier:
 
     def addPoint(self, point, value, check=True):
         """
-        Add a point to the tier<br />
-<br />
-        point -- Time point<br />
-        value -- Value<br />
+        Add a point to the tier
+
+        point -- Time point
+        value -- Value
         check -- Flag for overlap checking"""
         if self.tierType is not 'TextTier':
             warnings.warn(
@@ -334,12 +334,12 @@ class Tier:
 
     def addInterval(self, begin, end, value, check=True, threshhold=5):
         """
-        Add an interval to the tier<br />
-<br />
-        begin      -- Start time<br />
-        end        -- End time<br />
-        value      -- Value<br />
-        check      -- Flag for overlap checking<br />
+        Add an interval to the tier
+
+        begin      -- Start time
+        end        -- End time
+        value      -- Value
+        check      -- Flag for overlap checking
         threshhold -- Threshhold for checking overlap"""
         if self.tierType != 'IntervalTier':
             warnings.warn('addInterval: Wrong tier type... Tier should be a ' +
@@ -358,8 +358,8 @@ class Tier:
 
     def removeInterval(self, time):
         """
-        Remove an interval at time<br />
-<br />
+        Remove an interval at time
+
         time -- Time"""
         for r in [i for i in self.intervals if i[0] <= time and i[1] >= time]:
             self.intervals.remove(r)
