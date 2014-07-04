@@ -83,7 +83,8 @@ class Eaf:
 
     def tofile(self, filePath, pretty=True):
         """
-        Exports the eaf object to a file with or without pretty printing
+        Exports the eaf object to a file with or without pretty printing, if
+        the file already exists it will create a backup with the .bak suffix
 
         filePath -- The output file path - for stdout
         pretty   -- Flag for pretty indented output"""

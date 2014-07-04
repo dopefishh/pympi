@@ -2,6 +2,7 @@
 
 from xml.etree import ElementTree
 import sys
+import os
 
 
 def parseEaf(filePath, eafObj):
@@ -206,6 +207,8 @@ def toEaf(filePath, eafObj, pretty=True):
         indent(ANNOTATION_DOCUMENT)
     if filePath == "-":
         filePath = sys.stdout
+    elif os.access(filePath, os.F_OK):
+        os.rename(filePath, '{}.bak'.format(filePath))
     ElementTree.ElementTree(ANNOTATION_DOCUMENT).write(filePath,
                                                        xml_declaration=True,
                                                        encoding='UTF-8')
