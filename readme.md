@@ -5,9 +5,9 @@ Contents
 - ./pympi/Praat.py 
     - A python class to read, write, edit and create praat's TextGrid files.
 - ./pympi/Elan.py 
-	- A python class to edit and create ELAN's eaf files.
+    - A python class to edit and create ELAN's eaf files.
 - ./pympi/EafIO.py 
-	- A python class to write and read ELAN's eaf files.
+    - A python class to write and read ELAN's eaf files.
 
 Installation
 ============

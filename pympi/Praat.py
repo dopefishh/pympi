@@ -195,44 +195,49 @@ class TextGrid:
         for t in self.tiers.itervalues():
             t.update()
         self.__update()
-        f.write(('File Type = "ooTextFile\n' +
-                 'Object class = "TextGrid"\n\n' +
-                 'xmin = %f\n' +
-                 'xmax = %f\n' +
-                 'tiers? <exists>\n' +
-                 'size = %d\n' +
-                 'item []:\n') % (self.xmin, self.xmax, self.tierNum))
+        f.write("""\
+File Type = "ooTextFile
+Object class = "TextGrid"
+
+xmin = {}
+xmax = {}
+tiers? <exists>
+size = {}
+item []:
+""".format(self.xmin, self.xmax, self.tierNum))
         for tierName in sorted(self.tiers.keys(),
                                key=lambda k: self.tiers[k].number):
             tier = self.getTier(tierName)
-            f.write('%sitem [%d]:\n' % (' '*4, tier.number))
-            f.write('%sclass = "%s"\n' % (' '*8, tier.tierType))
-            f.write('%sname = "%s"\n' % (' '*8, tier.name))
-            f.write('%sxmin = %f\n' % (' '*8, tier.xmin))
-            f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
+            f.write('{:>4}sitem [{}]:\n'.format(' ', tier.number))
+            f.write('{:>8}class = "{}"\n'.format(' ', tier.tierType))
+            f.write('{:>8}name = "{}"\n'.format(' ', tier.name))
+            f.write('{:>8}xmin = {}\n'.format(' ', tier.xmin))
+            f.write('{:>8}xmax = {}\n'.format(' ', tier.xmax))
             srtint = sorted(tier.getIntervals())
-            ints = []
-            if srtint and srtint[0][0] > 0.0:
-                ints.append((0.0, srtint[0][0], ""))
-            for i in srtint:
-                if i[1] - i[0] == 0:
-                    continue
-                if ints and ints[-1][1] < i[0]:
-                    ints.append((ints[-1][1], i[0], ""))
-                ints.append(i)
-            f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
-            for i, c in enumerate(ints):
-                if tier.tierType == 'TextTier':
-                    f.write('%spoints [%d]:\n' % (' '*8, i + 1))
-                    f.write('%snumber = %f\n' % (' '*12, c[0]))
-                    f.write('%smark = "%s"\n' % (' '*12,
-                                                 c[1].replace('"', '""')))
-                elif tier.tierType == 'IntervalTier':
-                    f.write('%sintervals [%d]:\n' % (' '*8, i + 1))
-                    f.write('%sxmin = %f\n' % (' '*12, c[0]))
-                    f.write('%sxmax = %f\n' % (' '*12, c[1]))
-                    f.write('%stext = "%s"\n' % (' '*12,
-                                                 c[2].replace('"', '""')))
+            if tier.tierType == 'IntervalTier':
+                ints = []
+                if srtint and srtint[0][0] > 0.0:
+                    ints.append((0.0, srtint[0][0], ""))
+                for i in srtint:
+                    if i[1] - i[0] == 0:
+                        continue
+                    if ints and ints[-1][1] < i[0]:
+                        ints.append((ints[-1][1], i[0], ""))
+                    ints.append(i)
+                f.write('{:>8}intervals: size = {}\n'.format(' ', len(ints)))
+                for i, c in enumerate(ints):
+                    f.write('{:>8}intervals [{}]:\n'.format(' ', i+1))
+                    f.write('{:>12}xmin = {}\n'.format(' ', c[0]))
+                    f.write('{:>12}xmax = {}\n'.format(' ', c[1]))
+                    f.write('{:>12}text = "{}"\n'.format(
+                        ' ', c[2].replace('"', '""')))
+            elif tier.tierType == 'TextTier':
+                f.write('{:>8}points: size = {}\n'.format(' ', len(srtint)))
+                for i, c in enumerate(srtint):
+                    f.write('{:>8}points [{}]:\n'.format(' ', i + 1))
+                    f.write('{:>12}number = {}\n'.format(' ', c[0]))
+                    f.write('{:>12}mark = "{}"\n'.format(
+                        ' ', c[1].replace('"', '""')))
         if filepath != "-":
             f.close()
 
@@ -301,7 +306,7 @@ class Tier:
                     mark = remark.search(data[1]).group(1).replace('""', '"')
                     self.intervals.append((number, mark))
             else:
-                raise Exception('Unknown tiertype: %s' % self.tierType)
+                raise Exception('Unknown tiertype: {}'.format(self.tierType))
 
     def update(self):
         """Update the internal values"""

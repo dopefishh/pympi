@@ -89,13 +89,16 @@ class Eaf:
         pretty   -- Flag for pretty indented output"""
         EafIO.toEaf(filePath, self)
 
-    def toTextGrid(self, filePath, excludedTiers=[], includedTiers=[]):
+    def toTextGrid(self, filePath, excludedTiers=[], includedTiers=[],
+                   encoding='utf-16'):
         """
         Convert the elan file to praat's TextGrid, returns 0 if succesfull
 
         filePath      -- The output file path - for stdout
         excludedTiers -- Tiers to exclude
-        includedTiers -- Tiers to include if empty all tiers are included"""
+        includedTiers -- Tiers to include if empty all tiers are included
+        encoding      -- Character encoding for the resulting TextGrid file
+        """
         try:
             from pympi.Praat import TextGrid
         except ImportError:
@@ -114,7 +117,7 @@ class Eaf:
                     interval[0]/1000.0,
                     interval[1]/1000.0,
                     interval[2])
-        tgout.tofile(filePath)
+        tgout.tofile(filePath, codec=encoding)
         return 0
 
     def extract(self, start, end):
