@@ -939,17 +939,17 @@ rename = re.compile(r'name = "(.*)"')
 
 class TextGrid:
     """Class to read and write in TextGrid files,
-<br />
-    note all the times are in seconds<br />
-    xmin    - maximum x value<br />
-    xmax    - maximum y value<br />
-    tierNum - number of tiers currently present<br />
-    tiers   - dict of tiers<br />
+
+    note all the times are in seconds
+    xmin    - maximum x value
+    xmax    - maximum y value
+    tierNum - number of tiers currently present
+    tiers   - dict of tiers
     """
     def __init__(self, filePath=None, codec='ascii'):
         """Constructor,
-<br />
-        filePath -- Filepath to read from - for stdin<br />
+
+        filePath -- Filepath to read from - for stdin
         codec    -- File encoding"""
         self.tiers = dict()
         if filePath is None:
@@ -987,10 +987,10 @@ class TextGrid:
 
     def addTier(self, name, tierType='IntervalTier', number=None):
         """
-        Add a tier<br />
-<br />
-        name     -- Name of the tier<br />
-        tierType -- Type of the tier<br />
+        Add a tier
+
+        name     -- Name of the tier
+        tierType -- Type of the tier
         number   -- Position of the tier"""
         if number is None:
             number = 1 if len(self.tiers) is 0 else\
@@ -1001,20 +1001,20 @@ class TextGrid:
 
     def removeTier(self, name):
         """
-        Remove a tier<br />
-<br />
+        Remove a tier
+
         name -- Name of the tier"""
         if name in self.tiers:
             del(self.tiers[name])
             return 0
         else:
-            warning.warn('removeTier: tier non existent')
+            warnings.warn('removeTier: tier non existent')
             return 1
 
     def getTier(self, name):
         """
-        Give a tier<br />
-<br />
+        Give a tier
+
         name -- Name of the tier"""
         try:
             return self.tiers[name]
@@ -1028,10 +1028,10 @@ class TextGrid:
 
 #    def getGapsAndOverlapsDuration(self, tier1, tier2):
 #        """
-#        Give a list of gaps and overlaps between tiers (type, begin, end)<br />
-#<br />
-#        tier1 -- Name of tier 1<br />
-#        tie<br />
+#        Give a list of gaps and overlaps between tiers (type, begin, end)
+#
+#        tier1 -- Name of tier 1
+#        tie
 #        """Gives the gaps and the overlaps between tiers in (type, begin, end)
 #        None if one of the tiers doesn't exist"""
 #        if tier1 not in self.tiers or tier2 not in self.tiers:
@@ -1104,9 +1104,9 @@ class TextGrid:
 
     def tofile(self, filepath, codec='utf-16'):
         """
-        Write the object to a file<br />
-<br />
-        filepath -- Path to write to - for stdout<br />
+        Write the object to a file
+
+        filepath -- Path to write to - for stdout
         codec    -- Encoding to write to"""
         if filepath == "-":
             f = sys.stdout
@@ -1115,51 +1115,56 @@ class TextGrid:
         for t in self.tiers.itervalues():
             t.update()
         self.__update()
-        f.write(('File Type = "ooTextFile\n' +
-                 'Object class = "TextGrid"\n\n' +
-                 'xmin = %f\n' +
-                 'xmax = %f\n' +
-                 'tiers? <exists>\n' +
-                 'size = %d\n' +
-                 'item []:\n') % (self.xmin, self.xmax, self.tierNum))
+        f.write("""\
+File Type = "ooTextFile
+Object class = "TextGrid"
+
+xmin = {}
+xmax = {}
+tiers? <exists>
+size = {}
+item []:
+""".format(self.xmin, self.xmax, self.tierNum))
         for tierName in sorted(self.tiers.keys(),
                                key=lambda k: self.tiers[k].number):
             tier = self.getTier(tierName)
-            f.write('%sitem [%d]:\n' % (' '*4, tier.number))
-            f.write('%sclass = "%s"\n' % (' '*8, tier.tierType))
-            f.write('%sname = "%s"\n' % (' '*8, tier.name))
-            f.write('%sxmin = %f\n' % (' '*8, tier.xmin))
-            f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
+            f.write('{:>4}sitem [{}]:\n'.format(' ', tier.number))
+            f.write('{:>8}class = "{}"\n'.format(' ', tier.tierType))
+            f.write('{:>8}name = "{}"\n'.format(' ', tier.name))
+            f.write('{:>8}xmin = {}\n'.format(' ', tier.xmin))
+            f.write('{:>8}xmax = {}\n'.format(' ', tier.xmax))
             srtint = sorted(tier.getIntervals())
-            ints = []
-            if srtint and srtint[0][0] > 0.0:
-                ints.append((0.0, srtint[0][0], ""))
-            for i in srtint:
-                if i[1] - i[0] == 0:
-                    continue
-                if ints and ints[-1][1] < i[0]:
-                    ints.append((ints[-1][1], i[0], ""))
-                ints.append(i)
-            f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
-            for i, c in enumerate(ints):
-                if tier.tierType == 'TextTier':
-                    f.write('%spoints [%d]:\n' % (' '*8, i + 1))
-                    f.write('%snumber = %f\n' % (' '*12, c[0]))
-                    f.write('%smark = "%s"\n' % (' '*12,
-                                                 c[1].replace('"', '""')))
-                elif tier.tierType == 'IntervalTier':
-                    f.write('%sintervals [%d]:\n' % (' '*8, i + 1))
-                    f.write('%sxmin = %f\n' % (' '*12, c[0]))
-                    f.write('%sxmax = %f\n' % (' '*12, c[1]))
-                    f.write('%stext = "%s"\n' % (' '*12,
-                                                 c[2].replace('"', '""')))
+            if tier.tierType == 'IntervalTier':
+                ints = []
+                if srtint and srtint[0][0] > 0.0:
+                    ints.append((0.0, srtint[0][0], ""))
+                for i in srtint:
+                    if i[1] - i[0] == 0:
+                        continue
+                    if ints and ints[-1][1] < i[0]:
+                        ints.append((ints[-1][1], i[0], ""))
+                    ints.append(i)
+                f.write('{:>8}intervals: size = {}\n'.format(' ', len(ints)))
+                for i, c in enumerate(ints):
+                    f.write('{:>8}intervals [{}]:\n'.format(' ', i+1))
+                    f.write('{:>12}xmin = {}\n'.format(' ', c[0]))
+                    f.write('{:>12}xmax = {}\n'.format(' ', c[1]))
+                    f.write('{:>12}text = "{}"\n'.format(
+                        ' ', c[2].replace('"', '""')))
+            elif tier.tierType == 'TextTier':
+                f.write('{:>8}points: size = {}\n'.format(' ', len(srtint)))
+                for i, c in enumerate(srtint):
+                    f.write('{:>8}points [{}]:\n'.format(' ', i + 1))
+                    f.write('{:>12}number = {}\n'.format(' ', c[0]))
+                    f.write('{:>12}mark = "{}"\n'.format(
+                        ' ', c[1].replace('"', '""')))
         if filepath != "-":
             f.close()
 
     def toEaf(self, filepath):
         """
-        Write to eaf<br />
-<br />
+        Write to eaf
+
         filepath -- Filepath to write to - for stdout"""
         try:
             from pympi.Elan import Eaf
@@ -1180,21 +1185,21 @@ class TextGrid:
 
 class Tier:
     """Class to represent a TextGrid tier: IntervalTier or TextTier
-<br />
-    name      - tier name<br />
-    intervals - list of intervals (start, [end,] value)<br />
-    number    - number of the tier<br />
-    tierType  - TextTier or IntervalTier<br />
-    xmin      - minimum x value<br />
-    xmax      - maximum x value<br />
+
+    name      - tier name
+    intervals - list of intervals (start, [end,] value)
+    number    - number of the tier
+    tierType  - TextTier or IntervalTier
+    xmin      - minimum x value
+    xmax      - maximum x value
     """
 
     def __init__(self, name, number, tierType, lines=None):
         """Constructor
-<br />
-        name     -- Name of the tier<br />
-        number   -- Number of the tier<br />
-        tierType -- Type of the tier<br />
+
+        name     -- Name of the tier
+        number   -- Number of the tier
+        tierType -- Type of the tier
         lines    -- Lines to parse the tier information from"""
         self.name = name
         self.intervals = list()
@@ -1221,7 +1226,7 @@ class Tier:
                     mark = remark.search(data[1]).group(1).replace('""', '"')
                     self.intervals.append((number, mark))
             else:
-                raise Exception('Unknown tiertype: %s' % self.tierType)
+                raise Exception('Unknown tiertype: {}'.format(self.tierType))
 
     def update(self):
         """Update the internal values"""
@@ -1235,10 +1240,10 @@ class Tier:
 
     def addPoint(self, point, value, check=True):
         """
-        Add a point to the tier<br />
-<br />
-        point -- Time point<br />
-        value -- Value<br />
+        Add a point to the tier
+
+        point -- Time point
+        value -- Value
         check -- Flag for overlap checking"""
         if self.tierType is not 'TextTier':
             warnings.warn(
@@ -1254,16 +1259,16 @@ class Tier:
 
     def addInterval(self, begin, end, value, check=True, threshhold=5):
         """
-        Add an interval to the tier<br />
-<br />
-        begin      -- Start time<br />
-        end        -- End time<br />
-        value      -- Value<br />
-        check      -- Flag for overlap checking<br />
+        Add an interval to the tier
+
+        begin      -- Start time
+        end        -- End time
+        value      -- Value
+        check      -- Flag for overlap checking
         threshhold -- Threshhold for checking overlap"""
-        if self.tierType is not 'IntervalTier':
+        if self.tierType != 'IntervalTier':
             warnings.warn('addInterval: Wrong tier type... Tier should be a ' +
-                          'IntervalTier')
+                          'IntervalTier the tier is a')
             return 1
         if check is False or len(
                 [i for i in self.intervals
@@ -1278,12 +1283,11 @@ class Tier:
 
     def removeInterval(self, time):
         """
-        Remove an interval at time<br />
-<br />
+        Remove an interval at time
+
         time -- Time"""
         for r in [i for i in self.intervals if i[0] <= time and i[1] >= time]:
             self.intervals.remove(r)
-        return len(remove)
 
     def getIntervals(self):
         """Give a list of intervals in (begin, end, text) format"""
@@ -1456,29 +1460,28 @@ class Tier:
         <p id="pympi.Praat.TextGrid" class="name">class <span class="ident">TextGrid</span></p>
         
   
-      <div class="desc"><p>Class to read and write in TextGrid files,
-<br />
-    note all the times are in seconds<br />
-    xmin    - maximum x value<br />
-    xmax    - maximum y value<br />
-    tierNum - number of tiers currently present<br />
-    tiers   - dict of tiers<br /></p></div>
+      <div class="desc"><p>Class to read and write in TextGrid files,</p>
+<p>note all the times are in seconds
+xmin    - maximum x value
+xmax    - maximum y value
+tierNum - number of tiers currently present
+tiers   - dict of tiers</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.TextGrid', this);">Show source.</a></p>
     <div id="source-pympi.Praat.TextGrid" class="source">
       <pre><code>class TextGrid:
     """Class to read and write in TextGrid files,
-<br />
-    note all the times are in seconds<br />
-    xmin    - maximum x value<br />
-    xmax    - maximum y value<br />
-    tierNum - number of tiers currently present<br />
-    tiers   - dict of tiers<br />
+
+    note all the times are in seconds
+    xmin    - maximum x value
+    xmax    - maximum y value
+    tierNum - number of tiers currently present
+    tiers   - dict of tiers
     """
     def __init__(self, filePath=None, codec='ascii'):
         """Constructor,
-<br />
-        filePath -- Filepath to read from - for stdin<br />
+
+        filePath -- Filepath to read from - for stdin
         codec    -- File encoding"""
         self.tiers = dict()
         if filePath is None:
@@ -1516,10 +1519,10 @@ class Tier:
 
     def addTier(self, name, tierType='IntervalTier', number=None):
         """
-        Add a tier<br />
-<br />
-        name     -- Name of the tier<br />
-        tierType -- Type of the tier<br />
+        Add a tier
+
+        name     -- Name of the tier
+        tierType -- Type of the tier
         number   -- Position of the tier"""
         if number is None:
             number = 1 if len(self.tiers) is 0 else\
@@ -1530,20 +1533,20 @@ class Tier:
 
     def removeTier(self, name):
         """
-        Remove a tier<br />
-<br />
+        Remove a tier
+
         name -- Name of the tier"""
         if name in self.tiers:
             del(self.tiers[name])
             return 0
         else:
-            warning.warn('removeTier: tier non existent')
+            warnings.warn('removeTier: tier non existent')
             return 1
 
     def getTier(self, name):
         """
-        Give a tier<br />
-<br />
+        Give a tier
+
         name -- Name of the tier"""
         try:
             return self.tiers[name]
@@ -1557,10 +1560,10 @@ class Tier:
 
 #    def getGapsAndOverlapsDuration(self, tier1, tier2):
 #        """
-#        Give a list of gaps and overlaps between tiers (type, begin, end)<br />
-#<br />
-#        tier1 -- Name of tier 1<br />
-#        tie<br />
+#        Give a list of gaps and overlaps between tiers (type, begin, end)
+#
+#        tier1 -- Name of tier 1
+#        tie
 #        """Gives the gaps and the overlaps between tiers in (type, begin, end)
 #        None if one of the tiers doesn't exist"""
 #        if tier1 not in self.tiers or tier2 not in self.tiers:
@@ -1633,9 +1636,9 @@ class Tier:
 
     def tofile(self, filepath, codec='utf-16'):
         """
-        Write the object to a file<br />
-<br />
-        filepath -- Path to write to - for stdout<br />
+        Write the object to a file
+
+        filepath -- Path to write to - for stdout
         codec    -- Encoding to write to"""
         if filepath == "-":
             f = sys.stdout
@@ -1644,51 +1647,56 @@ class Tier:
         for t in self.tiers.itervalues():
             t.update()
         self.__update()
-        f.write(('File Type = "ooTextFile\n' +
-                 'Object class = "TextGrid"\n\n' +
-                 'xmin = %f\n' +
-                 'xmax = %f\n' +
-                 'tiers? <exists>\n' +
-                 'size = %d\n' +
-                 'item []:\n') % (self.xmin, self.xmax, self.tierNum))
+        f.write("""\
+File Type = "ooTextFile
+Object class = "TextGrid"
+
+xmin = {}
+xmax = {}
+tiers? <exists>
+size = {}
+item []:
+""".format(self.xmin, self.xmax, self.tierNum))
         for tierName in sorted(self.tiers.keys(),
                                key=lambda k: self.tiers[k].number):
             tier = self.getTier(tierName)
-            f.write('%sitem [%d]:\n' % (' '*4, tier.number))
-            f.write('%sclass = "%s"\n' % (' '*8, tier.tierType))
-            f.write('%sname = "%s"\n' % (' '*8, tier.name))
-            f.write('%sxmin = %f\n' % (' '*8, tier.xmin))
-            f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
+            f.write('{:>4}sitem [{}]:\n'.format(' ', tier.number))
+            f.write('{:>8}class = "{}"\n'.format(' ', tier.tierType))
+            f.write('{:>8}name = "{}"\n'.format(' ', tier.name))
+            f.write('{:>8}xmin = {}\n'.format(' ', tier.xmin))
+            f.write('{:>8}xmax = {}\n'.format(' ', tier.xmax))
             srtint = sorted(tier.getIntervals())
-            ints = []
-            if srtint and srtint[0][0] > 0.0:
-                ints.append((0.0, srtint[0][0], ""))
-            for i in srtint:
-                if i[1] - i[0] == 0:
-                    continue
-                if ints and ints[-1][1] < i[0]:
-                    ints.append((ints[-1][1], i[0], ""))
-                ints.append(i)
-            f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
-            for i, c in enumerate(ints):
-                if tier.tierType == 'TextTier':
-                    f.write('%spoints [%d]:\n' % (' '*8, i + 1))
-                    f.write('%snumber = %f\n' % (' '*12, c[0]))
-                    f.write('%smark = "%s"\n' % (' '*12,
-                                                 c[1].replace('"', '""')))
-                elif tier.tierType == 'IntervalTier':
-                    f.write('%sintervals [%d]:\n' % (' '*8, i + 1))
-                    f.write('%sxmin = %f\n' % (' '*12, c[0]))
-                    f.write('%sxmax = %f\n' % (' '*12, c[1]))
-                    f.write('%stext = "%s"\n' % (' '*12,
-                                                 c[2].replace('"', '""')))
+            if tier.tierType == 'IntervalTier':
+                ints = []
+                if srtint and srtint[0][0] > 0.0:
+                    ints.append((0.0, srtint[0][0], ""))
+                for i in srtint:
+                    if i[1] - i[0] == 0:
+                        continue
+                    if ints and ints[-1][1] < i[0]:
+                        ints.append((ints[-1][1], i[0], ""))
+                    ints.append(i)
+                f.write('{:>8}intervals: size = {}\n'.format(' ', len(ints)))
+                for i, c in enumerate(ints):
+                    f.write('{:>8}intervals [{}]:\n'.format(' ', i+1))
+                    f.write('{:>12}xmin = {}\n'.format(' ', c[0]))
+                    f.write('{:>12}xmax = {}\n'.format(' ', c[1]))
+                    f.write('{:>12}text = "{}"\n'.format(
+                        ' ', c[2].replace('"', '""')))
+            elif tier.tierType == 'TextTier':
+                f.write('{:>8}points: size = {}\n'.format(' ', len(srtint)))
+                for i, c in enumerate(srtint):
+                    f.write('{:>8}points [{}]:\n'.format(' ', i + 1))
+                    f.write('{:>12}number = {}\n'.format(' ', c[0]))
+                    f.write('{:>12}mark = "{}"\n'.format(
+                        ' ', c[1].replace('"', '""')))
         if filepath != "-":
             f.close()
 
     def toEaf(self, filepath):
         """
-        Write to eaf<br />
-<br />
+        Write to eaf
+
         filepath -- Filepath to write to - for stdout"""
         try:
             from pympi.Elan import Eaf
@@ -1736,17 +1744,15 @@ class Tier:
 
       
   
-      <div class="desc"><p>Constructor,
-<br />
-        filePath -- Filepath to read from - for stdin<br />
-        codec    -- File encoding</p></div>
+      <div class="desc"><p>Constructor,</p>
+<p>filePath -- Filepath to read from - for stdin
+codec    -- File encoding</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.TextGrid.__init__', this);">Show source.</a></p>
     <div id="source-pympi.Praat.TextGrid.__init__" class="source">
       <pre><code>def __init__(self, filePath=None, codec='ascii'):
     """Constructor,
-/>
-    filePath -- Filepath to read from - for stdin<br />
+    filePath -- Filepath to read from - for stdin
     codec    -- File encoding"""
     self.tiers = dict()
     if filePath is None:
@@ -1788,20 +1794,18 @@ class Tier:
 
       
   
-      <div class="desc"><p>Add a tier<br />
-<br />
-        name     -- Name of the tier<br />
-        tierType -- Type of the tier<br />
-        number   -- Position of the tier</p></div>
+      <div class="desc"><p>Add a tier</p>
+<p>name     -- Name of the tier
+tierType -- Type of the tier
+number   -- Position of the tier</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.TextGrid.addTier', this);">Show source.</a></p>
     <div id="source-pympi.Praat.TextGrid.addTier" class="source">
       <pre><code>def addTier(self, name, tierType='IntervalTier', number=None):
     """
-    Add a tier<br />
-/>
-    name     -- Name of the tier<br />
-    tierType -- Type of the tier<br />
+    Add a tier
+    name     -- Name of the tier
+    tierType -- Type of the tier
     number   -- Position of the tier"""
     if number is None:
         number = 1 if len(self.tiers) is 0 else\
@@ -1824,16 +1828,14 @@ class Tier:
 
       
   
-      <div class="desc"><p>Give a tier<br />
-<br />
-        name -- Name of the tier</p></div>
+      <div class="desc"><p>Give a tier</p>
+<p>name -- Name of the tier</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.TextGrid.getTier', this);">Show source.</a></p>
     <div id="source-pympi.Praat.TextGrid.getTier" class="source">
       <pre><code>def getTier(self, name):
     """
-    Give a tier<br />
-/>
+    Give a tier
     name -- Name of the tier"""
     try:
         return self.tiers[name]
@@ -1877,22 +1879,20 @@ class Tier:
 
       
   
-      <div class="desc"><p>Remove a tier<br />
-<br />
-        name -- Name of the tier</p></div>
+      <div class="desc"><p>Remove a tier</p>
+<p>name -- Name of the tier</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.TextGrid.removeTier', this);">Show source.</a></p>
     <div id="source-pympi.Praat.TextGrid.removeTier" class="source">
       <pre><code>def removeTier(self, name):
     """
-    Remove a tier<br />
-/>
+    Remove a tier
     name -- Name of the tier"""
     if name in self.tiers:
         del(self.tiers[name])
         return 0
     else:
-        warning.warn('removeTier: tier non existent')
+        warnings.warn('removeTier: tier non existent')
         return 1
 </code></pre>
     </div>
@@ -1909,16 +1909,14 @@ class Tier:
 
       
   
-      <div class="desc"><p>Write to eaf<br />
-<br />
-        filepath -- Filepath to write to - for stdout</p></div>
+      <div class="desc"><p>Write to eaf</p>
+<p>filepath -- Filepath to write to - for stdout</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.TextGrid.toEaf', this);">Show source.</a></p>
     <div id="source-pympi.Praat.TextGrid.toEaf" class="source">
       <pre><code>def toEaf(self, filepath):
     """
-    Write to eaf<br />
-/>
+    Write to eaf
     filepath -- Filepath to write to - for stdout"""
     try:
         from pympi.Elan import Eaf
@@ -1950,18 +1948,16 @@ class Tier:
 
       
   
-      <div class="desc"><p>Write the object to a file<br />
-<br />
-        filepath -- Path to write to - for stdout<br />
-        codec    -- Encoding to write to</p></div>
+      <div class="desc"><p>Write the object to a file</p>
+<p>filepath -- Path to write to - for stdout
+codec    -- Encoding to write to</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.TextGrid.tofile', this);">Show source.</a></p>
     <div id="source-pympi.Praat.TextGrid.tofile" class="source">
       <pre><code>def tofile(self, filepath, codec='utf-16'):
     """
-    Write the object to a file<br />
-/>
-    filepath -- Path to write to - for stdout<br />
+    Write the object to a file
+    filepath -- Path to write to - for stdout
     codec    -- Encoding to write to"""
     if filepath == "-":
         f = sys.stdout
@@ -1970,44 +1966,48 @@ class Tier:
     for t in self.tiers.itervalues():
         t.update()
     self.__update()
-    f.write(('File Type = "ooTextFile\n' +
-             'Object class = "TextGrid"\n\n' +
-             'xmin = %f\n' +
-             'xmax = %f\n' +
-             'tiers? <exists>\n' +
-             'size = %d\n' +
-             'item []:\n') % (self.xmin, self.xmax, self.tierNum))
+    f.write("""\
+ Type = "ooTextFile
+ct class = "TextGrid"
+ = {}
+ = {}
+s? <exists>
+ = {}
+ []:
+format(self.xmin, self.xmax, self.tierNum))
     for tierName in sorted(self.tiers.keys(),
                            key=lambda k: self.tiers[k].number):
         tier = self.getTier(tierName)
-        f.write('%sitem [%d]:\n' % (' '*4, tier.number))
-        f.write('%sclass = "%s"\n' % (' '*8, tier.tierType))
-        f.write('%sname = "%s"\n' % (' '*8, tier.name))
-        f.write('%sxmin = %f\n' % (' '*8, tier.xmin))
-        f.write('%sxmax = %f\n' % (' '*8, tier.xmax))
+        f.write('{:>4}sitem [{}]:\n'.format(' ', tier.number))
+        f.write('{:>8}class = "{}"\n'.format(' ', tier.tierType))
+        f.write('{:>8}name = "{}"\n'.format(' ', tier.name))
+        f.write('{:>8}xmin = {}\n'.format(' ', tier.xmin))
+        f.write('{:>8}xmax = {}\n'.format(' ', tier.xmax))
         srtint = sorted(tier.getIntervals())
-        ints = []
-        if srtint and srtint[0][0] > 0.0:
-            ints.append((0.0, srtint[0][0], ""))
-        for i in srtint:
-            if i[1] - i[0] == 0:
-                continue
-            if ints and ints[-1][1] < i[0]:
-                ints.append((ints[-1][1], i[0], ""))
-            ints.append(i)
-        f.write('%sintervals: size = %d\n' % (' '*8, len(ints)))
-        for i, c in enumerate(ints):
-            if tier.tierType == 'TextTier':
-                f.write('%spoints [%d]:\n' % (' '*8, i + 1))
-                f.write('%snumber = %f\n' % (' '*12, c[0]))
-                f.write('%smark = "%s"\n' % (' '*12,
-                                             c[1].replace('"', '""')))
-            elif tier.tierType == 'IntervalTier':
-                f.write('%sintervals [%d]:\n' % (' '*8, i + 1))
-                f.write('%sxmin = %f\n' % (' '*12, c[0]))
-                f.write('%sxmax = %f\n' % (' '*12, c[1]))
-                f.write('%stext = "%s"\n' % (' '*12,
-                                             c[2].replace('"', '""')))
+        if tier.tierType == 'IntervalTier':
+            ints = []
+            if srtint and srtint[0][0] > 0.0:
+                ints.append((0.0, srtint[0][0], ""))
+            for i in srtint:
+                if i[1] - i[0] == 0:
+                    continue
+                if ints and ints[-1][1] < i[0]:
+                    ints.append((ints[-1][1], i[0], ""))
+                ints.append(i)
+            f.write('{:>8}intervals: size = {}\n'.format(' ', len(ints)))
+            for i, c in enumerate(ints):
+                f.write('{:>8}intervals [{}]:\n'.format(' ', i+1))
+                f.write('{:>12}xmin = {}\n'.format(' ', c[0]))
+                f.write('{:>12}xmax = {}\n'.format(' ', c[1]))
+                f.write('{:>12}text = "{}"\n'.format(
+                    ' ', c[2].replace('"', '""')))
+        elif tier.tierType == 'TextTier':
+            f.write('{:>8}points: size = {}\n'.format(' ', len(srtint)))
+            for i, c in enumerate(srtint):
+                f.write('{:>8}points [{}]:\n'.format(' ', i + 1))
+                f.write('{:>12}number = {}\n'.format(' ', c[0]))
+                f.write('{:>12}mark = "{}"\n'.format(
+                    ' ', c[1].replace('"', '""')))
     if filepath != "-":
         f.close()
 </code></pre>
@@ -2023,34 +2023,33 @@ class Tier:
         <p id="pympi.Praat.Tier" class="name">class <span class="ident">Tier</span></p>
         
   
-      <div class="desc"><p>Class to represent a TextGrid tier: IntervalTier or TextTier
-<br />
-    name      - tier name<br />
-    intervals - list of intervals (start, [end,] value)<br />
-    number    - number of the tier<br />
-    tierType  - TextTier or IntervalTier<br />
-    xmin      - minimum x value<br />
-    xmax      - maximum x value<br /></p></div>
+      <div class="desc"><p>Class to represent a TextGrid tier: IntervalTier or TextTier</p>
+<p>name      - tier name
+intervals - list of intervals (start, [end,] value)
+number    - number of the tier
+tierType  - TextTier or IntervalTier
+xmin      - minimum x value
+xmax      - maximum x value</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.Tier', this);">Show source.</a></p>
     <div id="source-pympi.Praat.Tier" class="source">
       <pre><code>class Tier:
     """Class to represent a TextGrid tier: IntervalTier or TextTier
-<br />
-    name      - tier name<br />
-    intervals - list of intervals (start, [end,] value)<br />
-    number    - number of the tier<br />
-    tierType  - TextTier or IntervalTier<br />
-    xmin      - minimum x value<br />
-    xmax      - maximum x value<br />
+
+    name      - tier name
+    intervals - list of intervals (start, [end,] value)
+    number    - number of the tier
+    tierType  - TextTier or IntervalTier
+    xmin      - minimum x value
+    xmax      - maximum x value
     """
 
     def __init__(self, name, number, tierType, lines=None):
         """Constructor
-<br />
-        name     -- Name of the tier<br />
-        number   -- Number of the tier<br />
-        tierType -- Type of the tier<br />
+
+        name     -- Name of the tier
+        number   -- Number of the tier
+        tierType -- Type of the tier
         lines    -- Lines to parse the tier information from"""
         self.name = name
         self.intervals = list()
@@ -2077,7 +2076,7 @@ class Tier:
                     mark = remark.search(data[1]).group(1).replace('""', '"')
                     self.intervals.append((number, mark))
             else:
-                raise Exception('Unknown tiertype: %s' % self.tierType)
+                raise Exception('Unknown tiertype: {}'.format(self.tierType))
 
     def update(self):
         """Update the internal values"""
@@ -2091,10 +2090,10 @@ class Tier:
 
     def addPoint(self, point, value, check=True):
         """
-        Add a point to the tier<br />
-<br />
-        point -- Time point<br />
-        value -- Value<br />
+        Add a point to the tier
+
+        point -- Time point
+        value -- Value
         check -- Flag for overlap checking"""
         if self.tierType is not 'TextTier':
             warnings.warn(
@@ -2110,16 +2109,16 @@ class Tier:
 
     def addInterval(self, begin, end, value, check=True, threshhold=5):
         """
-        Add an interval to the tier<br />
-<br />
-        begin      -- Start time<br />
-        end        -- End time<br />
-        value      -- Value<br />
-        check      -- Flag for overlap checking<br />
+        Add an interval to the tier
+
+        begin      -- Start time
+        end        -- End time
+        value      -- Value
+        check      -- Flag for overlap checking
         threshhold -- Threshhold for checking overlap"""
-        if self.tierType is not 'IntervalTier':
+        if self.tierType != 'IntervalTier':
             warnings.warn('addInterval: Wrong tier type... Tier should be a ' +
-                          'IntervalTier')
+                          'IntervalTier the tier is a')
             return 1
         if check is False or len(
                 [i for i in self.intervals
@@ -2134,12 +2133,11 @@ class Tier:
 
     def removeInterval(self, time):
         """
-        Remove an interval at time<br />
-<br />
+        Remove an interval at time
+
         time -- Time"""
         for r in [i for i in self.intervals if i[0] <= time and i[1] >= time]:
             self.intervals.remove(r)
-        return len(remove)
 
     def getIntervals(self):
         """Give a list of intervals in (begin, end, text) format"""
@@ -2209,21 +2207,19 @@ class Tier:
 
       
   
-      <div class="desc"><p>Constructor
-<br />
-        name     -- Name of the tier<br />
-        number   -- Number of the tier<br />
-        tierType -- Type of the tier<br />
-        lines    -- Lines to parse the tier information from</p></div>
+      <div class="desc"><p>Constructor</p>
+<p>name     -- Name of the tier
+number   -- Number of the tier
+tierType -- Type of the tier
+lines    -- Lines to parse the tier information from</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.Tier.__init__', this);">Show source.</a></p>
     <div id="source-pympi.Praat.Tier.__init__" class="source">
       <pre><code>def __init__(self, name, number, tierType, lines=None):
     """Constructor
-/>
-    name     -- Name of the tier<br />
-    number   -- Number of the tier<br />
-    tierType -- Type of the tier<br />
+    name     -- Name of the tier
+    number   -- Number of the tier
+    tierType -- Type of the tier
     lines    -- Lines to parse the tier information from"""
     self.name = name
     self.intervals = list()
@@ -2250,7 +2246,7 @@ class Tier:
                 mark = remark.search(data[1]).group(1).replace('""', '"')
                 self.intervals.append((number, mark))
         else:
-            raise Exception('Unknown tiertype: %s' % self.tierType)
+            raise Exception('Unknown tiertype: {}'.format(self.tierType))
 </code></pre>
     </div>
 </div>
@@ -2266,28 +2262,26 @@ class Tier:
 
       
   
-      <div class="desc"><p>Add an interval to the tier<br />
-<br />
-        begin      -- Start time<br />
-        end        -- End time<br />
-        value      -- Value<br />
-        check      -- Flag for overlap checking<br />
-        threshhold -- Threshhold for checking overlap</p></div>
+      <div class="desc"><p>Add an interval to the tier</p>
+<p>begin      -- Start time
+end        -- End time
+value      -- Value
+check      -- Flag for overlap checking
+threshhold -- Threshhold for checking overlap</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.Tier.addInterval', this);">Show source.</a></p>
     <div id="source-pympi.Praat.Tier.addInterval" class="source">
       <pre><code>def addInterval(self, begin, end, value, check=True, threshhold=5):
     """
-    Add an interval to the tier<br />
-/>
-    begin      -- Start time<br />
-    end        -- End time<br />
-    value      -- Value<br />
-    check      -- Flag for overlap checking<br />
+    Add an interval to the tier
+    begin      -- Start time
+    end        -- End time
+    value      -- Value
+    check      -- Flag for overlap checking
     threshhold -- Threshhold for checking overlap"""
-    if self.tierType is not 'IntervalTier':
+    if self.tierType != 'IntervalTier':
         warnings.warn('addInterval: Wrong tier type... Tier should be a ' +
-                      'IntervalTier')
+                      'IntervalTier the tier is a')
         return 1
     if check is False or len(
             [i for i in self.intervals
@@ -2314,20 +2308,18 @@ class Tier:
 
       
   
-      <div class="desc"><p>Add a point to the tier<br />
-<br />
-        point -- Time point<br />
-        value -- Value<br />
-        check -- Flag for overlap checking</p></div>
+      <div class="desc"><p>Add a point to the tier</p>
+<p>point -- Time point
+value -- Value
+check -- Flag for overlap checking</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.Tier.addPoint', this);">Show source.</a></p>
     <div id="source-pympi.Praat.Tier.addPoint" class="source">
       <pre><code>def addPoint(self, point, value, check=True):
     """
-    Add a point to the tier<br />
-/>
-    point -- Time point<br />
-    value -- Value<br />
+    Add a point to the tier
+    point -- Time point
+    value -- Value
     check -- Flag for overlap checking"""
     if self.tierType is not 'TextTier':
         warnings.warn(
@@ -2399,20 +2391,17 @@ class Tier:
 
       
   
-      <div class="desc"><p>Remove an interval at time<br />
-<br />
-        time -- Time</p></div>
+      <div class="desc"><p>Remove an interval at time</p>
+<p>time -- Time</p></div>
     <div class="source_cont">
     <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-pympi.Praat.Tier.removeInterval', this);">Show source.</a></p>
     <div id="source-pympi.Praat.Tier.removeInterval" class="source">
       <pre><code>def removeInterval(self, time):
     """
-    Remove an interval at time<br />
-/>
+    Remove an interval at time
     time -- Time"""
     for r in [i for i in self.intervals if i[0] <= time and i[1] >= time]:
         self.intervals.remove(r)
-    return len(remove)
 </code></pre>
     </div>
 </div>
