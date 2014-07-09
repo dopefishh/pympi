@@ -1,4 +1,4 @@
-# pympi version 0.7, 2014-03-24
+# pympi version 0.8, 2014-07-09
 
 Contents
 ========
@@ -30,16 +30,24 @@ nothing currently
 
 History
 =======
+- 2014-07-09
+	- Changed the style to pep8 and thus some functions(read all) have changed
+	  name
 - 2014-03-24
-	- Fixed a lot of TextGrid bugs and have written a better parser using more regexp
+	- Fixed a lot of TextGrid bugs and have written a better parser using more
+	  regexp
 - 2014-02-17
 	- Started branching
 	- Fixed a few bugs
 - 2014-02-03
-	- Fixed the praat tofile function so that it writes silence intervals (that praat convention)
+	- Fixed the praat tofile function so that it writes silence intervals (that
+	  praat convention)
 - 2014-01-27
-	- Added documentation via pdoc in html and cleaned up some documentation in EafIO.py
+	- Added documentation via pdoc in html and cleaned up some documentation in
+	  EafIO.py
 - 2013-12-02
-	- IO is now in a different file, the old tofile is removed because the new one is much better.
+	- IO is now in a different file, the old tofile is removed because the new
+	  one is much better.
 - 2013-11-15
-	- Rewritten the tofile function, the old function is a bit faster but less reliable. The old function can still be used by using tofileOLD().
+	- Rewritten the tofile function, the old function is a bit faster but less
+	  reliable. The old function can still be used by using tofileOLD().

@@ -1,0 +1,339 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module pympi.Elan</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="pympi.html"><font color="#ffffff">pympi</font></a>.Elan</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/marlub/home/lib/python2.7/site-packages/pympi/Elan.py">/home/marlub/home/lib/python2.7/site-packages/pympi/Elan.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;-*-&nbsp;coding:&nbsp;utf-8&nbsp;-*-</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="pympi.EafIO.html">pympi.EafIO</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td><td width="25%" valign=top><a href="warnings.html">warnings</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="pympi.Elan.html#Eaf">Eaf</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Eaf">class <strong>Eaf</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>class&nbsp;that&nbsp;represents&nbsp;ELAN's&nbsp;eaf&nbsp;files<br>
+&nbsp;<br>
+Internal&nbsp;variables:<br>
+annotation_document&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;dict&nbsp;of&nbsp;all&nbsp;annotationdocument&nbsp;TAG&nbsp;entries.<br>
+header&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;dict&nbsp;of&nbsp;the&nbsp;header&nbsp;TAG&nbsp;entries.<br>
+media_descriptors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;list&nbsp;of&nbsp;all&nbsp;linked&nbsp;files:&nbsp;[{attrib}]<br>
+properties&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;list&nbsp;of&nbsp;all&nbsp;properties:&nbsp;[(value,&nbsp;{attrib})]<br>
+linked_file_descriptors&nbsp;--&nbsp;list&nbsp;of&nbsp;all&nbsp;secondary&nbsp;linked&nbsp;files:&nbsp;[{attrib}].<br>
+timeslots&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;timeslot&nbsp;data:&nbsp;{TimslotID&nbsp;-&gt;&nbsp;time(ms)}<br>
+tiers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;tier&nbsp;data:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{tier_name&nbsp;-&gt;&nbsp;(aligned_annotations,&nbsp;reference_annotations,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attributes,&nbsp;ordinal)}&nbsp;where<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aligned_annotations:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[{annotation_id&nbsp;-&gt;&nbsp;(begin_ts,&nbsp;end_ts,&nbsp;value,&nbsp;svg_ref)}]<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reference_annotations:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[{annotation_id&nbsp;-&gt;&nbsp;(reference,&nbsp;value,&nbsp;previous,&nbsp;svg_ref)}]<br>
+linguistic_types&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;linguistic&nbsp;type&nbsp;data:&nbsp;[{id&nbsp;-&gt;&nbsp;attrib}]<br>
+locales&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;list&nbsp;of&nbsp;locale&nbsp;data:&nbsp;[{attrib}]<br>
+constraints&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;constraint&nbsp;data:&nbsp;{stereotype&nbsp;-&gt;&nbsp;description}<br>
+controlled_vocabularies&nbsp;--&nbsp;controlled&nbsp;vocabulary&nbsp;data:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{id&nbsp;-&gt;&nbsp;(description,&nbsp;entries,&nbsp;ext_ref)}&nbsp;where<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{description&nbsp;-&gt;&nbsp;(attrib,&nbsp;value)}<br>
+external&nbsp;refs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;external&nbsp;refs&nbsp;[extref]&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extref:&nbsp;[id,&nbsp;type,&nbsp;value]<br>
+lexicon_refs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;lexicon&nbsp;refs&nbsp;[{attribs}]<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Eaf-__init__"><strong>__init__</strong></a>(self, file_path<font color="#909090">=None</font>, author<font color="#909090">='Elan.py'</font>)</dt><dd><tt>constructor,&nbsp;builds&nbsp;an&nbsp;elan&nbsp;object&nbsp;from&nbsp;file&nbsp;or&nbsp;if&nbsp;the&nbsp;path&nbsp;is&nbsp;None<br>
+it&nbsp;creates&nbsp;an&nbsp;empty&nbsp;object<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+file_path&nbsp;--&nbsp;path&nbsp;to&nbsp;load&nbsp;the&nbsp;file&nbsp;from&nbsp;(default&nbsp;None)<br>
+author&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;author&nbsp;used&nbsp;in&nbsp;the&nbsp;xml&nbsp;tag&nbsp;(default&nbsp;Elan.py)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-add_linked_file"><strong>add_linked_file</strong></a>(self, file_path, relpath<font color="#909090">=None</font>, mimetype<font color="#909090">=None</font>, time_origin<font color="#909090">=None</font>, ex_from<font color="#909090">=None</font>)</dt><dd><tt>add&nbsp;a&nbsp;linked&nbsp;file<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+file_path&nbsp;&nbsp;&nbsp;--&nbsp;path&nbsp;of&nbsp;the&nbsp;file<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+relpath&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;relative&nbsp;filepath&nbsp;(default&nbsp;None)<br>
+mimetype&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;MIME-type,&nbsp;if&nbsp;none&nbsp;it&nbsp;tries&nbsp;to&nbsp;guess&nbsp;it&nbsp;(default&nbsp;None)<br>
+time_origin&nbsp;--&nbsp;time&nbsp;origin&nbsp;for&nbsp;media&nbsp;files&nbsp;(default&nbsp;None)<br>
+ex_from&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;extracted&nbsp;from&nbsp;(default&nbsp;None)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-add_tier"><strong>add_tier</strong></a>(self, tier_id, ling<font color="#909090">='default-lt'</font>, parent<font color="#909090">=None</font>, locale<font color="#909090">=None</font>, part<font color="#909090">=None</font>, ann<font color="#909090">=None</font>, tier_dict<font color="#909090">=None</font>)</dt><dd><tt>add&nbsp;a&nbsp;tier<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+tier_id&nbsp;&nbsp;&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+ling&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;linguistic&nbsp;type&nbsp;(default&nbsp;None)<br>
+parent&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;id&nbsp;of&nbsp;parent&nbsp;tier&nbsp;(default&nbsp;None)<br>
+locale&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;locale&nbsp;of&nbsp;the&nbsp;tier&nbsp;(default&nbsp;None)<br>
+part&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;participant&nbsp;(default&nbsp;None)<br>
+ann&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;annotator&nbsp;(default&nbsp;None)<br>
+tier_dict&nbsp;--&nbsp;tier&nbsp;dict&nbsp;to&nbsp;use&nbsp;the&nbsp;quick&nbsp;function,&nbsp;when&nbsp;this&nbsp;is&nbsp;not&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;will&nbsp;ignore&nbsp;all&nbsp;other&nbsp;options&nbsp;(default&nbsp;None)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-child_tiers_for"><strong>child_tiers_for</strong></a>(self, id_tier)</dt><dd><tt>gives&nbsp;all&nbsp;child&nbsp;tiers<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;tier&nbsp;name</tt></dd></dl>
+
+<dl><dt><a name="Eaf-clean_time_slots"><strong>clean_time_slots</strong></a>(self)</dt><dd><tt>clean&nbsp;up&nbsp;all&nbsp;unused&nbsp;timeslots<br>
+!!!&nbsp;this&nbsp;can&nbsp;and&nbsp;will&nbsp;take&nbsp;time&nbsp;for&nbsp;larger&nbsp;tiers,&nbsp;this&nbsp;is&nbsp;only<br>
+necessary&nbsp;after&nbsp;a&nbsp;lot&nbsp;of&nbsp;deleting</tt></dd></dl>
+
+<dl><dt><a name="Eaf-copy_tier"><strong>copy_tier</strong></a>(self, eaf_obj, tier_name)</dt><dd><tt>copies&nbsp;the&nbsp;tier&nbsp;to&nbsp;another&nbsp;eaf&nbsp;object<br>
+&nbsp;<br>
+eaf_obj&nbsp;&nbsp;&nbsp;--&nbsp;eaf&nbsp;object<br>
+tier_name&nbsp;--&nbsp;tier&nbsp;name</tt></dd></dl>
+
+<dl><dt><a name="Eaf-create_controlled_vocabulary"><strong>create_controlled_vocabulary</strong></a>(self, cv_entries, cv_id, description<font color="#909090">=''</font>)</dt><dd><tt>create&nbsp;a&nbsp;controlled&nbsp;vocabulary<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+cv_entries&nbsp;&nbsp;&nbsp;--&nbsp;entries&nbsp;in&nbsp;the&nbsp;controlled&nbsp;vocabulary<br>
+cv_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;controlled&nbsp;vocabulary<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+description&nbsp;--&nbsp;description</tt></dd></dl>
+
+<dl><dt><a name="Eaf-create_gaps_and_overlaps_tier"><strong>create_gaps_and_overlaps_tier</strong></a>(self, tier1, tier2, tier_name<font color="#909090">=None</font>, maxlen<font color="#909090">=-1</font>)</dt><dd><tt>create&nbsp;a&nbsp;tier&nbsp;with&nbsp;the&nbsp;gaps&nbsp;and&nbsp;overlaps<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+tier1&nbsp;&nbsp;&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;first&nbsp;tier<br>
+tier2&nbsp;&nbsp;&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;second&nbsp;tier<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+tierNam&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;output&nbsp;tier<br>
+maxlen&nbsp;&nbsp;--&nbsp;maximum&nbsp;length&nbsp;of&nbsp;the&nbsp;gaps</tt></dd></dl>
+
+<dl><dt><a name="Eaf-create_linguistic_type"><strong>create_linguistic_type</strong></a>(self, lingtype, constraints, timealignable<font color="#909090">=True</font>, graphicreferences<font color="#909090">=False</font>, extref<font color="#909090">=None</font>)</dt><dd><tt>create&nbsp;a&nbsp;linguistic&nbsp;type<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+lingtype&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;linguistic&nbsp;type<br>
+constraints&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;constraint&nbsp;names<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+timealignable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;flag&nbsp;for&nbsp;time&nbsp;alignable<br>
+graphicreferences&nbsp;--&nbsp;graphic&nbsp;references<br>
+extref&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;external&nbsp;references</tt></dd></dl>
+
+<dl><dt><a name="Eaf-extract"><strong>extract</strong></a>(self, start, end)</dt><dd><tt>extract&nbsp;a&nbsp;timeframe<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+start&nbsp;--&nbsp;starting&nbsp;time<br>
+end&nbsp;&nbsp;&nbsp;--&nbsp;ending&nbsp;time</tt></dd></dl>
+
+<dl><dt><a name="Eaf-filterAnnotations"><strong>filterAnnotations</strong></a>(self, tier, tier_name<font color="#909090">=None</font>, filtin<font color="#909090">=None</font>, filtex<font color="#909090">=None</font>)</dt><dd><tt>filter&nbsp;annotations&nbsp;in&nbsp;a&nbsp;tier<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+tier&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;tier&nbsp;name<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+tier_name&nbsp;--&nbsp;output&nbsp;tier&nbsp;name,&nbsp;if&nbsp;none&nbsp;it&nbsp;will&nbsp;be&nbsp;generated<br>
+filtin&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;inclusion&nbsp;list,&nbsp;if&nbsp;None&nbsp;all&nbsp;is&nbsp;included<br>
+filtex&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;exclusion&nbsp;list,&nbsp;if&nbsp;Nonen&nbsp;nothing&nbsp;is&nbsp;excluded</tt></dd></dl>
+
+<dl><dt><a name="Eaf-generate_annotation_concat"><strong>generate_annotation_concat</strong></a>(self, tiers, start, end, sep<font color="#909090">='-'</font>)</dt><dd><tt>concatenate&nbsp;annotations&nbsp;within&nbsp;a&nbsp;timeframe<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+tiers&nbsp;--&nbsp;list&nbsp;of&nbsp;tiers<br>
+start&nbsp;--&nbsp;start&nbsp;time<br>
+end&nbsp;&nbsp;&nbsp;--&nbsp;end&nbsp;time<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+sep&nbsp;&nbsp;&nbsp;--&nbsp;separator&nbsp;character</tt></dd></dl>
+
+<dl><dt><a name="Eaf-generate_annotation_id"><strong>generate_annotation_id</strong></a>(self)</dt><dd><tt>generate&nbsp;the&nbsp;next&nbsp;annotation&nbsp;ID</tt></dd></dl>
+
+<dl><dt><a name="Eaf-generate_ts_id"><strong>generate_ts_id</strong></a>(self, time<font color="#909090">=None</font>)</dt><dd><tt>generate&nbsp;the&nbsp;next&nbsp;timeslot&nbsp;ID<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+time&nbsp;--&nbsp;initial&nbsp;time&nbsp;to&nbsp;set</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_annotation_data_at_time"><strong>get_annotation_data_at_time</strong></a>(self, id_tier, time)</dt><dd><tt>give&nbsp;the&nbsp;annotation&nbsp;at&nbsp;the&nbsp;given&nbsp;time<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier<br>
+time&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;time</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_annotation_data_for_tier"><strong>get_annotation_data_for_tier</strong></a>(self, id_tier)</dt><dd><tt>gives&nbsp;a&nbsp;list&nbsp;of&nbsp;annotations&nbsp;in&nbsp;the&nbsp;format&nbsp;(start,&nbsp;end,&nbsp;value)<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_annotation_datas_between_times"><strong>get_annotation_datas_between_times</strong></a>(self, id_tier, start, end)</dt><dd><tt>Gives&nbsp;a&nbsp;list&nbsp;of&nbsp;annotations&nbsp;that&nbsp;occur&nbsp;between&nbsp;times<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier<br>
+start&nbsp;&nbsp;&nbsp;--&nbsp;start&nbsp;time<br>
+end&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;end&nbsp;time</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_full_time_interval"><strong>get_full_time_interval</strong></a>(self)</dt><dd><tt>give&nbsp;a&nbsp;tuple&nbsp;with&nbsp;the&nbsp;start&nbsp;and&nbsp;end&nbsp;time&nbsp;of&nbsp;the&nbsp;entire&nbsp;file</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_gaps_and_overlaps_duration"><strong>get_gaps_and_overlaps_duration</strong></a>(self, tier1, tier2, maxlen<font color="#909090">=-1</font>, progressbar<font color="#909090">=False</font>)</dt><dd><tt>give&nbsp;gaps&nbsp;and&nbsp;overlaps&nbsp;in&nbsp;the&nbsp;format&nbsp;(type,&nbsp;start,&nbsp;end)<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+tier1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;first&nbsp;tier<br>
+tier2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;second&nbsp;tier<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+maxlen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;maximum&nbsp;length&nbsp;of&nbsp;the&nbsp;gaps,&nbsp;-1&nbsp;is&nbsp;infinite<br>
+progressbar&nbsp;--&nbsp;flag&nbsp;to&nbsp;display&nbsp;the&nbsp;progress(debug&nbsp;purpose)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_linguistic_types"><strong>get_linguistic_types</strong></a>(self)</dt><dd><tt>give&nbsp;a&nbsp;list&nbsp;of&nbsp;available&nbsp;linguistic&nbsp;types</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_linked_files"><strong>get_linked_files</strong></a>(self)</dt><dd><tt>give&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;media&nbsp;files</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_parameters_for_tier"><strong>get_parameters_for_tier</strong></a>(self, id_tier)</dt><dd><tt>gives&nbsp;the&nbsp;tierdict&nbsp;that&nbsp;is&nbsp;usable&nbsp;in&nbsp;the&nbsp;add_tier&nbsp;function<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_ref_annotation_data_for_tier"><strong>get_ref_annotation_data_for_tier</strong></a>(self, id_tier)</dt><dd><tt>"give&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;reference&nbsp;annotations<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;Name&nbsp;of&nbsp;the&nbsp;tier</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_tier_ids_for_linguistic_type"><strong>get_tier_ids_for_linguistic_type</strong></a>(self, ling_type, parent<font color="#909090">=None</font>)</dt><dd><tt>give&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;tiers&nbsp;matching&nbsp;a&nbsp;linguistic&nbsp;type<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+ling_type&nbsp;--&nbsp;linguistic&nbsp;type&nbsp;name<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+parent&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;only&nbsp;match&nbsp;tiers&nbsp;from&nbsp;this&nbsp;parent</tt></dd></dl>
+
+<dl><dt><a name="Eaf-get_tier_names"><strong>get_tier_names</strong></a>(self)</dt><dd><tt>give&nbsp;a&nbsp;list&nbsp;of&nbsp;tiernames</tt></dd></dl>
+
+<dl><dt><a name="Eaf-glue_annotations_in_tier"><strong>glue_annotations_in_tier</strong></a>(self, tier, tier_name<font color="#909090">=None</font>, treshhold<font color="#909090">=85</font>, filtin<font color="#909090">=None</font>, filtex<font color="#909090">=None</font>)</dt><dd><tt>glue&nbsp;annotatotions&nbsp;together&nbsp;in&nbsp;a&nbsp;tier<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+tier&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;tier&nbsp;name<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+tier_name&nbsp;&nbsp;--&nbsp;output&nbsp;tier&nbsp;name,&nbsp;if&nbsp;None&nbsp;it&nbsp;will&nbsp;be&nbsp;generated<br>
+treshhold&nbsp;&nbsp;--&nbsp;gap&nbsp;threshhold<br>
+filtin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;include&nbsp;only&nbsp;this&nbsp;annotations,&nbsp;if&nbsp;None&nbsp;all&nbsp;is&nbsp;included<br>
+filtex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;exclude&nbsp;all&nbsp;this&nbsp;annotations</tt></dd></dl>
+
+<dl><dt><a name="Eaf-insert_annotation"><strong>insert_annotation</strong></a>(self, id_tier, start, end, value<font color="#909090">=''</font>, svg_ref<font color="#909090">=None</font>)</dt><dd><tt>insert&nbsp;an&nbsp;annotation&nbsp;in&nbsp;a&nbsp;tier<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier<br>
+start&nbsp;&nbsp;&nbsp;--&nbsp;start&nbsp;time&nbsp;of&nbsp;the&nbsp;annotation<br>
+end&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;end&nbsp;time&nbsp;of&nbsp;the&nbsp;annotation<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+value&nbsp;&nbsp;&nbsp;--&nbsp;value&nbsp;of&nbsp;the&nbsp;annotation&nbsp;(default&nbsp;)<br>
+svg_ref&nbsp;--&nbsp;svg&nbsp;reference&nbsp;(default&nbsp;None)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-insert_ref_annotation"><strong>insert_ref_annotation</strong></a>(self, id_tier, ref, value, prev, svg_ref<font color="#909090">=None</font>)</dt><dd><tt>insert&nbsp;a&nbsp;ref&nbsp;annotation<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier<br>
+ref&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;reference<br>
+value&nbsp;&nbsp;&nbsp;--&nbsp;value&nbsp;of&nbsp;the&nbsp;annotation<br>
+prev&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;previous&nbsp;annotation<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+svg_ref&nbsp;--&nbsp;svg&nbsp;reference&nbsp;(default&nbsp;None)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-merge_tiers"><strong>merge_tiers</strong></a>(self, tiers, tiernew<font color="#909090">=None</font>, gaptresh<font color="#909090">=1</font>)</dt><dd><tt>merge&nbsp;tiers&nbsp;into&nbsp;a&nbsp;new&nbsp;tier<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+tiers&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;list&nbsp;of&nbsp;tiers<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+tiernew&nbsp;&nbsp;--&nbsp;nome&nbsp;of&nbsp;the&nbsp;new&nbsp;tier,&nbsp;if&nbsp;None&nbsp;the&nbsp;name&nbsp;will&nbsp;be&nbsp;generated<br>
+gaptresh&nbsp;--&nbsp;treshhold&nbsp;to&nbsp;glue&nbsp;annotations</tt></dd></dl>
+
+<dl><dt><a name="Eaf-remove_all_annotations_from_tier"><strong>remove_all_annotations_from_tier</strong></a>(self, id_tier)</dt><dd><tt>remove&nbsp;all&nbsp;annotations&nbsp;from&nbsp;a&nbsp;tier<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier</tt></dd></dl>
+
+<dl><dt><a name="Eaf-remove_annotation"><strong>remove_annotation</strong></a>(self, id_tier, time, clean<font color="#909090">=True</font>)</dt><dd><tt>remove&nbsp;an&nbsp;annotation&nbsp;at&nbsp;time<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier<br>
+time&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;time<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+clean&nbsp;&nbsp;&nbsp;--&nbsp;flag&nbsp;to&nbsp;clean&nbsp;timeslots&nbsp;(default&nbsp;True)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-remove_controlled_vocabulary"><strong>remove_controlled_vocabulary</strong></a>(self, cv)</dt><dd><tt>remove&nbsp;a&nbsp;controlled&nbsp;vocabulary<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+cv&nbsp;--&nbsp;Controlled&nbsp;vocabulary&nbsp;ID</tt></dd></dl>
+
+<dl><dt><a name="Eaf-remove_linguistic_type"><strong>remove_linguistic_type</strong></a>(self, ling_type)</dt><dd><tt>remove&nbsp;a&nbsp;linguistic&nbsp;type<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+ling_type&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;linguistic&nbsp;type</tt></dd></dl>
+
+<dl><dt><a name="Eaf-remove_tier"><strong>remove_tier</strong></a>(self, id_tier, clean<font color="#909090">=True</font>)</dt><dd><tt>remove&nbsp;tier<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+id_tier&nbsp;--&nbsp;name&nbsp;of&nbsp;the&nbsp;tier<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+clean&nbsp;&nbsp;&nbsp;--&nbsp;flag&nbsp;to&nbsp;also&nbsp;clean&nbsp;up&nbsp;the&nbsp;timeslot&nbsp;id's&nbsp;(default&nbsp;True)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-remove_tiers"><strong>remove_tiers</strong></a>(self, tiers)</dt><dd><tt>remove&nbsp;tiers<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+tiers&nbsp;--&nbsp;list&nbsp;of&nbsp;names&nbsp;of&nbsp;tiers&nbsp;to&nbsp;remove</tt></dd></dl>
+
+<dl><dt><a name="Eaf-shift_annotations"><strong>shift_annotations</strong></a>(self, time)</dt><dd><tt>shift&nbsp;all&nbsp;annotations&nbsp;in&nbsp;time,&nbsp;this&nbsp;creates&nbsp;a&nbsp;new&nbsp;object<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+time&nbsp;--&nbsp;time&nbsp;shift&nbsp;width&nbsp;negative&nbsp;for&nbsp;right&nbsp;shift</tt></dd></dl>
+
+<dl><dt><a name="Eaf-to_file"><strong>to_file</strong></a>(self, file_path, pretty<font color="#909090">=True</font>)</dt><dd><tt>exports&nbsp;the&nbsp;eaf&nbsp;object&nbsp;to&nbsp;a&nbsp;file,&nbsp;if&nbsp;the&nbsp;file&nbsp;already&nbsp;exists&nbsp;it&nbsp;will<br>
+create&nbsp;a&nbsp;backup&nbsp;with&nbsp;the&nbsp;.bak&nbsp;suffix<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+file_path&nbsp;--&nbsp;file&nbsp;path&nbsp;-&nbsp;for&nbsp;stdout<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+pretty&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;flag&nbsp;for&nbsp;pretty&nbsp;indented&nbsp;output&nbsp;(default&nbsp;True)</tt></dd></dl>
+
+<dl><dt><a name="Eaf-to_textgrid"><strong>to_textgrid</strong></a>(self, file_path, excluded_tiers<font color="#909090">=[]</font>, included_tiers<font color="#909090">=[]</font>, encoding<font color="#909090">='utf-16'</font>)</dt><dd><tt>convert&nbsp;the&nbsp;elan&nbsp;file&nbsp;to&nbsp;praat's&nbsp;TextGrid<br>
+&nbsp;<br>
+Required&nbsp;arguments:<br>
+file_path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;file&nbsp;path,&nbsp;-&nbsp;for&nbsp;stdout<br>
+excluded_tiers&nbsp;--&nbsp;tiers&nbsp;to&nbsp;specifically&nbsp;exclude<br>
+included_tiers&nbsp;--&nbsp;tiers&nbsp;to&nbsp;specifically&nbsp;include,&nbsp;if&nbsp;empty&nbsp;all&nbsp;tiers&nbsp;are<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;included<br>
+&nbsp;<br>
+Keyword&nbsp;arguments:<br>
+encoding&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;character&nbsp;encoding&nbsp;(default&nbsp;utf-16)</tt></dd></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>
