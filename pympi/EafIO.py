@@ -14,8 +14,8 @@ def parse_eaf(file_path, eaf_obj):
     if file_path == "-":
         file_path = sys.stdin
     tree_root = etree.parse(file_path).getroot()
-    eaf_obj.annotationDocument.update(tree_root.attrib)
-    del(eaf_obj.annotationDocument["""{http://www.w3.org/2001/XMLSchema-instan\
+    eaf_obj.annotation_document.update(tree_root.attrib)
+    del(eaf_obj.annotation_document["""{http://www.w3.org/2001/XMLSchema-instan\
 ce}noNamespaceSchemaLocation"""])
     tier_number = 0
     for elem in tree_root:
@@ -130,7 +130,7 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     rm_none = lambda x:\
         dict((k, unicode(v)) for k, v in x.iteritems() if v is not None)
     ANNOTATION_DOCUMENT = etree.Element('ANNOTATION_DOCUMENT',
-                                        eaf_obj.annotationDocument)
+                                        eaf_obj.annotation_document)
 
     HEADER = etree.SubElement(ANNOTATION_DOCUMENT, 'HEADER', eaf_obj.header)
     for m in eaf_obj.media_descriptors:
@@ -195,5 +195,5 @@ def to_eaf(file_path, eaf_obj, pretty=True):
         file_path = sys.stdout
     elif os.access(file_path, os.F_OK):
         os.rename(file_path, '{}.bak'.format(file_path))
-    etree.etree(ANNOTATION_DOCUMENT).write(file_path, xml_declaration=True,
-                                           encoding='UTF-8')
+    etree.ElementTree(ANNOTATION_DOCUMENT).write(
+        file_path, xml_declaration=True, encoding='UTF-8')
