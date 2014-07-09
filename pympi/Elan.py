@@ -6,41 +6,47 @@ import warnings
 
 
 class Eaf:
+    """class that represents ELAN's eaf files
+
+    Internal variables:
+    annotation_document     -- dict of all annotationdocument TAG entries.
+    header                  -- dict of the header TAG entries.
+    media_descriptors       -- list of all linked files: [{attrib}]
+    properties              -- list of all properties: [(value, {attrib})]
+    linked_file_descriptors -- list of all secondary linked files: [{attrib}].
+    timeslots               -- timeslot data: {TimslotID -> time(ms)}
+    tiers                   -- tier data:
+        {tier_name -> (aligned_annotations, reference_annotations,
+                       attributes, ordinal)} where
+
+                              aligned_annotations:
+        [{annotation_id -> (begin_ts, end_ts, value, svg_ref)}]
+
+                              reference_annotations:
+        [{annotation_id -> (reference, value, previous, svg_ref)}]
+    linguistic_types        -- linguistic type data: [{id -> attrib}]
+    locales                 -- list of locale data: [{attrib}]
+    constraints             -- constraint data: {stereotype -> description}
+    controlled_vocabularies -- controlled vocabulary data:
+        {id -> (description, entries, ext_ref)} where
+
+                              entry:
+        {description -> (attrib, value)}
+    external refs           -- external refs [extref] where
+                              extref: [id, type, value]
+    lexicon_refs            -- lexicon refs [{attribs}]
     """
-    Class to work with elan files
 
-    annotationDocument      - Dict of all annotationdocument TAG entries.
-    header                  - Dict of the header TAG entries.
-    media_descriptors       - List of all linked files: [{attrib}]
-    properties              - List of all properties: [(value, {attrib})]
-    linked_file_descriptors - List of all secondary linked files: [{attrib}].
-    timeslots               - Timeslot data: {TimslotID -> time(ms)}
-    tiers                   - Tier data: {TierName ->
-            (alignedAnnotations, referenceAnnotations, attributes, ordinal)},
-                              alignedAnnotations: [{annotationId ->
-            (beginTs, endTs, value, svg_ref)}]
-                              referenceAnnotations: [{annotationId ->
-            (reference, value, previous, svg_ref)}]
-    linguistic_types        - Linguistic type data [{id -> attrib}]
-    locales                 - List of locale data: [{attrib}]
-    constraints             - Constraint data: {stereotype -> description}
-    controlled_vocabularies - Controlled vocabulary data: {id ->
-            (description, entries, ext_ref)}
-                                entry: {description -> (attrib, value)}
-    external refs           - External refs [extref]
-                                extref: [id, type, value]
-    lexicon_refs            - Lexicon refs [{attribs}]
-    """
+    def __init__(self, file_path=None, author='Elan.py'):
+        """constructor, builds an elan object from file or if the path is None
+        it creates an empty object
 
-    def __init__(self, filePath=None, author='Elan.py'):
+        Keyword arguments:
+        file_path -- path to load the file from (default None)
+        author    -- author used in the xml tag (default Elan.py)
         """
-        Constructor, builds an elan object from file or an empty one
-
-        filepath -- The path to load the file from
-        author   -- The author used in the xml tag
-        """
-        self.naiveGenAnn, self.naiveGenTS = False, False
-        self.annotationDocument = {
+        self.naive_gen_ann, self.naive_gen_ts = False, False
+        self.annotation_document = {
             'AUTHOR': author,
             'DATE': time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             'VERSION': '2.7',
@@ -62,43 +68,45 @@ class Eaf:
         self.linked_file_descriptors = []
         self.new_time, self.new_ann = 0, 0
 
-        if filePath is None:
-            self.addLinguisticType('default-lt', None)
-            self.constraints = {
-                'Time_Subdivision':
-                    'Time subdivision of parent annotation\'s time interval' +
-                    ', no time gaps allowed within this interval',
-                'Symbolic_Subdivision':
-                    'Symbolic subdivision of a parent annotation. Annotation' +
-                    's refering to the same parent are ordered',
-                'Symbolic_Association':
-                    '1-1 association with a parent annotation',
-                'Included_In':
-                    'Time alignable annotations within the parent annotation' +
-                    '\'s time interval, gaps are allowed'}
+        if file_path is None:
+            self.add_linguistic_type('default-lt', None)
+            self.constraints = {'Time_Subdivision': """Time subdivision of par\
+ent annotation\'s time interval, no time gaps allowed within this interval""",
+                                'Symbolic_Subdivision': """Symbolic subdivision\
+of a parent annotation. Annotations refering to the same parent are ordered""",
+                                'Symbolic_Association': """1-1 association wit\
+h a parent annotation""",
+                                'Included_In': """Time alignable annotations w\
+ithin the parent annotation's time interval, gaps are allowed"""}
             self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
-            self.addTier('default')
+            self.add_tier('default')
         else:
-            EafIO.parseEaf(filePath, self)
+            EafIO.parse_eaf(file_path, self)
 
-    def tofile(self, filePath, pretty=True):
+    def to_file(self, file_path, pretty=True):
+        """exports the eaf object to a file, if the file already exists it will
+        create a backup with the .bak suffix
+
+        Required arguments:
+        file_path -- file path - for stdout
+
+        Keyword arguments:
+        pretty    -- flag for pretty indented output (default True)
         """
-        Exports the eaf object to a file with or without pretty printing, if
-        the file already exists it will create a backup with the .bak suffix
+        EafIO.to_eaf(file_path, self)
 
-        filePath -- The output file path - for stdout
-        pretty   -- Flag for pretty indented output"""
-        EafIO.toEaf(filePath, self)
+    def to_textgrid(self, file_path, excluded_tiers=[], included_tiers=[],
+                    encoding='utf-16'):
+        """convert the elan file to praat's TextGrid
 
-    def toTextGrid(self, filePath, excludedTiers=[], includedTiers=[],
-                   encoding='utf-16'):
-        """
-        Convert the elan file to praat's TextGrid, returns 0 if succesfull
+        Required arguments:
+        file_path      -- file path, - for stdout
+        excluded_tiers -- tiers to specifically exclude
+        included_tiers -- tiers to specifically include, if empty all tiers are
+                          included
 
-        filePath      -- The output file path - for stdout
-        excludedTiers -- Tiers to exclude
-        includedTiers -- Tiers to include if empty all tiers are included
-        encoding      -- Character encoding for the resulting TextGrid file
+        Keyword arguments:
+        encoding       -- character encoding (default utf-16)
         """
         try:
             from pympi.Praat import TextGrid
@@ -108,299 +116,330 @@ class Eaf:
                 'mpi module found at https://github.com/dopefishh/pympi')
             return 1
         tgout = TextGrid()
-        for tier in [a for a in self.tiers if a not in excludedTiers and
-                     (not includedTiers or a in includedTiers)]:
-            currentTier = tgout.addTier(tier)
-            for interval in self.getAnnotationDataForTier(tier):
+        for tier in [a for a in self.tiers if a not in excluded_tiers and
+                     (not included_tiers or a in included_tiers)]:
+            currentTier = tgout.add_tier(tier)
+            for interval in self.get_annotation_data_for_tier(tier):
                 if interval[0] == interval[1]:
                     continue
-                currentTier.addInterval(
+                currentTier.add_interval(
                     interval[0]/1000.0,
                     interval[1]/1000.0,
                     interval[2])
-        tgout.tofile(filePath, codec=encoding)
+        tgout.to_file(file_path, codec=encoding)
         return 0
 
     def extract(self, start, end):
-        """
-        Extracts a timeframe from the eaf file and returns it
+        """extract a timeframe
 
-        start -- Starting time
-        end   -- Ending time"""
+        Required arguments:
+        start -- starting time
+        end   -- ending time
+        """
         from copy import deepcopy
-        eafOut = deepcopy(self)
-        for tier in eafOut.tiers.itervalues():
+        eaf_out = deepcopy(self)
+        for tier in eaf_out.tiers.itervalues():
             rems = []
             for ann in tier[0]:
-                if eafOut.timeslots[tier[0][ann][1]] > end or\
-                        eafOut.timeslots[tier[0][ann][0]] < start:
+                if eaf_out.timeslots[tier[0][ann][1]] > end or\
+                        eaf_out.timeslots[tier[0][ann][0]] < start:
                     rems.append(ann)
             for r in rems:
                 del tier[0][r]
-        return eafOut
+        return eaf_out
 
-    def getLinkedFiles(self):
-        """Gives a list of all media files"""
+    def get_linked_files(self):
+        """give a list of all media files"""
         return self.media_descriptors
 
-    def addLinkedFile(self, filePath, relpath=None, mimetype=None,
-                      time_origin=None, exfrom=None):
-        """Adds the linked file to the object
+    def add_linked_file(self, file_path, relpath=None, mimetype=None,
+                        time_origin=None, ex_from=None):
+        """add a linked file
 
-        filePath    -- Path of the file to link
-        relpath     -- Relative filepath
-        mimetype    -- MIME-type, if none it tries to guess it
-        time_origin -- Time origin for media files
-        exfrom      -- Extracted from"""
+        Required arguments:
+        file_path   -- path of the file
+
+        Keyword arguments:
+        relpath     -- relative filepath (default None)
+        mimetype    -- MIME-type, if none it tries to guess it (default None)
+        time_origin -- time origin for media files (default None)
+        ex_from      -- extracted from (default None)
+        """
         if mimetype is None:
             mimes = {'wav': 'audio/x-wav', 'mpg': 'video/mpeg',
                      'mpeg': 'video/mpg', 'xml': 'text/xml'}
-            mimetype = mimes[filePath.split('.')[-1]]
+            mimetype = mimes[file_path.split('.')[-1]]
         self.media_descriptors.append({
-            'MEDIA_URL': filePath, 'RELATIVE_MEDIA_URL': relpath,
+            'MEDIA_URL': file_path, 'RELATIVE_MEDIA_URL': relpath,
             'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
-            'EXTRACTED_FROM': exfrom})
+            'EXTRACTED_FROM': ex_from})
 
-    def copyTier(self, eafObj, tierName):
+    def copy_tier(self, eaf_obj, tier_name):
+        """copies the tier to another eaf object
+
+        eaf_obj   -- eaf object
+        tier_name -- tier name
         """
-        Copies the tier to this object
-
-        eafObj   -- Elan object
-        tierName -- Tier name"""
-        eafObj.removeTier(tierName)
+        eaf_obj.remove_tier(tier_name)
         try:
-            eafObj.addTier(tierName, tierDict=self.tiers[tierName][3])
-            for ann in self.getAnnotationDataForTier(tierName):
-                eafObj.insertAnnotation(tierName, ann[0], ann[1], ann[2])
+            eaf_obj.add_tier(tier_name, tier_dict=self.tiers[tier_name][3])
+            for ann in self.get_annotation_data_for_tier(tier_name):
+                eaf_obj.insert_annotation(tier_name, ann[0], ann[1], ann[2])
             return 0
         except KeyError:
-            warnings.warn('copyTier: Tier non existent!')
+            warnings.warn('copy_tier: Tier non existent!')
             return 1
 
-    def addTier(self, tierId, ling='default-lt', parent=None, locale=None,
-                part=None, ann=None, tierDict=None):
-        """
-        Add a tier to the object
+    def add_tier(self, tier_id, ling='default-lt', parent=None, locale=None,
+                 part=None, ann=None, tier_dict=None):
+        """add a tier
 
-        tierId   -- Name of the tier
-        ling     -- Linguistic type
-        parent   -- ID of parent tier
-        locale   -- Locale used
-        part     -- Participant
-        ann      -- Annotator
-        tierDict -- Tier dict to use the quick function, when this is not None
-                    it will ignore all other options"""
+        Required arguments:
+        tier_id   -- name of the tier
+
+        Keyword arguments:
+        ling      -- linguistic type (default None)
+        parent    -- id of parent tier (default None)
+        locale    -- locale of the tier (default None)
+        part      -- participant (default None)
+        ann       -- annotator (default None)
+        tier_dict -- tier dict to use the quick function, when this is not None
+                     it will ignore all other options (default None)
+        """
         if ling not in self.linguistic_types:
             warnings.warn(
-                'addTier: Linguistic type non existent, choosing the first')
+                'add_tier: Linguistic type non existent, choosing the first')
             ling = self.linguistic_types.keys()[0]
-        if tierDict is None:
-            self.tiers[tierId] = ({}, {}, {
-                'TIER_ID': tierId,
+        if tier_dict is None:
+            self.tiers[tier_id] = ({}, {}, {
+                'TIER_ID': tier_id,
                 'LINGUISTIC_TYPE_REF': ling,
                 'PARENT_REF': parent,
                 'PARTICIPANT': part,
                 'DEFAULT_LOCALE': locale,
                 'ANNOTATOR': ann}, len(self.tiers))
         else:
-            self.tiers[tierId] = ({}, {}, tierDict, len(self.tiers))
+            self.tiers[tier_id] = ({}, {}, tier_dict, len(self.tiers))
 
-    def removeTiers(self, tiers):
+    def remove_tiers(self, tiers):
+        """remove tiers
+
+        Required arguments:
+        tiers -- list of names of tiers to remove
         """
-        Remove tiers
-
-        tiers -- List of names of tiers to remove"""
         for a in tiers:
-            self.removeTier(a, check=False, clean=False)
-        self.cleanTimeSlots()
+            self.remove_tier(a, check=False, clean=False)
+        self.clean_time_slots()
 
-    def removeTier(self, idTier, clean=True):
+    def remove_tier(self, id_tier, clean=True):
+        """remove tier
+
+        Required arguments:
+        id_tier -- name of the tier
+
+        Keyword arguments:
+        clean   -- flag to also clean up the timeslot id's (default True)
         """
-        Remove tier
-
-        idTier -- Name of the tier
-        clean  -- Flag to also clean up the timeslot id's(takes time)"""
         try:
-            del(self.tiers[idTier])
+            del(self.tiers[id_tier])
             if clean:
-                self.cleanTimeSlots()
+                self.clean_time_slots()
             return 0
         except KeyError:
             warnings.warn(
-                'removeTier: Tier non existent!\nlooking for: %s' % idTier)
+                'remove_tier: Tier non existent!\nlooking for: %s' % id_tier)
             return 1
 
-    def getTierNames(self):
-        """Give a list of tiernames"""
+    def get_tier_names(self):
+        """give a list of tiernames"""
         return self.tiers.keys()
 
-    def getParametersForTier(self, idTier):
-        """
-        Gives the tierdict that is usable in the addTier function
+    def get_parameters_for_tier(self, id_tier):
+        """gives the tierdict that is usable in the add_tier function
 
-        idTier -- Name of the tier"""
+        Required arguments:
+        id_tier -- name of the tier
+        """
         try:
-            return self.tiers[idTier][2]
+            return self.tiers[id_tier][2]
         except KeyError:
-            warnings.warn('getParameterDictForTier: Tier non existent!')
+            warnings.warn('get_parameters_for_tier: Tier non existent!')
             return None
 
-    def childTiersFor(self, idTier):
-        """
-        Gives all children tiers
+    def child_tiers_for(self, id_tier):
+        """gives all child tiers
 
-        idTier -- Parent tier"""
+        Required arguments:
+        id_tier -- tier name
+        """
         try:
             return [m for m in self.tiers
                     if 'PARENT_REF' in self.tiers[m][2] and
-                    self.tiers[m][2]['PARENT_REF'] == idTier]
+                    self.tiers[m][2]['PARENT_REF'] == id_tier]
         except KeyError:
-            warnings.warn('childTierFor: Tier non existent!')
+            warnings.warn('child_tier_for: Tier non existent!')
             return None
 
-    def getAnnotationDataForTier(self, idTier):
-        """
-        Gives a list of annotations in the format (start, end, value)
+    def get_annotation_data_for_tier(self, id_tier):
+        """gives a list of annotations in the format (start, end, value)
 
-        idTier -- Name of the tier"""
+        Required arguments:
+        id_tier -- name of the tier
+        """
         try:
-            a = self.tiers[idTier][0]
+            a = self.tiers[id_tier][0]
             return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2])
                     for b in a]
         except KeyError:
-            warnings.warn('getAnnotationDataForTier: Tier non existent!')
+            warnings.warn('get_annotation_data_for_tier: Tier non existent!')
             return None
 
-    def getAnnotationDataAtTime(self, idTier, time):
-        """
-        Gives the annotation at time
+    def get_annotation_data_at_time(self, id_tier, time):
+        """give the annotation at the given time
 
-        idTier -- Name of the tier
-        time   -- Time"""
+        Required arguments:
+        id_tier -- name of the tier
+        time    -- time
+        """
         try:
-            anns = self.tiers[idTier][0]
+            anns = self.tiers[id_tier][0]
             return sorted(
                 [(self.timeslots[m[0]], self.timeslots[m[1]], m[2])
                     for m in anns.itervalues() if
                     self.timeslots[m[0]] <= time and
                     self.timeslots[m[1]] >= time])
         except KeyError:
-            warnings.warn('getAnnotationDataAtTime: Tier non existent!')
+            warnings.warn('get_annotation_data_at_time: Tier non existent!')
             return None
 
-    def getAnnotationDatasBetweenTimes(self, idTier, start, end):
+    def get_annotation_datas_between_times(self, id_tier, start, end):
         """
         Gives a list of annotations that occur between times
 
-        idTier -- Name of the tier
-        start  -- Start time
-        end    -- End time"""
+        Required arguments:
+        id_tier -- name of the tier
+        start   -- start time
+        end     -- end time
+        """
         try:
-            anns = self.tiers[idTier][0]
+            anns = self.tiers[id_tier][0]
             return sorted([
                 (self.timeslots[m[0]], self.timeslots[m[1]], m[2])
                 for m in anns.itervalues() if self.timeslots[m[1]] >= start and
                 self.timeslots[m[0]] <= end])
         except KeyError:
-            warnings.warn('getAnnotationDatasBetweenTimes: Tier non existent!')
+            warnings.warn('annotation_datas_between_times: Tier non existent!')
             return None
 
-    def removeAllAnnotationsFromTier(self, idTier):
-        """
-        Remove all annotations from a tier
+    def remove_all_annotations_from_tier(self, id_tier):
+        """remove all annotations from a tier
 
-        idTier -- Name of the tier"""
+        Required arguments:
+        id_tier -- name of the tier
+        """
         try:
-            self.tiers[idTier][0], self.tiers[idTier][1] = {}, {}
-            self.cleanTimeSlots()
+            self.tiers[id_tier][0], self.tiers[id_tier][1] = {}, {}
+            self.clean_time_slots()
             return 0
         except KeyError:
-            warnings.warn('removeAllAnnotationsFromTier: Tier non existent!')
+            warnings.warn('removeallannotations_from_tier: Tier non existent!')
             return 1
 
-    def insertAnnotation(self, idTier, start, end, value='', svg_ref=None):
-        """
-        Insert an annotation in a tier
+    def insert_annotation(self, id_tier, start, end, value='', svg_ref=None):
+        """insert an annotation in a tier
 
-        idTier  -- Name of the tier
-        start   -- Start time of the annotation
-        end     -- End time of the annotation
-        value   -- Value of the annotation
-        svg_ref -- SVG reference"""
+        Required arguments:
+        id_tier -- name of the tier
+        start   -- start time of the annotation
+        end     -- end time of the annotation
+
+        Keyword arguments:
+        value   -- value of the annotation (default )
+        svg_ref -- svg reference (default None)
+        """
         try:
-            startTs = self.generateTsId(start)
-            endTs = self.generateTsId(end)
-            self.tiers[idTier][0][self.generateAnnotationId()] =\
-                (startTs, endTs, value, svg_ref)
+            start_ts = self.generate_ts_id(start)
+            end_ts = self.generate_ts_id(end)
+            self.tiers[id_tier][0][self.generate_annotation_id()] =\
+                (start_ts, end_ts, value, svg_ref)
             return 0
         except KeyError:
-            warnings.warn('insertAnnotation: Tier non existent')
+            warnings.warn('insert_annotation: Tier non existent')
             return 1
 
-    def removeAnnotation(self, idTier, time, clean=True):
-        """
-        Remove an annotation at time
+    def remove_annotation(self, id_tier, time, clean=True):
+        """remove an annotation at time
 
-        idTier -- Name of the tier
-        time   -- Time
-        clean  -- Flag to clean timeslots(this takes time)"""
+        Required arguments:
+        id_tier -- name of the tier
+        time    -- time
+
+        Keyword arguments:
+        clean   -- flag to clean timeslots (default True)
+        """
         try:
-            for b in [a for a in self.tiers[idTier][0].iteritems() if
+            for b in [a for a in self.tiers[id_tier][0].iteritems() if
                       a[1][0] >= time and a[1][1] <= time]:
-                del(self.tiers[idTier][0][b[0]])
+                del(self.tiers[id_tier][0][b[0]])
             if clean:
-                self.cleanTimeSlots()
+                self.clean_time_slots()
             return 0
         except KeyError:
-            warnings.warn('removeAnnotation: Tier non existent')
+            warnings.warn('remove_annotation: Tier non existent')
         return 1
 
-    def insertRefAnnotation(self, idTier, ref, value, prev, svg_ref=None):
-        """
-        Insert a ref annotation in a tier
+    def insert_ref_annotation(self, id_tier, ref, value, prev, svg_ref=None):
+        """insert a ref annotation
 
-        idTier  -- Name of the tier
-        ref     -- Reference
-        value   -- Value of the annotation
-        prev    -- Previous annotation
-        svg_ref -- SVG reference"""
+        Required arguments:
+        id_tier -- name of the tier
+        ref     -- reference
+        value   -- value of the annotation
+        prev    -- previous annotation
+
+        Keyword arguments:
+        svg_ref -- svg reference (default None)
+        """
         try:
-            self.tiers[idTier][1][self.generateAnnotationId()] =\
+            self.tiers[id_tier][1][self.generate_annotation_id()] =\
                 (ref, value, prev, svg_ref)
             return 0
         except KeyError:
-            warnings.warn('insertRefAnnotation: Tier non existent')
+            warnings.warn('insert_ref_annotation: Tier non existent')
             return 1
 
-    def getRefAnnotationDataForTier(self, idTier):
-        """"
-        Give a list of all reference annotations
+    def get_ref_annotation_data_for_tier(self, id_tier):
+        """"give a list of all reference annotations
 
-        idTier -- Name of the tier"""
+        Required arguments:
+        id_tier -- Name of the tier
+        """
         try:
-            return self.tiers[idTier][1]
+            return self.tiers[id_tier][1]
         except KeyError:
-            warnings.warn('getRefAnnotationDataForTier: Tier non existent!')
+            warnings.warn("""get_ref_annotation_data_for_tier: Tier non existe\
+nt!""")
             return None
 
-    def removeControlledVocabulary(self, cv):
-        """
-        Remove a controlled vocabulary
+    def remove_controlled_vocabulary(self, cv):
+        """remove a controlled vocabulary
 
-        cv -- Controlled vocabulary ID"""
+        Required arguments:
+        cv -- Controlled vocabulary ID
+        """
         try:
             del(self.controlled_vocabularies[cv])
             return 0
         except KeyError:
-            warnings.warn('removeControlledVocabulary: Controlled vocabulary' +
-                          ' non existent!')
+            warnings.warn("""remove_controlled_vocabulary: Controlled vocabula\
+ry non existent!""")
             return 1
 
-    def generateAnnotationId(self):
-        """Generate the next annotation ID"""
-        if self.naiveGenAnn:
-            new = self.lastAnn+1
-            self.lastAnn = new
+    def generate_annotation_id(self):
+        """generate the next annotation ID"""
+        if self.naive_gen_ann:
+            new = self.last_ann+1
+            self.last_ann = new
         else:
             new = 1
             anns = {int(ann[1:]) for tier in self.tiers.itervalues()
@@ -409,17 +448,21 @@ class Eaf:
                 newann = set(xrange(1, max(anns))).difference(anns)
                 if len(newann) == 0:
                     new = max(anns)+1
-                    self.naiveGenAnn = True
-                    self.lastAnn = new
+                    self.naive_gen_ann = True
+                    self.last_ann = new
                 else:
                     new = sorted(newann)[0]
         return 'a%d' % new
 
-    def generateTsId(self, time=None):
-        """Generate the next timeslot ID"""
-        if self.naiveGenTS:
-            new = self.lastTS+1
-            self.lastTS = new
+    def generate_ts_id(self, time=None):
+        """generate the next timeslot ID
+
+        Keyword arguments:
+        time -- initial time to set
+        """
+        if self.naive_gen_ts:
+            new = self.last_ts+1
+            self.last_ts = new
         else:
             new = 1
             tss = {int(x[2:]) for x in self.timeslots}
@@ -427,186 +470,213 @@ class Eaf:
                 newts = set(xrange(1, max(tss))).difference(tss)
                 if len(newts) == 0:
                     new = max(tss)+1
-                    self.naiveGenTS = True
-                    self.lastTS = new
+                    self.naive_gen_ts = True
+                    self.last_ts = new
                 else:
                     new = sorted(newts)[0]
         ts = 'ts%d' % new
         self.timeslots[ts] = time
         return ts
 
-    def cleanTimeSlots(self):
-        """Clean up all unused timeslots(warning this can take time)"""
-        tsInTier = set(sum([a[0:2] for tier in self.tiers.itervalues()
-                            for a in tier[0].itervalues()], ()))
-        tsAvail = set(self.timeslots)
-        for a in tsInTier.symmetric_difference(tsAvail):
+    def clean_time_slots(self):
+        """clean up all unused timeslots
+        !!! this can and will take time for larger tiers, this is only
+        necessary after a lot of deleting
+        """
+        ts_in_tier = set(sum([a[0:2] for tier in self.tiers.itervalues()
+                              for a in tier[0].itervalues()], ()))
+        ts_avail = set(self.timeslots)
+        for a in ts_in_tier.symmetric_difference(ts_avail):
             del(self.timeslots[a])
-        self.naiveGenTS = False
-        self.naiveGenAnn = False
+        self.naive_gen_ts = False
+        self.naive_gen_ann = False
 
-    def generateAnnotationConcat(self, tiers, start, end):
+    def generate_annotation_concat(self, tiers, start, end, sep='-'):
+        """concatenate annotations within a timeframe
+
+        Required arguments:
+        tiers -- list of tiers
+        start -- start time
+        end   -- end time
+
+        Keyword arguments:
+        sep   -- separator character
         """
-        Generate an concatenated annotation from annotations within a timeframe
+        return sep.join(set(d[2] for t in tiers if t in self.tiers for d in
+                        self.get_annotation_datas_between_times(t, start,
+                                                                end)))
 
-        tiers -- List of tiers
-        start -- Start time
-        end   -- End time"""
-        return '_'.join(set(d[2] for t in tiers if t in self.tiers for d in
-                        self.getAnnotationDatasBetweenTimes(t, start, end)))
+    def merge_tiers(self, tiers, tiernew=None, gaptresh=1):
+        """merge tiers into a new tier
 
-    def mergeTiers(self, tiers, tiernew=None, gaptresh=1):
+        Required arguments:
+        tiers    -- list of tiers
+
+        Keyword arguments:
+        tiernew  -- nome of the new tier, if None the name will be generated
+        gaptresh -- treshhold to glue annotations
         """
-        Merge tiers
-
-        tiers    -- List of tiers to merge
-        tiernew  -- Name of the new tier, if None it will be generated
-        gaptresh -- Treshhold to glue annotations in ms"""
         if len([t for t in tiers if t not in self.tiers]) > 0:
-            warnings.warn('mergeTiers: One or more tiers non existent!')
+            warnings.warn('merge_tiers: One or more tiers non existent!')
             return 1
         if tiernew is None:
             tiernew = '%s_Merged' % '_'.join(tiers)
-        self.removeTier(tiernew)
-        self.addTier(tiernew)
+        self.remove_tier(tiernew)
+        self.add_tier(tiernew)
         try:
             timepts = sorted(set.union(
                 *[set(j for j in xrange(d[0], d[1])) for d in
                     [ann for tier in tiers for ann in
-                     self.getAnnotationDataForTier(tier)]]))
+                     self.get_annotation_data_for_tier(tier)]]))
         except TypeError:
-            warnings.warn('mergeTiers: No annotations found!')
+            warnings.warn('merge_tiers: No annotations found!')
             return 1
         if len(timepts) > 1:
             start = timepts[0]
             for i in xrange(1, len(timepts)):
                 if timepts[i]-timepts[i-1] > gaptresh:
-                    self.insertAnnotation(
+                    self.insert_annotation(
                         tiernew,
                         start,
                         timepts[i-1],
-                        self.generateAnnotationConcat(
+                        self.generate_annotation_concat(
                             tiers, start, timepts[i-1]))
                     start = timepts[i]
-            self.insertAnnotation(
+            self.insert_annotation(
                 tiernew,
                 start,
                 timepts[i-1],
-                self.generateAnnotationConcat(tiers, start, timepts[i-1]))
+                self.generate_annotation_concat(tiers, start, timepts[i-1]))
         return 0
 
-    def shiftAnnotations(self, time):
-        """
-        Shift all annotations to the left or right, this creates a new object
+    def shift_annotations(self, time):
+        """shift all annotations in time, this creates a new object
 
-        time -- Shift width in ms negative for right shift"""
+        Required arguments:
+        time -- time shift width negative for right shift
+        """
         e = self.extract(
-            -1*time, self.getFullTimeInterval()[1]) if time < 0 else\
-            self.extract(0, self.getFullTimeInterval()[1]-time)
+            -1*time, self.get_full_time_interval()[1]) if time < 0 else\
+            self.extract(0, self.get_full_time_interval()[1]-time)
         for tier in e.tiers.itervalues():
             for ann in tier[0].itervalues():
                 e.timeslots[ann[0]] = e.timeslots[ann[0]]+time
                 e.timeslots[ann[1]] = e.timeslots[ann[1]]+time
-        e.cleanTimeSlots()
+        e.clean_time_slots()
         return e
 
-    def filterAnnotations(self, tier, tierName=None, filtin=None, filtex=None):
-        """
-        Filter annotations in tier
+    def filterAnnotations(self, tier,
+                          tier_name=None, filtin=None, filtex=None):
+        """filter annotations in a tier
 
-        tier     -- Tier to filter
-        tierName -- Tier to put the filtered annotations in
-        filtin   -- Include everything in this list
-        filtex   -- Exclude everything in this list"""
+        Required arguments:
+        tier      -- tier name
+
+        Keyword arguments:
+        tier_name -- output tier name, if none it will be generated
+        filtin    -- inclusion list, if None all is included
+        filtex    -- exclusion list, if Nonen nothing is excluded
+        """
         if tier not in self.tiers:
             warnings.warn('filterAnnotations: Tier non existent!' + tier)
             return 1
-        if tierName is None:
-            tierName = '%s_filter' % tier
-        self.removeTier(tierName)
-        self.addTier(tierName)
-        for a in [b for b in self.getAnnotationDataForTier(tier)
+        if tier_name is None:
+            tier_name = '%s_filter' % tier
+        self.remove_tier(tier_name)
+        self.add_tier(tier_name)
+        for a in [b for b in self.get_annotation_data_for_tier(tier)
                   if (filtex is None or b[2] not in filtex) and
                   (filtin is None or b[2] in filtin)]:
-            self.insertAnnotation(tierName, a[0], a[1], a[2])
+            self.insert_annotation(tier_name, a[0], a[1], a[2])
         return 0
 
-    def glueAnnotationsInTier(self, tier, tierName=None, treshhold=85,
-                              filtin=None, filtex=None):
+    def glue_annotations_in_tier(self, tier, tier_name=None, treshhold=85,
+                                 filtin=None, filtex=None):
+        """glue annotatotions together in a tier
+
+        Required arguments:
+        tier      -- tier name
+
+        Keyword arguments:
+        tier_name  -- output tier name, if None it will be generated
+        treshhold  -- gap threshhold
+        filtin     -- include only this annotations, if None all is included
+        filtex     -- exclude all this annotations
         """
-        Glue annotatotions together
-
-        tier      -- Tier to glue
-        tierName  -- Name for the output tier
-        treshhold -- Maximal gap to glue
-        filtin    -- Include only this annotations
-        filtex    -- Exclude all this annotations"""
         if tier not in self.tiers:
-            warnings.warn('glueAnnotationsInTier: Tier non existent!')
+            warnings.warn('glue_annotations_in_tier: Tier non existent!')
             return 1
-        if tierName is None:
-            tierName = '%s_glued' % tier
-        self.removeTier(tierName)
-        self.addTier(tierName)
-        tierData = sorted(self.getAnnotationDataForTier(tier))
-        tierData = [t for t in tierData if
-                    (filtin is None or t[2] in filtin) and
-                    (filtex is None or t[2] not in filtex)]
+        if tier_name is None:
+            tier_name = '%s_glued' % tier
+        self.remove_tier(tier_name)
+        self.add_tier(tier_name)
+        tier_data = sorted(self.get_annotation_data_for_tier(tier))
+        tier_data = [t for t in tier_data if
+                     (filtin is None or t[2] in filtin) and
+                     (filtex is None or t[2] not in filtex)]
         currentAnn = None
-        for i in xrange(0, len(tierData)):
+        for i in xrange(0, len(tier_data)):
             if currentAnn is None:
-                currentAnn = (tierData[i][0], tierData[i][1], tierData[i][2])
-            elif tierData[i][0] - currentAnn[1] < treshhold:
-                currentAnn = (currentAnn[0], tierData[i][1],
-                              '%s_%s' % (currentAnn[2], tierData[i][2]))
+                currentAnn = (tier_data[i][0], tier_data[i][1],
+                              tier_data[i][2])
+            elif tier_data[i][0] - currentAnn[1] < treshhold:
+                currentAnn = (currentAnn[0], tier_data[i][1],
+                              '%s_%s' % (currentAnn[2], tier_data[i][2]))
             else:
-                self.insertAnnotation(tierName, currentAnn[0], currentAnn[1],
-                                      currentAnn[2])
-                currentAnn = tierData[i]
+                self.insert_annotation(tier_name, currentAnn[0], currentAnn[1],
+                                       currentAnn[2])
+                currentAnn = tier_data[i]
         if currentAnn is not None:
-            self.insertAnnotation(tierName, currentAnn[0],
-                                  tierData[len(tierData)-1][1], currentAnn[2])
+            self.insert_annotation(tier_name, currentAnn[0],
+                                   tier_data[len(tier_data)-1][1],
+                                   currentAnn[2])
         return 0
 
-    def getFullTimeInterval(self):
-        """Give a tuple with the start and end of the entire file"""
+    def get_full_time_interval(self):
+        """give a tuple with the start and end time of the entire file"""
         return (min(self.timeslots.itervalues()),
                 max(self.timeslots.itervalues()))
 
-    def createGapsAndOverlapsTier(self, tier1, tier2, tierName=None,
-                                  maxlen=-1):
-        """
-        Create a tier with the gaps and overlaps
+    def create_gaps_and_overlaps_tier(self, tier1, tier2, tier_name=None,
+                                      maxlen=-1):
+        """create a tier with the gaps and overlaps
 
-        tier1   -- Name of the first tier
-        tier2   -- Name of the second tier
-        tierNam -- Name of the output tier
-        maxlen  -- Maximum length of the ftos"""
+        Required arguments:
+        tier1   -- name of the first tier
+        tier2   -- name of the second tier
+
+        Keyword arguments:
+        tierNam -- name of the output tier
+        maxlen  -- maximum length of the gaps
+        """
         if tier1 not in self.tiers or tier2 not in self.tiers:
-            warnings.warn(
-                'createGapsAndOverlapsTier: One or more tiers non existent!')
+            warnings.warn("""create_gaps_and_overlaps_tier: One or more tiers \
+non existent!""")
             return None
-        if tierName is None:
-            tierName = '%s_%s_ftos' % (tier1, tier2)
-        self.removeTier(tierName)
-        self.addTier(tierName)
-        ftos = self.getGapsAndOverlapsDuration(tier1, tier2, maxlen)
+        if tier_name is None:
+            tier_name = '%s_%s_ftos' % (tier1, tier2)
+        self.remove_tier(tier_name)
+        self.add_tier(tier_name)
+        ftos = self.get_gaps_and_overlaps_duration(tier1, tier2, maxlen)
         for fto in ftos:
-            self.insertAnnotation(tierName, fto[1], fto[2], fto[0])
+            self.insert_annotation(tier_name, fto[1], fto[2], fto[0])
         return ftos
 
-    def getGapsAndOverlapsDuration(self, tier1, tier2, maxlen=-1,
-                                   progressbar=False):
-        """
-        Give gaps and overlaps in the format (type, start, end)
+    def get_gaps_and_overlaps_duration(self, tier1, tier2, maxlen=-1,
+                                       progressbar=False):
+        """give gaps and overlaps in the format (type, start, end)
 
-        tier1       -- Name of the first tier
-        tier2       -- Name of the second tier
-        maxlen      -- Maximum length of the ftos
-        progressbar -- Flag to display the progress"""
+        Required arguments:
+        tier1       -- name of the first tier
+        tier2       -- name of the second tier
+
+        Keyword arguments:
+        maxlen      -- maximum length of the gaps, -1 is infinite
+        progressbar -- flag to display the progress(debug purpose)
+        """
         if tier1 not in self.tiers or tier2 not in self.tiers:
-            warnings.warn(
-                'getGapsAndOverlapsDuration: One or more tiers non existent!')
+            warnings.warn("""get_gaps_and_overlaps_duration: One or more tiers\
+non existent!""")
             return None
         spkr1anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]])
                            for a in self.tiers[tier1][0].values())
@@ -620,7 +690,7 @@ class Eaf:
                       max(spkr1anns[-1][1], spkr2anns[-1][1]))
         except IndexError:
             warnings.warn(
-                'getGapsAndOverlapsDuration: No annotations found...')
+                'get_gaps_and_overlaps_duration: No annotations found...')
             return []
         last = (1, minmax[0])
         lastP = 0
@@ -672,48 +742,58 @@ class Eaf:
                                 (tier2, tier1)), line1[i][1], line1[i][2]))
         return [f for f in ftos if maxlen == -1 or abs(f[2] - f[1]) < maxlen]
 
-    def createControlledVocabulary(self, cvEntries, cvId, description=''):
+    def create_controlled_vocabulary(self, cv_entries, cv_id, description=''):
+        """create a controlled vocabulary
+
+        Required arguments:
+        cv_entries   -- entries in the controlled vocabulary
+        cv_id        -- name of the controlled vocabulary
+
+        Keyword arguments:
+        description -- description
         """
-        Add a controlled vocabulary
+        self.controlledvocabularies[cv_id] = (description, cv_entries)
 
-        cvEntries   -- Entries in the controlled vocabulary
-        cvId        -- Name of the controlled vocabulary
-        description -- Description"""
-        self.controlledvocabularies[cvId] = (description, cvEntries)
+    def get_tier_ids_for_linguistic_type(self, ling_type, parent=None):
+        """give a list of all tiers matching a linguistic type
 
-    def getTierIdsForLinguisticType(self, lingType, parent=None):
+        Required arguments:
+        ling_type -- linguistic type name
+
+        Keyword arguments:
+        parent    -- only match tiers from this parent
         """
-        Give a list of all tiers matching a linguistic type
-
-        lingType -- The linguistic type
-        parent   -- Only match tiers from this parent"""
         return [t for t in self.tiers if
-                self.tiers[t][2]['LINGUISTIC_TYPE_REF'] == lingType and
+                self.tiers[t][2]['LINGUISTIC_TYPE_REF'] == ling_type and
                 (parent is None or self.tiers[t][2]['PARENT_REF'] == parent)]
 
-    def removeLinguisticType(self, lingType):
-        """
-        Remove a linguistic type
+    def remove_linguistic_type(self, ling_type):
+        """remove a linguistic type
 
-        lingType -- Name of the linguistic type"""
+        Required arguments:
+        ling_type -- name of the linguistic type
+        """
         try:
-            del(self.linguistic_types[lingType])
+            del(self.linguistic_types[ling_type])
             return 0
         except KeyError:
-            warnings.warn(
-                'removeLinguisticType: Linguistic type non existent!')
+            warnings.warn("""remove_linguistic_type: Linguistic type non exist\
+ent!""")
             return 1
 
-    def addLinguisticType(self, lingtype, constraints, timealignable=True,
-                          graphicreferences=False, extref=None):
-        """
-        Add a linguistic type
+    def create_linguistic_type(self, lingtype, constraints, timealignable=True,
+                               graphicreferences=False, extref=None):
+        """create a linguistic type
 
-        lingtype          -- Name of the linguistic type
-        constraints       -- Constraint names
-        timealignable     -- Flag for time alignable
-        graphicreferences -- Graphic references
-        extref            -- External references"""
+        Required arguments:
+        lingtype          -- name of the linguistic type
+        constraints       -- constraint names
+
+        Keyword arguments:
+        timealignable     -- flag for time alignable
+        graphicreferences -- graphic references
+        extref            -- external references
+        """
         self.linguistic_types[lingtype] = {
             'LINGUISTIC_TYPE_ID': lingtype,
             'TIME_ALIGNABLE': str(timealignable).lower(),
@@ -722,6 +802,6 @@ class Eaf:
         if extref is not None:
             self.linguistic_types[lingtype]['EXT_REF'] = extref
 
-    def getLinguisticTypes(self):
-        """Give a list of available linguistic types"""
+    def get_linguistic_types(self):
+        """give a list of available linguistic types"""
         return self.linguistic_types.keys()
