@@ -10,6 +10,7 @@ class Eaf:
 
     Internal variables:
     annotation_document     -- dict of all annotationdocument TAG entries.
+    licences                -- dictionary of licences
     header                  -- dict of the header TAG entries.
     media_descriptors       -- list of all linked files: [{attrib}]
     properties              -- list of all properties: [(value, {attrib})]
@@ -49,23 +50,24 @@ class Eaf:
         self.annotation_document = {
             'AUTHOR': author,
             'DATE': time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            'VERSION': '2.7',
-            'FORMAT': '2.7',
+            'VERSION': '2.8',
+            'FORMAT': '2.8',
             'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:noNamespaceSchemaLocation':
-                'http://www.mpi.nl/tools/elan/EAFv2.7.xsd'}
-        self.controlled_vocabularies = {}
+                'http://www.mpi.nl/tools/elan/EAFv2.8.xsd'}
         self.constraints = {}
-        self.tiers = {}
-        self.linguistic_types = {}
+        self.controlled_vocabularies = {}
         self.header = {}
+        self.licences = {}
+        self.linguistic_types = {}
+        self.tiers = {}
         self.timeslots = {}
         self.external_refs = []
         self.lexicon_refs = []
+        self.linked_file_descriptors = []
         self.locales = []
         self.media_descriptors = []
         self.properties = []
-        self.linked_file_descriptors = []
         self.new_time, self.new_ann = 0, 0
 
         if file_path is None:

@@ -1,4 +1,4 @@
-# pympi version 0.8, 2014-07-09
+# pympi version 0.9, 2014-07-09
 
 Contents
 ========
@@ -28,10 +28,14 @@ Then you can just run for example:
 
 TODO
 ====
-nothing currently
+- Implement the full Controlled Vocabulary options
+- Make the class faster and more usable by using iterators for certain functions
 
 History
 =======
+- 2014-07-16
+	- Added support for licences(eaf file format 2.8) and planned extended
+	  controlled vocabulary support
 - 2014-07-09
 	- Changed the style to pep8 and thus some functions(read all) have changed
 	  name

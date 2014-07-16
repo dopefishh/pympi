@@ -13,12 +13,18 @@ def parse_eaf(file_path, eaf_obj):
     eaf_obj   -- object to put the data in"""
     if file_path == "-":
         file_path = sys.stdin
+    # Annotation document
     tree_root = etree.parse(file_path).getroot()
     eaf_obj.annotation_document.update(tree_root.attrib)
-    del(eaf_obj.annotation_document["""{http://www.w3.org/2001/XMLSchema-instan\
-ce}noNamespaceSchemaLocation"""])
+    del(eaf_obj.annotation_document[
+        '{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation'
+        ])
     tier_number = 0
     for elem in tree_root:
+        # Licence
+        if elem.tag == 'LICENCE':
+            eaf_obj.licences[elem.text] = elem.attrib
+        # Header
         if elem.tag == 'HEADER':
             eaf_obj.header.update(elem.attrib)
             for elem1 in elem:
@@ -28,12 +34,14 @@ ce}noNamespaceSchemaLocation"""])
                     eaf_obj.linked_file_descriptors.append(elem1.attrib)
                 elif elem1.tag == 'PROPERTY':
                     eaf_obj.properties.append((elem1.text, elem1.attrib))
+        # Time order
         elif elem.tag == 'TIME_ORDER':
             for elem1 in elem:
                 if int(elem1.attrib['TIME_SLOT_ID'][2:]) > eaf_obj.new_time:
                     eaf_obj.new_time = int(elem1.attrib['TIME_SLOT_ID'][2:])
                 eaf_obj.timeslots[elem1.attrib['TIME_SLOT_ID']] =\
                     int(elem1.attrib['TIME_VALUE'])
+        # Tier
         elif elem.tag == 'TIER':
             tier_id = elem.attrib['TIER_ID']
             align = {}
@@ -71,14 +79,18 @@ ce}noNamespaceSchemaLocation"""])
                                 previous, svg_ref)
             eaf_obj.tiers[tier_id] = (align, ref, elem.attrib, tier_number)
             tier_number += 1
+        # Linguistic type
         elif elem.tag == 'LINGUISTIC_TYPE':
             eaf_obj.linguistic_types[elem.attrib['LINGUISTIC_TYPE_ID']] =\
                 elem.attrib
+        # Locale
         elif elem.tag == 'LOCALE':
             eaf_obj.locales.append(elem.attrib)
+        # Constraint
         elif elem.tag == 'CONSTRAINT':
             eaf_obj.constraints[elem.attrib['STEREOTYPE']] =\
                 elem.attrib['DESCRIPTION']
+        # Controlled vocabulary
         elif elem.tag == 'CONTROLLED_VOCABULARY':
             vc_id = elem.attrib['CV_ID']
             descr = elem.attrib['DESCRIPTION']
@@ -90,8 +102,10 @@ ce}noNamespaceSchemaLocation"""])
                     entries[elem1.attrib['DESCRIPTION']] =\
                         (elem1.attrib, elem1.text)
             eaf_obj.controlled_vocabularies[vc_id] = (descr, entries, ext_ref)
+        # Lexicon ref
         elif elem.tag == 'LEXICON_REF':
             eaf_obj.lexicon_refs.append(elem.attrib)
+        # External ref
         elif elem.tag == 'EXTERNAL_REF':
             eaf_obj.external_refs.append((elem.attrib['EXT_REF_ID'],
                                           elem.attrib['TYPE'],
@@ -132,6 +146,9 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     ANNOTATION_DOCUMENT = etree.Element('ANNOTATION_DOCUMENT',
                                         eaf_obj.annotation_document)
 
+    for m in eaf_obj.licences.iteritems():
+        n = etree.SubElement(ANNOTATION_DOCUMENT, 'LICENCE', m[1])
+        n.text = m[0]
     HEADER = etree.SubElement(ANNOTATION_DOCUMENT, 'HEADER', eaf_obj.header)
     for m in eaf_obj.media_descriptors:
         etree.SubElement(HEADER, 'MEDIA_DESCRIPTOR', rm_none(m))
