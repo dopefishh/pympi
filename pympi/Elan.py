@@ -121,16 +121,16 @@ ithin the parent annotation's time interval, gaps are allowed"""}
                 'mpi module found at https://github.com/dopefishh/pympi')
             return 1
         tgout = TextGrid()
-        for tier in [a for a in self.tiers if a not in excluded_tiers and
-                     (not included_tiers or a in included_tiers)]:
+        tiers = [a for a in self.tiers if a not in excluded_tiers]
+        if included_tiers:
+            tiers = [a for a in tiers if a in included_tiers]
+        for tier in tiers:
             currentTier = tgout.add_tier(tier)
             for interval in self.get_annotation_data_for_tier(tier):
                 if interval[0] == interval[1]:
                     continue
-                currentTier.add_interval(
-                    interval[0]/1000.0,
-                    interval[1]/1000.0,
-                    interval[2])
+                currentTier.add_interval(interval[0]/1000.0,
+                                         interval[1]/1000.0, interval[2])
         tgout.to_file(file_path, codec=encoding)
         return 0
 
