@@ -2,7 +2,7 @@
 WARNING
 =======
 This version is already updated for Eaf file format 2.8. If you need the class
-for the older 2.7 format please go to the branch ```eaf\_file\_2.7```.
+for the older 2.7 format please go to the branch ```eaf_file_2.7```.
 
 Contents
 ========
