@@ -28,11 +28,12 @@ Then you can just run for example:
 
 TODO
 ====
-- Implement the full Controlled Vocabulary options
 - Make the class faster and more usable by using iterators for certain functions
 
 History
 =======
+- 2014-07-17
+	- Controlled vocabularies (eaf file format 2.8) added and quickly tested.
 - 2014-07-16
 	- Added support for licences(eaf file format 2.8) and planned extended
 	  controlled vocabulary support
