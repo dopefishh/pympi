@@ -29,10 +29,13 @@ class Eaf:
     locales                 -- list of locale data: [{attrib}]
     constraints             -- constraint data: {stereotype -> description}
     controlled_vocabularies -- controlled vocabulary data:
-        {id -> (description, entries, ext_ref)} where
-
-                              entry:
-        {description -> (attrib, value)}
+        {id -> (descriptions, entries, ext_ref)} where
+                              descriptions:
+            [(lang_ref, text)]
+                              entries:
+            {id -> (values, ext_ref)}
+                              values:
+            [(lang_ref, description, text)]
     external refs           -- external refs [extref] where
                               extref: [id, type, value]
     lexicon_refs            -- lexicon refs [{attribs}]
@@ -744,17 +747,20 @@ non existent!""")
                                 (tier2, tier1)), line1[i][1], line1[i][2]))
         return [f for f in ftos if maxlen == -1 or abs(f[2] - f[1]) < maxlen]
 
-    def create_controlled_vocabulary(self, cv_entries, cv_id, description=''):
-        """create a controlled vocabulary
+    def create_controlled_vocabulary(self, cv_id, descriptions, entries,
+                                     ext_ref=None):
+        """create a controlled vocabulary, warning check the class header for
+        the required formats
 
         Required arguments:
-        cv_entries   -- entries in the controlled vocabulary
         cv_id        -- name of the controlled vocabulary
+        descriptions -- list of descriptions
+        entries      -- dictionary of entries
 
         Keyword arguments:
-        description -- description
+        ext_ref      -- external ref
         """
-        self.controlledvocabularies[cv_id] = (description, cv_entries)
+        self.controlledvocabularies[cv_id] = (descriptions, entries, ext_ref)
 
     def get_tier_ids_for_linguistic_type(self, ling_type, parent=None):
         """give a list of all tiers matching a linguistic type
