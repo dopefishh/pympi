@@ -1,4 +1,8 @@
 # pympi version 0.9, 2014-07-09
+WARNING
+=======
+This version is already updated for Eaf file format 2.8. If you need the class
+for the older 2.7 format please go to the branch ```eaf\_file\_2.7```.
 
 Contents
 ========
