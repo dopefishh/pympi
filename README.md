@@ -11,6 +11,7 @@ Contents
 
 Installation
 ============
+##\*nix(linux, mac ...)
 Run: `# python setup.py install`
 
 If you don't have super user right you can install it in your home directory by
@@ -19,16 +20,15 @@ running: `$ python setup.py install --prefix=/home/user/bin`
 and then add `export PYTHONPATH=~/home/user/bin/lib/python2.7/site-packages` to
 your ~/.bashrc
 
-Then you can just run for example:
-```
->>> from pympi import Praat, Elan
->>> help(Elan.Eaf)
->>> help(Praat.TextGrid)
-```
+##Windows
+This package is not tested on windows, it should work on windows because the
+package doesn't use os exclusive functions as far as we know...
 
 TODO
 ====
 - Make the class faster and more usable by using iterators for certain functions
+- Maybe integration with [praatalign]{https://github.com/dopefishh/praatalign}
+  so forced phonetic alignment is also added to the library.
 
 History
 =======
