@@ -4,6 +4,7 @@
 import codecs
 import re
 import sys
+import itertools
 
 rexmin = re.compile(r'xmin = ([0-9.]*)')
 rexmax = re.compile(r'xmax = ([0-9.]*)')
@@ -38,31 +39,28 @@ class TextGrid:
         """
         self.tiers = dict()
         self.codec = codec
-        if file_path is None:
-            self.xmin = 0
-            self.xmax = 0
-            self.tier_num = 0
+        if not file_path:
+            self.xmin, self.xmax, self.tier_num = [0]*3
         else:
-            if file_path == "-":
-                f = sys.stdin
-            else:
-                f = codecs.open(file_path, 'r', codec)
-            lines = [line for line in f if line]
-            self.xmin = float(rexmin.search(lines[3]).group(1))
-            self.xmax = float(rexmax.search(lines[4]).group(1))
-            self.tier_num = int(resize.search(lines[6]).group(1))
-            lines = lines[8:]
-            for current_tier in range(self.tier_num):
-                number = int(reitem.search(lines[0]).group(1))
-                tier_type = retype.search(lines[1]).group(1)
-                name = rename.search(lines[2]).group(1)
-                numinterval = int(resize.search(lines[5]).group(1))
-                lpitem = 3 if tier_type == 'TextTier' else 4
-                self.tiers[name] = Tier(name, number, tier_type,
-                                        lines[:6 + lpitem * numinterval],
-                                        codec)
-                lines = lines[6+lpitem*numinterval:]
-            f.close()
+            ifile = sys.stdin if file_path == '-' else\
+                codecs.open(file_path, 'r', codec)
+            lines = itertools.ifilter(lambda x: x.strip(), ifile)
+            # File Type and Object class
+            lines.next(), lines.next()
+            self.xmin = float(rexmin.search(lines.next()).group(1))
+            self.xmax = float(rexmax.search(lines.next()).group(1))
+            # tiers? <exists>
+            lines.next()
+            self.tier_num = int(resize.search(lines.next()).group(1))
+            # item []:
+            lines.next()
+            for current_tier in xrange(self.tier_num):
+                number = int(reitem.search(lines.next()).group(1))
+                tier_type = retype.search(lines.next()).group(1)
+                name = rename.search(lines.next()).group(1)
+                self.tiers[name] = Tier(name, tier_type, number, lines, codec)
+            if file_path == '-':
+                ifile.close()
 
     def __update(self):
         """update the internal values"""
@@ -224,8 +222,8 @@ class Tier:
     xmax      -- maximum x value
     """
 
-    def __init__(self, name, number, tier_type, lines=None, codec='ascii'):
-        """constructor
+    def __init__(self, name, tier_type, number, lines=None, codec='ascii'):
+        """constructoR
 
         Required arguments:
         name      -- name of the tier
@@ -242,23 +240,23 @@ class Tier:
         if lines is None:
             self.xmin, self.xmax = 0, 0
         else:
-            self.xmin = float(rexmin.search(lines[3]).group(1))
-            self.xmax = float(rexmax.search(lines[4]).group(1))
-            num_int = int(resize.search(lines[5]).group(1))
-            lines = lines[6:]
+            self.xmin = float(rexmin.search(lines.next()).group(1))
+            self.xmax = float(rexmax.search(lines.next()).group(1))
+            num_int = int(resize.search(lines.next()).group(1))
             if self.tier_type == 'IntervalTier':
-                for i in range(num_int):
-                    data = lines[4*i+1:4*i+1+3]
-                    xmin = float(rexmin.search(data[0]).group(1))
-                    xmax = float(rexmax.search(data[1]).group(1))
-                    xtxt = retext.search(data[2]).group(1).replace('""', '"')
-                    xtxt = xtxt.encode(codec)
+                for i in xrange(num_int):
+                    # intervals [1]:
+                    lines.next()
+                    xmin = float(rexmin.search(lines.next()).group(1))
+                    xmax = float(rexmax.search(lines.next()).group(1))
+                    xtxt = retext.search(lines.next()).group(1).\
+                        replace('""', '"')
                     self.intervals.append((xmin, xmax, xtxt))
             elif self.tier_type == 'TextTier':
                 for i in range(num_int):
-                    data = lines[3*i+1:4*i+3]
-                    number = float(renumb.search(data[0]).group(1))
-                    mark = remark.search(data[1]).group(1).replace('""', '"')
+                    number = float(renumb.search(lines.next()).group(1))
+                    mark = remark.search(lines.next()).group(1).\
+                        replace('""', '"')
                     mark = mark.encode(codec)
                     self.intervals.append((number, mark))
             else:
