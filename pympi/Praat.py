@@ -125,6 +125,7 @@ class TextGrid:
         """
         if name in self.tiers:
             self.tiers[name2] = self.tiers.pop(name)
+            self.tiers[name2].name = name2
 
     def get_tiers(self):
         """get the internal tier dictionary"""
