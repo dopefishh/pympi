@@ -2,6 +2,7 @@
 
 Contents
 ========
+Full API documentation at: http://dopefishh.github.io/pympi/
 - ./pympi/Praat.py 
     - A python class to read, write, edit and create praat's TextGrid files.
 - ./pympi/Elan.py 
