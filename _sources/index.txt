@@ -20,17 +20,21 @@ Intro
 ==================
 Readme
 
-Praat.py
+Praat
 ==================
 .. automodule:: pympi.Praat
    :members:
    :special-members:
 
 
-Elan.py
+Elan
 ==================
-Elan.py
+.. automodule:: pympi.Elan
+   :members:
+   :special-members:
 
 EafIO.py
 ==================
-EafIO.py
+.. automodule:: pympi.EafIO
+   :members:
+   :special-members:
