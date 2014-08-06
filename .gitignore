@@ -2,5 +2,5 @@
 *.eaf
 *.pyc
 test.py
-
 build/
+doc/build/

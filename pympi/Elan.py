@@ -789,8 +789,9 @@ non existent!""")
 ent!""")
             return 1
 
-    def create_linguistic_type(self, lingtype, constraints, timealignable=True,
-                               graphicreferences=False, extref=None):
+    def add_linguistic_type(self, lingtype, constraints=None,
+                            timealignable=True, graphicreferences=False,
+                            extref=None):
         """create a linguistic type
 
         Required arguments:
