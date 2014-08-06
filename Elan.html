@@ -1,0 +1,544 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. Elan &mdash; pympi 0.91 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.91',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pympi 0.91 documentation" href="index.html" />
+    <link rel="next" title="3. EafIO" href="EafIO.html" />
+    <link rel="prev" title="1. Praat" href="Praat.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="EafIO.html" title="3. EafIO"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Praat.html" title="1. Praat"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">pympi 0.91 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pympi.Elan">
+<span id="elan"></span><h1>2. Elan<a class="headerlink" href="#module-pympi.Elan" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pympi.Elan.Eaf">
+<em class="property">class </em><tt class="descclassname">pympi.Elan.</tt><tt class="descname">Eaf</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>author='Elan.py'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf" title="Permalink to this definition">¶</a></dt>
+<dd><p>class that represents ELAN&#8217;s eaf files</p>
+<p>Internal variables:
+annotation_document     &#8211; dict of all annotationdocument TAG entries.
+licences                &#8211; dictionary of licences
+header                  &#8211; dict of the header TAG entries.
+media_descriptors       &#8211; list of all linked files: [{attrib}]
+properties              &#8211; list of all properties: [(value, {attrib})]
+linked_file_descriptors &#8211; list of all secondary linked files: [{attrib}].
+timeslots               &#8211; timeslot data: {TimslotID -&gt; time(ms)}
+tiers                   &#8211; tier data:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>{tier_name -&gt; (aligned_annotations, reference_annotations,</dt>
+<dd><p class="first">attributes, ordinal)} where</p>
+<blockquote class="last">
+<div>aligned_annotations:</div></blockquote>
+</dd>
+</dl>
+<p>[{annotation_id -&gt; (begin_ts, end_ts, value, svg_ref)}]</p>
+<blockquote>
+<div>reference_annotations:</div></blockquote>
+<p>[{annotation_id -&gt; (reference, value, previous, svg_ref)}]</p>
+</div></blockquote>
+<p>linguistic_types        &#8211; linguistic type data: [{id -&gt; attrib}]
+locales                 &#8211; list of locale data: [{attrib}]
+constraints             &#8211; constraint data: {stereotype -&gt; description}
+controlled_vocabularies &#8211; controlled vocabulary data:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>{id -&gt; (descriptions, entries, ext_ref)} where</dt>
+<dd><blockquote class="first">
+<div>descriptions:</div></blockquote>
+<dl class="docutils">
+<dt>[(lang_ref, text)]</dt>
+<dd>entries:</dd>
+<dt>{id -&gt; (values, ext_ref)}</dt>
+<dd>values:</dd>
+</dl>
+<p class="last">[(lang_ref, description, text)]</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>external refs           &#8211; external refs [extref] where</dt>
+<dd>extref: [id, type, value]</dd>
+</dl>
+<p>lexicon_refs            &#8211; lexicon refs [{attribs}]</p>
+<dl class="method">
+<dt id="pympi.Elan.Eaf.__init__">
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>author='Elan.py'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>constructor, builds an elan object from file or if the path is None
+it creates an empty object</p>
+<p>Keyword arguments:
+file_path &#8211; path to load the file from (default None)
+author    &#8211; author used in the xml tag (default Elan.py)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.add_linguistic_type">
+<tt class="descname">add_linguistic_type</tt><span class="sig-paren">(</span><em>lingtype</em>, <em>constraints=None</em>, <em>timealignable=True</em>, <em>graphicreferences=False</em>, <em>extref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_linguistic_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a linguistic type</p>
+<p>Required arguments:
+lingtype          &#8211; name of the linguistic type
+constraints       &#8211; constraint names</p>
+<p>Keyword arguments:
+timealignable     &#8211; flag for time alignable
+graphicreferences &#8211; graphic references
+extref            &#8211; external references</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.add_linked_file">
+<tt class="descname">add_linked_file</tt><span class="sig-paren">(</span><em>file_path</em>, <em>relpath=None</em>, <em>mimetype=None</em>, <em>time_origin=None</em>, <em>ex_from=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_linked_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a linked file</p>
+<p>Required arguments:
+file_path   &#8211; path of the file</p>
+<p>Keyword arguments:
+relpath     &#8211; relative filepath (default None)
+mimetype    &#8211; MIME-type, if none it tries to guess it (default None)
+time_origin &#8211; time origin for media files (default None)
+ex_from      &#8211; extracted from (default None)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.add_tier">
+<tt class="descname">add_tier</tt><span class="sig-paren">(</span><em>tier_id</em>, <em>ling='default-lt'</em>, <em>parent=None</em>, <em>locale=None</em>, <em>part=None</em>, <em>ann=None</em>, <em>tier_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a tier</p>
+<p>Required arguments:
+tier_id   &#8211; name of the tier</p>
+<p>Keyword arguments:
+ling      &#8211; linguistic type (default None)
+parent    &#8211; id of parent tier (default None)
+locale    &#8211; locale of the tier (default None)
+part      &#8211; participant (default None)
+ann       &#8211; annotator (default None)
+tier_dict &#8211; tier dict to use the quick function, when this is not None</p>
+<blockquote>
+<div>it will ignore all other options (default None)</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.child_tiers_for">
+<tt class="descname">child_tiers_for</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.child_tiers_for" title="Permalink to this definition">¶</a></dt>
+<dd><p>gives all child tiers</p>
+<p>Required arguments:
+id_tier &#8211; tier name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.clean_time_slots">
+<tt class="descname">clean_time_slots</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.clean_time_slots" title="Permalink to this definition">¶</a></dt>
+<dd><p>clean up all unused timeslots
+!!! this can and will take time for larger tiers, this is only
+necessary after a lot of deleting</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.copy_tier">
+<tt class="descname">copy_tier</tt><span class="sig-paren">(</span><em>eaf_obj</em>, <em>tier_name</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.copy_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>copies the tier to another eaf object</p>
+<p>eaf_obj   &#8211; eaf object
+tier_name &#8211; tier name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.create_controlled_vocabulary">
+<tt class="descname">create_controlled_vocabulary</tt><span class="sig-paren">(</span><em>cv_id</em>, <em>descriptions</em>, <em>entries</em>, <em>ext_ref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.create_controlled_vocabulary" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a controlled vocabulary, warning check the class header for
+the required formats</p>
+<p>Required arguments:
+cv_id        &#8211; name of the controlled vocabulary
+descriptions &#8211; list of descriptions
+entries      &#8211; dictionary of entries</p>
+<p>Keyword arguments:
+ext_ref      &#8211; external ref</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.create_gaps_and_overlaps_tier">
+<tt class="descname">create_gaps_and_overlaps_tier</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>tier_name=None</em>, <em>maxlen=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.create_gaps_and_overlaps_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a tier with the gaps and overlaps</p>
+<p>Required arguments:
+tier1   &#8211; name of the first tier
+tier2   &#8211; name of the second tier</p>
+<p>Keyword arguments:
+tierNam &#8211; name of the output tier
+maxlen  &#8211; maximum length of the gaps</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.extract">
+<tt class="descname">extract</tt><span class="sig-paren">(</span><em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.extract" title="Permalink to this definition">¶</a></dt>
+<dd><p>extract a timeframe</p>
+<p>Required arguments:
+start &#8211; starting time
+end   &#8211; ending time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.filterAnnotations">
+<tt class="descname">filterAnnotations</tt><span class="sig-paren">(</span><em>tier</em>, <em>tier_name=None</em>, <em>filtin=None</em>, <em>filtex=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.filterAnnotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>filter annotations in a tier</p>
+<p>Required arguments:
+tier      &#8211; tier name</p>
+<p>Keyword arguments:
+tier_name &#8211; output tier name, if none it will be generated
+filtin    &#8211; inclusion list, if None all is included
+filtex    &#8211; exclusion list, if Nonen nothing is excluded</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.generate_annotation_concat">
+<tt class="descname">generate_annotation_concat</tt><span class="sig-paren">(</span><em>tiers</em>, <em>start</em>, <em>end</em>, <em>sep='-'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.generate_annotation_concat" title="Permalink to this definition">¶</a></dt>
+<dd><p>concatenate annotations within a timeframe</p>
+<p>Required arguments:
+tiers &#8211; list of tiers
+start &#8211; start time
+end   &#8211; end time</p>
+<p>Keyword arguments:
+sep   &#8211; separator character</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.generate_annotation_id">
+<tt class="descname">generate_annotation_id</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.generate_annotation_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate the next annotation ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.generate_ts_id">
+<tt class="descname">generate_ts_id</tt><span class="sig-paren">(</span><em>time=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.generate_ts_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate the next timeslot ID</p>
+<p>Keyword arguments:
+time &#8211; initial time to set</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_annotation_data_at_time">
+<tt class="descname">get_annotation_data_at_time</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_at_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>give the annotation at the given time</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier
+time    &#8211; time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_annotation_data_for_tier">
+<tt class="descname">get_annotation_data_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_for_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>gives a list of annotations in the format (start, end, value)</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_annotation_datas_between_times">
+<tt class="descname">get_annotation_datas_between_times</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_datas_between_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives a list of annotations that occur between times</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier
+start   &#8211; start time
+end     &#8211; end time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_full_time_interval">
+<tt class="descname">get_full_time_interval</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_full_time_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>give a tuple with the start and end time of the entire file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_gaps_and_overlaps_duration">
+<tt class="descname">get_gaps_and_overlaps_duration</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>maxlen=-1</em>, <em>progressbar=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_gaps_and_overlaps_duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>give gaps and overlaps in the format (type, start, end)</p>
+<p>Required arguments:
+tier1       &#8211; name of the first tier
+tier2       &#8211; name of the second tier</p>
+<p>Keyword arguments:
+maxlen      &#8211; maximum length of the gaps, -1 is infinite
+progressbar &#8211; flag to display the progress(debug purpose)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_linguistic_types">
+<tt class="descname">get_linguistic_types</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_linguistic_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>give a list of available linguistic types</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_linked_files">
+<tt class="descname">get_linked_files</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_linked_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>give a list of all media files</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_parameters_for_tier">
+<tt class="descname">get_parameters_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_parameters_for_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>gives the tierdict that is usable in the add_tier function</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_ref_annotation_data_for_tier">
+<tt class="descname">get_ref_annotation_data_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_ref_annotation_data_for_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#8220;give a list of all reference annotations</p>
+<p>Required arguments:
+id_tier &#8211; Name of the tier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_tier_ids_for_linguistic_type">
+<tt class="descname">get_tier_ids_for_linguistic_type</tt><span class="sig-paren">(</span><em>ling_type</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_tier_ids_for_linguistic_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>give a list of all tiers matching a linguistic type</p>
+<p>Required arguments:
+ling_type &#8211; linguistic type name</p>
+<p>Keyword arguments:
+parent    &#8211; only match tiers from this parent</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_tier_names">
+<tt class="descname">get_tier_names</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_tier_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>give a list of tiernames</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.glue_annotations_in_tier">
+<tt class="descname">glue_annotations_in_tier</tt><span class="sig-paren">(</span><em>tier</em>, <em>tier_name=None</em>, <em>treshhold=85</em>, <em>filtin=None</em>, <em>filtex=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.glue_annotations_in_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>glue annotatotions together in a tier</p>
+<p>Required arguments:
+tier      &#8211; tier name</p>
+<p>Keyword arguments:
+tier_name  &#8211; output tier name, if None it will be generated
+treshhold  &#8211; gap threshhold
+filtin     &#8211; include only this annotations, if None all is included
+filtex     &#8211; exclude all this annotations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.insert_annotation">
+<tt class="descname">insert_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>start</em>, <em>end</em>, <em>value=''</em>, <em>svg_ref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>insert an annotation in a tier</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier
+start   &#8211; start time of the annotation
+end     &#8211; end time of the annotation</p>
+<p>Keyword arguments:
+value   &#8211; value of the annotation (default )
+svg_ref &#8211; svg reference (default None)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.insert_ref_annotation">
+<tt class="descname">insert_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>ref</em>, <em>value</em>, <em>prev</em>, <em>svg_ref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_ref_annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>insert a ref annotation</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier
+ref     &#8211; reference
+value   &#8211; value of the annotation
+prev    &#8211; previous annotation</p>
+<p>Keyword arguments:
+svg_ref &#8211; svg reference (default None)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.merge_tiers">
+<tt class="descname">merge_tiers</tt><span class="sig-paren">(</span><em>tiers</em>, <em>tiernew=None</em>, <em>gaptresh=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.merge_tiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>merge tiers into a new tier</p>
+<p>Required arguments:
+tiers    &#8211; list of tiers</p>
+<p>Keyword arguments:
+tiernew  &#8211; nome of the new tier, if None the name will be generated
+gaptresh &#8211; treshhold to glue annotations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_all_annotations_from_tier">
+<tt class="descname">remove_all_annotations_from_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_all_annotations_from_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove all annotations from a tier</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_annotation">
+<tt class="descname">remove_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em>, <em>clean=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove an annotation at time</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier
+time    &#8211; time</p>
+<p>Keyword arguments:
+clean   &#8211; flag to clean timeslots (default True)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_controlled_vocabulary">
+<tt class="descname">remove_controlled_vocabulary</tt><span class="sig-paren">(</span><em>cv</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_controlled_vocabulary" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove a controlled vocabulary</p>
+<p>Required arguments:
+cv &#8211; Controlled vocabulary ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_linguistic_type">
+<tt class="descname">remove_linguistic_type</tt><span class="sig-paren">(</span><em>ling_type</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_linguistic_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove a linguistic type</p>
+<p>Required arguments:
+ling_type &#8211; name of the linguistic type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_tier">
+<tt class="descname">remove_tier</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>clean=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove tier</p>
+<p>Required arguments:
+id_tier &#8211; name of the tier</p>
+<p>Keyword arguments:
+clean   &#8211; flag to also clean up the timeslot id&#8217;s (default True)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_tiers">
+<tt class="descname">remove_tiers</tt><span class="sig-paren">(</span><em>tiers</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_tiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove tiers</p>
+<p>Required arguments:
+tiers &#8211; list of names of tiers to remove</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.shift_annotations">
+<tt class="descname">shift_annotations</tt><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.shift_annotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>shift all annotations in time, this creates a new object</p>
+<p>Required arguments:
+time &#8211; time shift width negative for right shift</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.to_file">
+<tt class="descname">to_file</tt><span class="sig-paren">(</span><em>file_path</em>, <em>pretty=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>exports the eaf object to a file, if the file already exists it will
+create a backup with the .bak suffix</p>
+<p>Required arguments:
+file_path &#8211; file path - for stdout</p>
+<p>Keyword arguments:
+pretty    &#8211; flag for pretty indented output (default True)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.to_textgrid">
+<tt class="descname">to_textgrid</tt><span class="sig-paren">(</span><em>file_path</em>, <em>excluded_tiers=[]</em>, <em>included_tiers=[]</em>, <em>encoding='utf-16'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.to_textgrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert the elan file to praat&#8217;s TextGrid</p>
+<p>Required arguments:
+file_path      &#8211; file path, - for stdout
+excluded_tiers &#8211; tiers to specifically exclude
+included_tiers &#8211; tiers to specifically include, if empty all tiers are</p>
+<blockquote>
+<div>included</div></blockquote>
+<p>Keyword arguments:
+encoding       &#8211; character encoding (default utf-16)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Praat.html"
+                        title="previous chapter">1. Praat</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="EafIO.html"
+                        title="next chapter">3. EafIO</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Elan.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="EafIO.html" title="3. EafIO"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Praat.html" title="1. Praat"
+             >previous</a> |</li>
+        <li><a href="index.html">pympi 0.91 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, Mart Lubbers (mart@martlubbers.net).
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

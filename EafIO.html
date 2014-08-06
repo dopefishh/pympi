@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Python Module Index &mdash; pympi 0.91 documentation</title>
+    <title>3. EafIO &mdash; pympi 0.91 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,9 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="pympi 0.91 documentation" href="index.html" />
- 
-
-
+    <link rel="prev" title="2. Elan" href="Elan.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -36,8 +34,11 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="#" title="Python Module Index"
+          <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="Elan.html" title="2. Elan"
+             accesskey="P">previous</a> |</li>
         <li><a href="index.html">pympi 0.91 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -47,39 +48,36 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
+  <div class="section" id="module-pympi.EafIO">
+<span id="eafio"></span><h1>3. EafIO<a class="headerlink" href="#module-pympi.EafIO" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pympi.EafIO.indent">
+<tt class="descclassname">pympi.EafIO.</tt><tt class="descname">indent</tt><span class="sig-paren">(</span><em>el</em>, <em>level=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.EafIO.indent" title="Permalink to this definition">¶</a></dt>
+<dd><p>pretty format the xml</p>
+<p>Keyword arguments:
+level &#8211; level of indenting, only used internally (default 0)</p>
+</dd></dl>
 
-   <h1>Python Module Index</h1>
+<dl class="function">
+<dt id="pympi.EafIO.parse_eaf">
+<tt class="descclassname">pympi.EafIO.</tt><tt class="descname">parse_eaf</tt><span class="sig-paren">(</span><em>file_path</em>, <em>eaf_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.EafIO.parse_eaf" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse an elan file into an Eaf object</p>
+<p>Required arguments:
+file_path &#8211; filepath to parse from - for stdin
+eaf_obj   &#8211; object to put the data in</p>
+</dd></dl>
 
-   <div class="modindex-jumpbox">
-   <a href="#cap-p"><strong>p</strong></a>
-   </div>
+<dl class="function">
+<dt id="pympi.EafIO.to_eaf">
+<tt class="descclassname">pympi.EafIO.</tt><tt class="descname">to_eaf</tt><span class="sig-paren">(</span><em>file_path</em>, <em>eaf_obj</em>, <em>pretty=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.EafIO.to_eaf" title="Permalink to this definition">¶</a></dt>
+<dd><p>write an elan object to a file</p>
+<p>Required arguments:
+file_path &#8211; filepath to write to, - for stdout
+eaf_obj   &#8211; eaf object to write
+pretty    &#8211; flag for pretty printing</p>
+</dd></dl>
 
-   <table class="indextable modindextable" cellspacing="0" cellpadding="2">
-     <tr class="pcap"><td></td><td>&nbsp;</td><td></td></tr>
-     <tr class="cap" id="cap-p"><td></td><td>
-       <strong>p</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <tt class="xref">pympi</tt></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&nbsp;&nbsp;&nbsp;
-       <a href="EafIO.html#module-pympi.EafIO"><tt class="xref">pympi.EafIO</tt></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&nbsp;&nbsp;&nbsp;
-       <a href="Elan.html#module-pympi.Elan"><tt class="xref">pympi.Elan</tt></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&nbsp;&nbsp;&nbsp;
-       <a href="Praat.html#module-pympi.Praat"><tt class="xref">pympi.Praat</tt></a></td><td>
-       <em></em></td></tr>
-   </table>
+</div>
 
 
           </div>
@@ -87,6 +85,16 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Elan.html"
+                        title="previous chapter">2. Elan</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/EafIO.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -111,8 +119,11 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="#" title="Python Module Index"
+          <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="Elan.html" title="2. Elan"
+             >previous</a> |</li>
         <li><a href="index.html">pympi 0.91 documentation</a> &raquo;</li> 
       </ul>
     </div>

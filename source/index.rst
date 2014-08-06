@@ -11,30 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   Intro
-   Praat.py
-   Elan.py
-   EafIO.py
+   Praat
+   Elan
+   EafIO
 
 Intro
 ==================
 Readme
-
-Praat
-==================
-.. automodule:: pympi.Praat
-   :members:
-   :special-members:
-
-
-Elan
-==================
-.. automodule:: pympi.Elan
-   :members:
-   :special-members:
-
-EafIO.py
-==================
-.. automodule:: pympi.EafIO
-   :members:
-   :special-members:

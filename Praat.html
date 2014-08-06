@@ -1,0 +1,504 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1. Praat &mdash; pympi 0.91 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.91',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pympi 0.91 documentation" href="index.html" />
+    <link rel="next" title="2. Elan" href="Elan.html" />
+    <link rel="prev" title="Welcome to pympi’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Elan.html" title="2. Elan"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to pympi’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">pympi 0.91 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pympi.Praat">
+<span id="praat"></span><h1>1. Praat<a class="headerlink" href="#module-pympi.Praat" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pympi.Praat.TextGrid">
+<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">TextGrid</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read write and edit Praat&#8217;s TextGrid files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> (<em>float</em>) &#8211; Minimum x value.</li>
+<li><strong>xmax</strong> (<em>float</em>) &#8211; Maximum x value.</li>
+<li><strong>tier_num</strong> (<em>int</em>) &#8211; Number of tiers.</li>
+<li><strong>tiers</strong> (<em>list</em>) &#8211; Internal (unsorted) list of tiers.</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; Codec of the input file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All times are in seconds and can have decimals</p>
+</div>
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.__init__">
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct either a new TextGrid object or read one from a
+file/stream.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Path to read from, - for stdin. If <tt class="docutils literal"><span class="pre">None</span></tt> an
+empty TextGrid will be created.</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding for the input.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.add_tier">
+<tt class="descname">add_tier</tt><span class="sig-paren">(</span><em>name</em>, <em>tier_type='IntervalTier'</em>, <em>number=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.add_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an Interval or a PointTier on the specified location.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of the tier, duplicate names is allowed.</li>
+<li><strong>tier_type</strong> (<em>str</em>) &#8211; Type of the tier. (&#8216;IntervalTier&#8217;, &#8216;TextTier&#8217;)</li>
+<li><strong>number</strong> (<em>int</em>) &#8211; Place to insert the tier, when <tt class="docutils literal"><span class="pre">None</span></tt> the number
+is generated and the tier will be placed on the
+bottom.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The created tier.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the number is out of bounds.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.change_tier_name">
+<tt class="descname">change_tier_name</tt><span class="sig-paren">(</span><em>name_num</em>, <em>name2</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.change_tier_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the name of the tier, when multiple tiers exist with that
+name only the first is renamed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name_num</strong> (<em>int or str</em>) &#8211; Name or number of the tier to rename.</li>
+<li><strong>name2</strong> (<em>str</em>) &#8211; New name of the tier.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TierNotFoundException:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier doesn&#8217;t exist.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.get_tier">
+<tt class="descname">get_tier</tt><span class="sig-paren">(</span><em>name_num</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.get_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives a tier, when multiple tiers exist with that name only the
+first is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name_num</strong> (<em>int or str</em>) &#8211; Name or number of the tier to return.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The tier.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises TierNotFoundException:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">If the tier doesn&#8217;t exist.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.get_tier_name_num">
+<tt class="descname">get_tier_name_num</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.get_tier_name_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give all tiers with their numbers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List consisting of the form
+<tt class="docutils literal"><span class="pre">[(num1,</span> <span class="pre">tier1),</span> <span class="pre">(num2,</span> <span class="pre">tier2)</span> <span class="pre">...</span> <span class="pre">(numn,</span> <span class="pre">tiern)]</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.get_tiers">
+<tt class="descname">get_tiers</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.get_tiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give all tiers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body">Available tiers</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.remove_tier">
+<tt class="descname">remove_tier</tt><span class="sig-paren">(</span><em>name_num</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.remove_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a tier, when multiple tiers exist with that name only the
+first is removed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name_num</strong> (<em>int or str</em>) &#8211; Name or number of the tier to remove.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TierNotFoundException:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier doesn&#8217;t exist.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.to_eaf">
+<tt class="descname">to_eaf</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_eaf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the object to an EAF object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">EAF object</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ImportError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the Eaf module can&#8217;t be loaded.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.to_file">
+<tt class="descname">to_file</tt><span class="sig-paren">(</span><em>filepath</em>, <em>codec='utf-16'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the object to a TextGrid file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Path to write to, - for stdout.</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding for the output.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympi.Praat.Tier">
+<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">Tier</tt><span class="sig-paren">(</span><em>name</em>, <em>tier_type</em>, <em>number</em>, <em>lines=None</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a TextGrid tier, either an Interval or TextTier</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of the tier.</li>
+<li><strong>intervals</strong> (<em>list</em>) &#8211; List of intervals where each interval is
+(start, [end,] value).</li>
+<li><strong>number</strong> (<em>int</em>) &#8211; Number of the tier.</li>
+<li><strong>tier_type</strong> (<em>str</em>) &#8211; Type of the tier(&#8216;IntervalTier&#8217; or &#8216;TextTier&#8217;).</li>
+<li><strong>xmin</strong> (<em>int</em>) &#8211; Minimum x value.</li>
+<li><strong>xmax</strong> (<em>int</em>) &#8211; Maximum x value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pympi.Praat.Tier.__init__">
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>name</em>, <em>tier_type</em>, <em>number</em>, <em>lines=None</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a tier, if lines is <tt class="docutils literal"><span class="pre">None</span></tt> a new tier is created and codec
+is ignored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of the tier.</li>
+<li><strong>tier_type</strong> (<em>str</em>) &#8211; Type of the tier(&#8216;IntervalTier&#8217; or &#8216;TextTier&#8217;).</li>
+<li><strong>number</strong> (<em>int</em>) &#8211; Number of the tier.</li>
+<li><strong>lines</strong> (<em>iter</em>) &#8211; Iterator of the input lines.</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding of the input.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TierTypeException:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier type is unknown.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.Tier.add_interval">
+<tt class="descname">add_interval</tt><span class="sig-paren">(</span><em>begin</em>, <em>end</em>, <em>value</em>, <em>check=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.add_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an interval to the IntervalTier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>begin</strong> (<em>float</em>) &#8211; Start time of the interval.</li>
+<li><strong>end</strong> (<em>float</em>) &#8211; End time of the interval.</li>
+<li><strong>value</strong> (<em>str</em>) &#8211; Text of the interval.</li>
+<li><strong>check</strong> (<em>bool</em>) &#8211; Flag to check for overlap.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>TierTypeException</strong> &#8211; If the tier is not an IntervalTier.</li>
+<li><strong>Exception</strong> &#8211; If there is already an interval in that time.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.Tier.add_point">
+<tt class="descname">add_point</tt><span class="sig-paren">(</span><em>point</em>, <em>value</em>, <em>check=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.add_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a point to the TextTier</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>point</strong> (<em>int</em>) &#8211; Time of the point.</li>
+<li><strong>value</strong> (<em>str</em>) &#8211; Text of the point.</li>
+<li><strong>check</strong> (<em>bool</em>) &#8211; Flag to check for overlap.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>TierTypeException</strong> &#8211; If the tier is not a TextTier.</li>
+<li><strong>Exception</strong> &#8211; If there is already a point at that time.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.Tier.clearIntervals">
+<tt class="descname">clearIntervals</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.clearIntervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all the intervals in the tier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.Tier.get_intervals">
+<tt class="descname">get_intervals</tt><span class="sig-paren">(</span><em>sort=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.get_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give all the intervals or points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sort</strong> (<em>bool</em>) &#8211; Flag for yielding the intervals or points sorted.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body">All the intervals</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.Tier.remove_interval">
+<tt class="descname">remove_interval</tt><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.remove_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a point or an interval, if no point or interval is found
+nothing happens.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>int</em>) &#8211; Time of the point or time in the interval.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.Tier.update">
+<tt class="descname">update</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the internal values</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pympi.Praat.TierNotFoundException">
+<em class="property">exception </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">TierNotFoundException</tt><span class="sig-paren">(</span><em>tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TierNotFoundException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception that is raised when a tier is adressed that doesn&#8217;t exist</p>
+<dl class="method">
+<dt id="pympi.Praat.TierNotFoundException.__init__">
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TierNotFoundException.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a TierNotFoundException.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tier</strong> (<em>int or str</em>) &#8211; Name or number of the tier.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pympi.Praat.TierNotFoundException.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#pympi.Praat.TierNotFoundException.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pympi.Praat.TierTypeException">
+<em class="property">exception </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">TierTypeException</tt><a class="headerlink" href="#pympi.Praat.TierTypeException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception that is raised when a tiertype is unknown or wrong for the
+function in which it is raised</p>
+<dl class="method">
+<dt id="pympi.Praat.TierTypeException.__init__">
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TierTypeException.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a TierTypeException.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pympi.Praat.TierTypeException.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#pympi.Praat.TierTypeException.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to pympi&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Elan.html"
+                        title="next chapter">2. Elan</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Praat.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Elan.html" title="2. Elan"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to pympi’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">pympi 0.91 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, Mart Lubbers (mart@martlubbers.net).
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>
