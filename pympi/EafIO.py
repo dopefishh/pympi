@@ -6,11 +6,12 @@ import os
 
 
 def parse_eaf(file_path, eaf_obj):
-    """parse an elan file into an Eaf object
+    """Parse an EAF file
 
-    Required arguments:
-    file_path -- filepath to parse from - for stdin
-    eaf_obj   -- object to put the data in"""
+    :param str file_path: Path to read from, - for stdin.
+    :param pympi.Elan.Eaf eaf_obj: Existing EAF object to put the data in.
+    :returns: EAF object.
+    """
     if file_path == "-":
         file_path = sys.stdin
     # Annotation document
@@ -117,10 +118,10 @@ def parse_eaf(file_path, eaf_obj):
 
 
 def indent(el, level=0):
-    """pretty format the xml
+    """Function to pretty print the xml, meaning adding tabs and newlines.
 
-    Keyword arguments:
-    level -- level of indenting, only used internally (default 0)
+    :param ElementTree.Element el: Current element.
+    :param int level: Current level.
     """
     i = '\n' + level*'\t'
     if len(el):
@@ -138,12 +139,11 @@ def indent(el, level=0):
 
 
 def to_eaf(file_path, eaf_obj, pretty=True):
-    """write an elan object to a file
+    """Write an Eaf object to file.
 
-    Required arguments:
-    file_path -- filepath to write to, - for stdout
-    eaf_obj   -- eaf object to write
-    pretty    -- flag for pretty printing
+    :param str file_path: Filepath to write to, - for stdout.
+    :param pympi.Elan.Eaf eaf_obj: Object to write.
+    :param bool pretty: Flag to set pretty printing.
     """
     rm_none = lambda x:\
         dict((k, unicode(v)) for k, v in x.iteritems() if v is not None)
