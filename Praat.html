@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>1. Praat &mdash; pympi 0.91 documentation</title>
+    <title>Praat &mdash; pympi 0.91d documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.91',
+        VERSION:     '0.91d',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 0.91 documentation" href="index.html" />
-    <link rel="next" title="2. Elan" href="Elan.html" />
+    <link rel="top" title="pympi 0.91d documentation" href="index.html" />
+    <link rel="next" title="Elan" href="Elan.html" />
     <link rel="prev" title="Welcome to pympi’s documentation!" href="index.html" /> 
   </head>
   <body role="document">
@@ -38,12 +38,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="Elan.html" title="2. Elan"
+          <a href="Elan.html" title="Elan"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to pympi’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">pympi 0.91 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 0.91d documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,11 +53,15 @@
           <div class="body" role="main">
             
   <div class="section" id="module-pympi.Praat">
-<span id="praat"></span><h1>1. Praat<a class="headerlink" href="#module-pympi.Praat" title="Permalink to this headline">¶</a></h1>
+<span id="praat"></span><h1>Praat<a class="headerlink" href="#module-pympi.Praat" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pympi.Praat.TextGrid">
 <em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">TextGrid</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read write and edit Praat&#8217;s TextGrid files.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All times are in seconds and can have decimals</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -73,10 +77,6 @@
 </tr>
 </tbody>
 </table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">All times are in seconds and can have decimals</p>
-</div>
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.__init__">
 <tt class="descname">__init__</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.__init__" title="Permalink to this definition">¶</a></dt>
@@ -218,12 +218,12 @@ first is removed.</p>
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.to_eaf">
 <tt class="descname">to_eaf</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_eaf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert the object to an EAF object</p>
+<dd><p>Convert the object to an pympi.Elan.Eaf object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">EAF object</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="Elan.html#pympi.Elan.Eaf" title="pympi.Elan.Eaf"><tt class="xref py py-class docutils literal"><span class="pre">pympi.Elan.Eaf</span></tt></a> object</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Raises ImportError:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the Eaf module can&#8217;t be loaded.</td>
@@ -448,12 +448,19 @@ function in which it is raised</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Praat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Elan.html">Elan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EafIO.html">EafIO</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Welcome to pympi&#8217;s documentation!</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="Elan.html"
-                        title="next chapter">2. Elan</a></p>
+                        title="next chapter">Elan</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -488,12 +495,12 @@ function in which it is raised</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="Elan.html" title="2. Elan"
+          <a href="Elan.html" title="Elan"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to pympi’s documentation!"
              >previous</a> |</li>
-        <li><a href="index.html">pympi 0.91 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 0.91d documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

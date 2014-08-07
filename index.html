@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to pympi’s documentation! &mdash; pympi 0.91 documentation</title>
+    <title>Welcome to pympi’s documentation! &mdash; pympi 0.91d documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.91',
+        VERSION:     '0.91d',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 0.91 documentation" href="#" />
-    <link rel="next" title="1. Praat" href="Praat.html" /> 
+    <link rel="top" title="pympi 0.91d documentation" href="#" />
+    <link rel="next" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,9 +37,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="Praat.html" title="1. Praat"
+          <a href="Praat.html" title="Praat"
              accesskey="N">next</a> |</li>
-        <li><a href="#">pympi 0.91 documentation</a> &raquo;</li> 
+        <li><a href="#">pympi 0.91d documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,18 +50,98 @@
             
   <div class="section" id="welcome-to-pympi-s-documentation">
 <h1>Welcome to pympi&#8217;s documentation!<a class="headerlink" href="#welcome-to-pympi-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+<p>API Documentation:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Praat.html">1. Praat</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Elan.html">2. Elan</a></li>
-<li class="toctree-l1"><a class="reference internal" href="EafIO.html">3. EafIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Praat.html">Praat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Elan.html">Elan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EafIO.html">EafIO</a></li>
 </ul>
 </div>
 </div>
-<div class="section" id="intro">
-<h1>Intro<a class="headerlink" href="#intro" title="Permalink to this headline">¶</a></h1>
-<p>Readme</p>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Run: <tt class="docutils literal"><span class="pre">#</span> <span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt></p>
+<p>If you don&#8217;t have right on your system to install in the default package
+location for python you can specify your own package location:
+<tt class="docutils literal"><span class="pre">$</span> <span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span> <span class="pre">--prefix=/home/user/bin</span></tt></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You have to add
+<tt class="docutils literal"><span class="pre">export</span> <span class="pre">PYTHONPATH=~/home/user/bin/lib/python2.7/site-packages</span></tt>
+to your <tt class="docutils literal"><span class="pre">~/.bashrc</span></tt></p>
+</div>
+</div>
+<div class="section" id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="12%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Date</th>
+<th class="head">Version</th>
+<th class="head">Changelog</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>2014-08-06</td>
+<td>0.91d</td>
+<td>New documentation format(sphinx) and github pages.</td>
+</tr>
+<tr class="row-odd"><td>2014-07-17</td>
+<td>0.91</td>
+<td>Controlled vocabularies (eaf file format 2.8) added
+and quickly tested.</td>
+</tr>
+<tr class="row-even"><td>2014-07-16</td>
+<td>0.9</td>
+<td>Added support for licences(eaf file format 2.8) and
+planned extended controlled vocabulary support.</td>
+</tr>
+<tr class="row-odd"><td>2014-07-09</td>
+<td>0.7</td>
+<td>Changed the style to pep8 and thus some functions
+(read all) have changed name.</td>
+</tr>
+<tr class="row-even"><td>2014-03-24</td>
+<td>&nbsp;</td>
+<td>Fixed a lot of TextGrid bugs and have written a
+better parser using more regexp.</td>
+</tr>
+<tr class="row-odd"><td>2014-02-17</td>
+<td>&nbsp;</td>
+<td>Started branching and fixed a few bugs.</td>
+</tr>
+<tr class="row-even"><td>2014-02-03</td>
+<td>&nbsp;</td>
+<td>Fixed the praat tofile function so that it writes
+silence intervals (that praat convention).</td>
+</tr>
+<tr class="row-odd"><td>2014-01-27</td>
+<td>&nbsp;</td>
+<td>Added documentation via pdoc in html and cleaned up
+some documentation in EafIO.py.</td>
+</tr>
+<tr class="row-even"><td>2013-12-02</td>
+<td>&nbsp;</td>
+<td>IO is now in a different file, the old tofile is
+removed because the new one is much better.</td>
+</tr>
+<tr class="row-odd"><td>2013-11-15</td>
+<td>&nbsp;</td>
+<td>Rewritten the tofile function, the old function is a
+bit faster but less reliable. The old function can
+still be used by using tofileOLD().</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="author">
+<h1>Author<a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h1>
+<p>Mart Lubbers(<tt class="docutils literal"><span class="pre">mart</span> <span class="pre">at</span> <span class="pre">martlubbers.net</span></tt>)</p>
 </div>
 
 
@@ -72,13 +152,14 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to pympi&#8217;s documentation!</a></li>
-<li><a class="reference internal" href="#intro">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Praat.html">Praat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Elan.html">Elan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EafIO.html">EafIO</a></li>
 </ul>
 
   <h4>Next topic</h4>
   <p class="topless"><a href="Praat.html"
-                        title="next chapter">1. Praat</a></p>
+                        title="next chapter">Praat</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -113,9 +194,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="Praat.html" title="1. Praat"
+          <a href="Praat.html" title="Praat"
              >next</a> |</li>
-        <li><a href="#">pympi 0.91 documentation</a> &raquo;</li> 
+        <li><a href="#">pympi 0.91d documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
