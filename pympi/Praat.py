@@ -43,13 +43,13 @@ class TierTypeException(Exception):
 class TextGrid:
     """Read write and edit Praat's TextGrid files.
 
+    .. note:: All times are in seconds and can have decimals
+
     :var float xmin: Minimum x value.
     :var float xmax: Maximum x value.
     :var int tier_num: Number of tiers.
     :var list tiers: Internal (unsorted) list of tiers.
     :var str codec: Codec of the input file.
-
-    .. note:: All times are in seconds and can have decimals
     """
     def __init__(self, file_path=None, codec='ascii'):
         """Construct either a new TextGrid object or read one from a
@@ -238,9 +238,9 @@ item []:
             f.close()
 
     def to_eaf(self):
-        """Convert the object to an EAF object
+        """Convert the object to an pympi.Elan.Eaf object
 
-        :returns: EAF object
+        :returns: :class:`pympi.Elan.Eaf` object
         :raises ImportError: If the Eaf module can't be loaded.
         """
         from pympi.Elan import Eaf
