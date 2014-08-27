@@ -13,7 +13,6 @@ API Documentation:
 
    Praat
    Elan
-   EafIO
    
 Installation
 ============
