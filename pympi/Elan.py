@@ -5,6 +5,8 @@ from xml.etree import ElementTree as etree
 import sys
 import os
 
+VERSION = 0.91
+
 CONSTRAINTS = {
     'Time_Subdivision': 'Time subdivision of parent annotation\'s time interva'
     'l, no time gaps allowed within this interval',
