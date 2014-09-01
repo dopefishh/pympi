@@ -395,8 +395,10 @@ class Eaf:
             self.last_ann = new
         else:
             new = 1
-            anns = {int(ann[1:]) for tier in self.tiers.itervalues()
-                    for ann in tier[0]}
+            anns = [int(ann[1:]) for tier in self.tiers.itervalues()
+                    for ann in tier[0]] +\
+                   [int(ann[1:]) for tier in self.tiers.itervalues()
+                    for ann in tier[1]]
             if len(anns) > 0:
                 newann = set(xrange(1, max(anns))).difference(anns)
                 if len(newann) == 0:
