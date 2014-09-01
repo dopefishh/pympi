@@ -24,7 +24,6 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="pympi 0.91d documentation" href="index.html" />
-    <link rel="next" title="EafIO" href="EafIO.html" />
     <link rel="prev" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
@@ -37,9 +36,6 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="EafIO.html" title="EafIO"
-             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              accesskey="P">previous</a> |</li>
@@ -185,7 +181,9 @@ extension or an unknown mimetype.</p>
 <dl class="method">
 <dt id="pympi.Elan.Eaf.add_tier">
 <tt class="descname">add_tier</tt><span class="sig-paren">(</span><em>tier_id</em>, <em>ling='default-lt'</em>, <em>parent=None</em>, <em>locale=None</em>, <em>part=None</em>, <em>ann=None</em>, <em>tier_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_tier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a tier.</p>
+<dd><p>Add a tier. When no linguistic type is given and the default
+linguistic type is unavailable then the assigned linguistic type will
+be the first in the list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -329,7 +327,7 @@ no maximum will be used.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The extracted frame in a new object.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">class:<cite>pympi.Elan.Eaf</cite> object containing the extracted frame.</p>
 </td>
 </tr>
 </tbody>
@@ -852,7 +850,7 @@ to clean the timeslots after the last removal.</p>
 <dl class="method">
 <dt id="pympi.Elan.Eaf.remove_tier">
 <tt class="descname">remove_tier</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>clean=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_tier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove tier.</p>
+<dd><p>Remove a tier.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -939,7 +937,7 @@ included.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="Praat.html#pympi.Praat.TextGrid" title="pympi.Praat.TextGrid"><tt class="xref py py-class docutils literal"><span class="pre">pympi.Praat.TextGrid</span></tt></a> object</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="Praat.html#pympi.Praat.TextGrid" title="pympi.Praat.TextGrid"><tt class="xref py py-class docutils literal"><span class="pre">pympi.Praat.TextGrid</span></tt></a> representation.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Raises ImportError:</th></tr>
@@ -950,6 +948,64 @@ included.</li>
 </table>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="pympi.Elan.indent">
+<tt class="descclassname">pympi.Elan.</tt><tt class="descname">indent</tt><span class="sig-paren">(</span><em>el</em>, <em>level=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.indent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to pretty print the xml, meaning adding tabs and newlines.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>el</strong> (<em>ElementTree.Element</em>) &#8211; Current element.</li>
+<li><strong>level</strong> (<em>int</em>) &#8211; Current level.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pympi.Elan.parse_eaf">
+<tt class="descclassname">pympi.Elan.</tt><tt class="descname">parse_eaf</tt><span class="sig-paren">(</span><em>file_path</em>, <em>eaf_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.parse_eaf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse an EAF file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Path to read from, - for stdin.</li>
+<li><strong>eaf_obj</strong> (<a class="reference internal" href="#pympi.Elan.Eaf" title="pympi.Elan.Eaf"><em>pympi.Elan.Eaf</em></a>) &#8211; Existing EAF object to put the data in.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">EAF object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pympi.Elan.to_eaf">
+<tt class="descclassname">pympi.Elan.</tt><tt class="descname">to_eaf</tt><span class="sig-paren">(</span><em>file_path</em>, <em>eaf_obj</em>, <em>pretty=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.to_eaf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write an Eaf object to file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Filepath to write to, - for stdout.</li>
+<li><strong>eaf_obj</strong> (<a class="reference internal" href="#pympi.Elan.Eaf" title="pympi.Elan.Eaf"><em>pympi.Elan.Eaf</em></a>) &#8211; Object to write.</li>
+<li><strong>pretty</strong> (<em>bool</em>) &#8211; Flag to set pretty printing.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -964,15 +1020,11 @@ included.</li>
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Praat.html">Praat</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Elan</a></li>
-<li class="toctree-l1"><a class="reference internal" href="EafIO.html">EafIO</a></li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="Praat.html"
                         title="previous chapter">Praat</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="EafIO.html"
-                        title="next chapter">EafIO</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -1006,9 +1058,6 @@ included.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="EafIO.html" title="EafIO"
-             >next</a> |</li>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              >previous</a> |</li>
