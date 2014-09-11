@@ -132,12 +132,11 @@ class Eaf:
         if included_tiers:
             tiers = [a for a in tiers if a in included_tiers]
         for tier in tiers:
-            currentTier = tgout.add_tier(tier)
-            for interval in self.get_annotation_data_for_tier(tier):
-                if interval[0] == interval[1]:
+            ctier = tgout.add_tier(tier)
+            for intv in self.get_annotation_data_for_tier(tier):
+                if intv[0] == intv[1]:
                     continue
-                currentTier.add_interval(interval[0]/1000.0,
-                                         interval[1]/1000.0, interval[2])
+                ctier.add_intv(intv[0]/1000.0, intv[1]/1000.0, intv[2])
         return tgout
 
     def extract(self, start, end):
@@ -407,7 +406,7 @@ class Eaf:
                     self.last_ann = new
                 else:
                     new = sorted(newann)[0]
-        return 'a%d' % new
+        return 'a{:d}'.format(new)
 
     def generate_ts_id(self, time=None):
         """Generate the next timeslot id, this function is mainly used
@@ -429,7 +428,7 @@ class Eaf:
                     self.last_ts = new
                 else:
                     new = sorted(newts)[0]
-        ts = 'ts%d' % new
+        ts = 'ts{:d}'.format(new)
         self.timeslots[ts] = time
         return ts
 
@@ -475,8 +474,9 @@ class Eaf:
         :raises TypeError: If there are no annotations within the tiers.
         """
         if tiernew is None:
-            tiernew = '%s_Merged' % '_'.join(tiers)
-        self.remove_tier(tiernew)
+            tiernew = '{}_Merged'.format('_'.join(tiers))
+        if tiernew in self.tiers:
+            self.remove_tier(tiernew)
         self.add_tier(tiernew)
         timepts = sorted(set.union(
             *[set(j for j in xrange(d[0], d[1])) for d in
@@ -525,8 +525,9 @@ class Eaf:
         :raises KeyError: If the tier is non existent.
         """
         if tier_name is None:
-            tier_name = '%s_filter' % tier
-        self.remove_tier(tier_name)
+            tier_name = '{}_filter'.format(tier)
+        if tier_name in self.tiers:
+            self.remove_tier(tier_name)
         self.add_tier(tier_name)
         for a in [b for b in self.get_annotation_data_for_tier(tier)
                   if (filtex is None or b[2] not in filtex) and
@@ -548,8 +549,9 @@ class Eaf:
         :raises KeyError: If the tier is non existent.
         """
         if tier_name is None:
-            tier_name = '%s_glued' % tier
-        self.remove_tier(tier_name)
+            tier_name = '{}_glued'.format(tier)
+        if tier_name in self.tiers:
+            self.remove_tier(tier_name)
         self.add_tier(tier_name)
         tier_data = sorted(self.get_annotation_data_for_tier(tier))
         tier_data = [t for t in tier_data if
@@ -562,7 +564,7 @@ class Eaf:
                               tier_data[i][2])
             elif tier_data[i][0] - currentAnn[1] < treshhold:
                 currentAnn = (currentAnn[0], tier_data[i][1],
-                              '%s_%s' % (currentAnn[2], tier_data[i][2]))
+                              '{}_{}'.format(currentAnn[2], tier_data[i][2]))
             else:
                 self.insert_annotation(tier_name, currentAnn[0], currentAnn[1],
                                        currentAnn[2])
@@ -597,8 +599,9 @@ class Eaf:
         :raises IndexError: If no annotations are available in the tiers.
         """
         if tier_name is None:
-            tier_name = '%s_%s_ftos' % (tier1, tier2)
-        self.remove_tier(tier_name)
+            tier_name = '{}_{}_ftos'.format(tier1, tier2)
+        if tier_name in self.tiers:
+            self.remove_tier(tier_name)
         self.add_tier(tier_name)
         ftos = self.get_gaps_and_overlaps_duration(tier1, tier2, maxlen)
         for fto in ftos:
@@ -684,30 +687,32 @@ class Eaf:
             last = (ty, ts)
             if progressbar and int((ts*1.0/minmax[1])*100) > lastP:
                 lastP = int((ts*1.0/minmax[1])*100)
-                print '%d%%' % lastP
+                print '{}%'.format(lastP)
         line1.append((last[0], last[1], minmax[1]))
         ftos = []
         for i in xrange(len(line1)):
             if line1[i][0] == 'N':
                 if i != 0 and i < len(line1) - 1 and\
                         line1[i-1][0] != line1[i+1][0]:
-                    ftos.append(('G12_%s_%s' % (tier1, tier2)
-                                if line1[i-1][0] == '1' else 'G21_%s_%s' %
-                                (tier2, tier1), line1[i][1], line1[i][2]))
+                    ftos.append(('G12_{}_{}'.format(tier1, tier2) if
+                                 line1[i-1][0] == '1' else
+                                 'G21_{}_{}'.format(tier2, tier1),
+                                 line1[i][1], line1[i][2]))
                 else:
-                    ftos.append(('P_%s' %
-                                (tier1 if line1[i-1][0] == '1' else tier2),
+                    ftos.append(('P_{}'.format(
+                                 tier1 if line1[i-1][0] == '1' else tier2),
                                 line1[i][1], line1[i][2]))
             elif line1[i][0] == 'B':
                 if i != 0 and i < len(line1) - 1 and\
                         line1[i-1][0] != line1[i+1][0]:
-                    ftos.append(('O12_%s_%s' % ((tier1, tier2)
-                                if line1[i-1][0] else 'O21_%s_%s' %
-                                (tier2, tier1)), line1[i][1], line1[i][2]))
+                    ftos.append(('O12_{}_{}'.format(tier1, tier2)
+                                if line1[i-1][0] else 'O21_{}_{}'.format(
+                                tier2, tier1), line1[i][1], line1[i][2]))
                 else:
-                    ftos.append(('B_%s_%s' % ((tier1, tier2)
-                                if line1[i-1][0] == '1' else
-                                (tier2, tier1)), line1[i][1], line1[i][2]))
+                    ftos.append(('B12_{}_{}'.format(tier1, tier2)
+                                 if line1[i-1][0] == '1' else
+                                 'B21_{}_{}'.format(tier2, tier1),
+                                 line1[i][1], line1[i][2]))
         return [f for f in ftos if maxlen == -1 or abs(f[2] - f[1]) < maxlen]
 
     def create_controlled_vocabulary(self, cv_id, descriptions, entries,
