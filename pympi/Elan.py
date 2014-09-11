@@ -577,7 +577,7 @@ class Eaf:
     def get_full_time_interval(self):
         """Give the full time interval of the file.
 
-        :returns: Tuple of the form: ``(min_time, max_time``.
+        :returns: Tuple of the form: ``(min_time, max_time)``.
         """
         return (min(self.timeslots.itervalues()),
                 max(self.timeslots.itervalues()))
