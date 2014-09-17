@@ -53,7 +53,7 @@ class TextGrid:
     :var list tiers: Internal (unsorted) list of tiers.
     :var str codec: Codec of the input file.
     """
-    def __init__(self, file_path=None, codec='ascii'):
+    def __init__(self, file_path=None, codec='ascii', stream=False):
         """Construct either a new TextGrid object or read one from a
         file/stream.
 
@@ -65,26 +65,36 @@ class TextGrid:
         self.codec = codec
         if not file_path:
             self.xmin, self.xmax, self.tier_num = [0]*3
+        elif stream:
+            self.from_stream(file_path, codec)
         else:
             ifile = sys.stdin if file_path == '-' else\
                 codecs.open(file_path, 'r', codec)
-            lines = itertools.ifilter(lambda x: x.strip(), ifile)
-            # skipping: 'File Type...' and 'Object class...'
-            lines.next(), lines.next()
-            self.xmin = float(rexmin.search(lines.next()).group(1))
-            self.xmax = float(rexmax.search(lines.next()).group(1))
-            # skipping: 'tiers? <exists>'
-            lines.next()
-            self.tier_num = int(resize.search(lines.next()).group(1))
-            # skipping: 'item []:'
-            lines.next()
-            for current_tier in xrange(self.tier_num):
-                number = int(reitem.search(lines.next()).group(1))
-                tier_type = retype.search(lines.next()).group(1)
-                name = rename.search(lines.next()).group(1)
-                self.tiers.append(Tier(name, tier_type, number, lines, codec))
+            self.from_stream(ifile, codec)
             if file_path == '-':
                 ifile.close()
+
+    def from_stream(self, ifile, codec='ascii'):
+        """Read textgrid from stream.
+
+        :param file ifile: Stream to read from.
+        :param str codec: Text encoding.
+        """
+        lines = itertools.ifilter(lambda x: x.strip(), ifile)
+        # skipping: 'File Type...' and 'Object class...'
+        lines.next(), lines.next()
+        self.xmin = float(rexmin.search(lines.next()).group(1))
+        self.xmax = float(rexmax.search(lines.next()).group(1))
+        # skipping: 'tiers? <exists>'
+        lines.next()
+        self.tier_num = int(resize.search(lines.next()).group(1))
+        # skipping: 'item []:'
+        lines.next()
+        for current_tier in xrange(self.tier_num):
+            number = int(reitem.search(lines.next()).group(1))
+            tier_type = retype.search(lines.next()).group(1)
+            name = rename.search(lines.next()).group(1)
+            self.tiers.append(Tier(name, tier_type, number, lines, codec))
 
     def __update(self):
         """Update the xmin, xmax and number of tiers value"""
@@ -186,34 +196,45 @@ class TextGrid:
         """
         return sorted((s.number, s.name) for s in self.tiers)
 
-    def to_file(self, filepath, codec='utf-16'):
-        """Write the object to a TextGrid file.
+    def to_file(self, filepath, codec='utf-8'):
+        """Write the object to a file.
 
-        :param str file_path: Path to write to, - for stdout.
-        :param str codec: Text encoding for the output.
+        :param str filepath: Path of the file, '-' for stdout.
+        :param str codec: Text encoding.
         """
-        f = sys.stdout if filepath == '-' else\
-            codecs.open(filepath, 'w', codec)
+        try:
+            stream = sys.stdout if filepath == '-' else\
+                codecs.open(filepath, 'w', codec)
+            self.to_stream(stream, codec)
+        finally:
+            if stream != sys.stdout:
+                stream.close()
 
+    def to_stream(self, f, codec='utf-8'):
+        """Write the object to a stream.
+
+        :param file f: Open stream to write to.
+        :param str codec: Text encoding.
+        """
         for t in self.tiers:
             t.update()
         self.__update()
-        f.write("""\
+        f.write(u"""\
 File Type = "ooTextFile
 Object class = "TextGrid"
 
-xmin = {}
-xmax = {}
+xmin = {:f}
+xmax = {:f}
 tiers? <exists>
-size = {}
+size = {:d}
 item []:
 """.format(self.xmin, self.xmax, self.tier_num))
         for tier in sorted(self.tiers, key=lambda x: x.number):
-            f.write('{:>4}sitem [{}]:\n'.format(' ', tier.number))
-            f.write('{:>8}class = "{}"\n'.format(' ', tier.tier_type))
-            f.write('{:>8}name = "{}"\n'.format(' ', tier.name))
-            f.write('{:>8}xmin = {}\n'.format(' ', tier.xmin))
-            f.write('{:>8}xmax = {}\n'.format(' ', tier.xmax))
+            f.write(u'{:>4}item [{:d}]:\n'.format(' ', tier.number))
+            f.write(u'{:>8}class = "{}"\n'.format(' ', tier.tier_type))
+            f.write(u'{:>8}name = "{}"\n'.format(' ', tier.name))
+            f.write(u'{:>8}xmin = {:f}\n'.format(' ', tier.xmin))
+            f.write(u'{:>8}xmax = {:f}\n'.format(' ', tier.xmax))
             srtint = sorted(list(tier.get_intervals()))
             if tier.tier_type == 'IntervalTier':
                 ints = []
@@ -225,22 +246,21 @@ item []:
                     if ints and ints[-1][1] < i[0]:
                         ints.append((ints[-1][1], i[0], ''))
                     ints.append(i)
-                f.write('{:>8}intervals: size = {}\n'.format(' ', len(ints)))
+                f.write(
+                    u'{:>8}intervals: size = {:d}\n'.format(' ', len(ints)))
                 for i, c in enumerate(ints):
-                    f.write('{:>8}intervals [{}]:\n'.format(' ', i+1))
-                    f.write('{:>12}xmin = {}\n'.format(' ', c[0]))
-                    f.write('{:>12}xmax = {}\n'.format(' ', c[1]))
+                    f.write(u'{:>8}intervals [{:d}]:\n'.format(' ', i+1))
+                    f.write(u'{:>12}xmin = {:f}\n'.format(' ', c[0]))
+                    f.write(u'{:>12}xmax = {:f}\n'.format(' ', c[1]))
                     f.write(u'{:>12}text = "{}"\n'.format(
                         ' ', c[2].replace('"', '""').decode(codec)))
             elif tier.tier_type == 'TextTier':
-                f.write('{:>8}points: size = {}\n'.format(' ', len(srtint)))
+                f.write(u'{:>8}points: size = {:d}\n'.format(' ', len(srtint)))
                 for i, c in enumerate(srtint):
-                    f.write('{:>8}points [{}]:\n'.format(' ', i + 1))
-                    f.write('{:>12}number = {}\n'.format(' ', c[0]))
-                    f.write('{:>12}mark = "{}"\n'.format(
+                    f.write(u'{:>8}points [{:d}]:\n'.format(' ', i + 1))
+                    f.write(u'{:>12}number = {:f}\n'.format(' ', c[0]))
+                    f.write(u'{:>12}mark = "{}"\n'.format(
                         ' ', c[1].replace('"', '""').decode(codec)))
-        if filepath != '-':
-            f.close()
 
     def to_eaf(self):
         """Convert the object to an pympi.Elan.Eaf object
@@ -299,7 +319,7 @@ class Tier:
                     xmin = float(rexmin.search(lines.next()).group(1))
                     xmax = float(rexmax.search(lines.next()).group(1))
                     xtxt = retext.search(lines.next()).group(1).\
-                        replace('""', '"')
+                        replace('""', '"').encode(codec)
                     self.intervals.append((xmin, xmax, xtxt))
             elif self.tier_type == 'TextTier':
                 for i in range(num_int):

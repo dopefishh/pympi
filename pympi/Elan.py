@@ -435,9 +435,9 @@ class Eaf:
     def clean_time_slots(self):
         """Clean up all unused timeslots.
         .. warning:: This can and will take time for larger tiers. When you
-                     want to do a lot of operations on a lot of tiers please
-                     unset the flags for cleaning in the functions so that the
-                     cleaning is only performed afterwards.
+           want to do a lot of operations on a lot of tiers please unset the
+           flags for cleaning in the functions so that the cleaning is only
+           performed afterwards.
         """
         ts_in_tier = set(sum([a[0:2] for tier in self.tiers.itervalues()
                               for a in tier[0].itervalues()], ()))
@@ -499,7 +499,7 @@ class Eaf:
         """Shift all annotations in time, this creates a new object.
 
         :param int time: Time shift width, negative numbers make a right shift.
-        :returns: Shifted :class:`pympi.Elan.Eaf' object.
+        :returns: Shifted :class:`pympi.Elan.Eaf` object.
         """
         e = self.extract(
             -1*time, self.get_full_time_interval()[1]) if time < 0 else\
