@@ -316,7 +316,7 @@ is ignored.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><strong>TierTypeException</strong> &#8211; If the tier is not an IntervalTier.</li>
+<li><strong>TierTypeException</strong> &#8211; If the tier is not a IntervalTier.</li>
 <li><strong>Exception</strong> &#8211; If there is already an interval in that time.</li>
 </ul>
 </td>
@@ -351,8 +351,8 @@ is ignored.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Praat.Tier.clearIntervals">
-<tt class="descname">clearIntervals</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.clearIntervals" title="Permalink to this definition">¶</a></dt>
+<dt id="pympi.Praat.Tier.clear_intervals">
+<tt class="descname">clear_intervals</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.clear_intervals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes all the intervals in the tier</p>
 </dd></dl>
 
@@ -375,13 +375,32 @@ is ignored.</p>
 <dl class="method">
 <dt id="pympi.Praat.Tier.remove_interval">
 <tt class="descname">remove_interval</tt><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.remove_interval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove a point or an interval, if no point or interval is found
-nothing happens.</p>
+<dd><p>Remove an interval, if no interval is found nothing happens.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>int</em>) &#8211; Time of the point or time in the interval.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>int</em>) &#8211; Time of the interval.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TierTypeException:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier is not a IntervalTier.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.Tier.remove_point">
+<tt class="descname">remove_point</tt><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.remove_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a point, if no point is found nothing happens.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>int</em>) &#8211; Time of the point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TierTypeException:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier is not a TextTier.</td>
 </tr>
 </tbody>
 </table>
