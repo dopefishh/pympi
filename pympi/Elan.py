@@ -5,7 +5,7 @@ from xml.etree import ElementTree as etree
 import sys
 import os
 
-VERSION = 0.91
+VERSION = 0.99
 
 CONSTRAINTS = {
     'Time_Subdivision': 'Time subdivision of parent annotation\'s time interva'

@@ -6,6 +6,8 @@ import itertools
 import re
 import sys
 
+VERSION = 0.99
+
 rexmin = re.compile(r'xmin = ([0-9.]*)')
 rexmax = re.compile(r'xmax = ([0-9.]*)')
 retext = re.compile(r'text = "(.*)"')
