@@ -706,7 +706,7 @@ class Eaf:
                 if i != 0 and i < len(line1) - 1 and\
                         line1[i-1][0] != line1[i+1][0]:
                     ftos.append(('O12_{}_{}'.format(tier1, tier2)
-                                if line1[i-1][0] else 'O21_{}_{}'.format(
+                                if line1[i-1][0] == '1' else 'O21_{}_{}'.format(
                                 tier2, tier1), line1[i][1], line1[i][2]))
                 else:
                     ftos.append(('B12_{}_{}'.format(tier1, tier2)
