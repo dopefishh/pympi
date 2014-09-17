@@ -1,6 +1,5 @@
 *.[Tt]ext[Gg]rid
 *.eaf
 *.pyc
-test.py
 build/
 doc/build/

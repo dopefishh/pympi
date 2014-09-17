@@ -108,7 +108,10 @@ class TextGrid:
                 max(i.number for i in self.tiers) + 1
         elif number < 1 or number > len(self.tiers):
             raise ValueError(
-                'Number has to be in [1..{}'.format(len(self.tiers)))
+                'Number has to be in [1..{}]'.format(len(self.tiers)))
+        elif tier_type not in ['IntervalTier', 'TextTier']:
+            raise ValueError(
+                'tier_type has to be either IntervalTier or TextTier')
         else:
             for tier in self.tiers:
                 if tier.number >= number:
@@ -333,7 +336,7 @@ class Tier:
             self.intervals.append((point, value))
         else:
             raise Exception('No overlap is allowed')
-        self.__update()
+        self.update()
 
     def add_interval(self, begin, end, value, check=True):
         """Add an interval to the IntervalTier.
@@ -342,25 +345,40 @@ class Tier:
         :param float end: End time of the interval.
         :param str value: Text of the interval.
         :param bool check: Flag to check for overlap.
-        :raises TierTypeException: If the tier is not an IntervalTier.
+        :raises TierTypeException: If the tier is not a IntervalTier.
         :raises Exception: If there is already an interval in that time.
         """
         if self.tier_type != 'IntervalTier':
             raise TierTypeException()
-        if check is False or len([i for i in self.intervals
-                                  if begin < i[1] and end > i[0]]) == 0:
+        if check is False or len(
+                [i for i in self.intervals if begin < i[1] and end > i[0]]
+                ) == 0 and begin < end:
             self.intervals.append((begin, end, value))
         else:
-            raise Exception('No overlap is allowed!')
+            raise Exception(
+                'No overlap is allowed!, and begin should be smaller then end')
         self.update()
 
     def remove_interval(self, time):
-        """Remove a point or an interval, if no point or interval is found
-        nothing happens.
+        """Remove an interval, if no interval is found nothing happens.
 
-        :param int time: Time of the point or time in the interval.
+        :param int time: Time of the interval.
+        :raises TierTypeException: If the tier is not a IntervalTier.
         """
+        if self.tier_type != 'IntervalTier':
+            raise TierTypeException()
         for r in [i for i in self.intervals if i[0] <= time and i[1] >= time]:
+            self.intervals.remove(r)
+
+    def remove_point(self, time):
+        """Remove a point, if no point is found nothing happens.
+
+        :param int time: Time of the point.
+        :raises TierTypeException: If the tier is not a TextTier.
+        """
+        if self.tier_type != 'TextTier':
+            raise TierTypeException()
+        for r in [i for i in self.intervals if i[0] == time]:
             self.intervals.remove(r)
 
     def get_intervals(self, sort=False):
@@ -369,11 +387,9 @@ class Tier:
         :param bool sort: Flag for yielding the intervals or points sorted.
         :yields: All the intervals
         """
-        if sort:
-            self.intervals = sorted(self.intervals)
-        for i in self.intervals:
+        for i in sorted(self.intervals) if sort else self.intervals:
             yield i
 
-    def clearIntervals(self):
+    def clear_intervals(self):
         """Removes all the intervals in the tier"""
         self.intervals = []

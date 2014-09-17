@@ -623,25 +623,25 @@ class Eaf:
          conversations. Journal of Phonetics, 38(4), 555–568.
          doi:10.1016/j.wocn.2010.08.002*
 
-        +-----+--------------------------------------------+
-        | id  | Description                                |
-        +=====+============================================+
-        | O12 | Overlap from tier1 to tier2                |
-        +-----+--------------------------------------------+
-        | O21 | Overlap from tier2 to tier1                |
-        +-----+--------------------------------------------+
-        | G12 | Gap from tier1 to tier2                    |
-        +-----+--------------------------------------------+
-        | G21 | Gap from tier2 to tier1                    |
-        +-----+--------------------------------------------+
-        | P1  | Pause for tier1                            |
-        +-----+--------------------------------------------+
-        | P2  | Pause for tier2                            |
-        +-----+--------------------------------------------+
-        | B12 | Within speaker overlap from tier1 to tier2 |
-        +-----+--------------------------------------------+
-        | B21 | Within speaker overlap from tier2 to tier1 |
-        +-----+--------------------------------------------+
+        +-----+---------------------------------------------+
+        | id  | Description                                 |
+        +=====+=============================================+
+        | O12 | Between speaker overlap from tier1 to tier2 |
+        +-----+---------------------------------------------+
+        | O21 | Overlap from tier2 to tier1                 |
+        +-----+---------------------------------------------+
+        | G12 | Between speaker gap from tier1 to tier2     |
+        +-----+---------------------------------------------+
+        | G21 | Between speaker gap from tier2 to tier1     |
+        +-----+---------------------------------------------+
+        | B12 | Within speaker overlap from tier2 in tier2  |
+        +-----+---------------------------------------------+
+        | B21 | Within speaker overlap from tier1 in tier2  |
+        +-----+---------------------------------------------+
+        | P1  | Pause for tier1                             |
+        +-----+---------------------------------------------+
+        | P2  | Pause for tier2                             |
+        +-----+---------------------------------------------+
 
         :param str tier1: Name of the first tier.
         :param str tier2: Name of the second tier.
@@ -706,8 +706,9 @@ class Eaf:
                 if i != 0 and i < len(line1) - 1 and\
                         line1[i-1][0] != line1[i+1][0]:
                     ftos.append(('O12_{}_{}'.format(tier1, tier2)
-                                if line1[i-1][0] == '1' else 'O21_{}_{}'.format(
-                                tier2, tier1), line1[i][1], line1[i][2]))
+                                 if line1[i-1][0] == '1' else
+                                 'O21_{}_{}'.format(tier2, tier1),
+                                 line1[i][1], line1[i][2]))
                 else:
                     ftos.append(('B12_{}_{}'.format(tier1, tier2)
                                  if line1[i-1][0] == '1' else
