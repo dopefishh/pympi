@@ -626,7 +626,7 @@ class Eaf:
         +-----+---------------------------------------------+
         | id  | Description                                 |
         +=====+=============================================+
-        | O12 | Between speaker overlap from tier1 to tier2 |
+        | O12 | Overlap from tier1 to tier2                 |
         +-----+---------------------------------------------+
         | O21 | Overlap from tier2 to tier1                 |
         +-----+---------------------------------------------+
@@ -634,9 +634,9 @@ class Eaf:
         +-----+---------------------------------------------+
         | G21 | Between speaker gap from tier2 to tier1     |
         +-----+---------------------------------------------+
-        | B12 | Within speaker overlap from tier2 in tier2  |
+        | W12 | Within speaker overlap from tier2 in tier1  |
         +-----+---------------------------------------------+
-        | B21 | Within speaker overlap from tier1 in tier2  |
+        | W21 | Within speaker overlap from tier1 in tier2  |
         +-----+---------------------------------------------+
         | P1  | Pause for tier1                             |
         +-----+---------------------------------------------+
@@ -710,9 +710,9 @@ class Eaf:
                                  'O21_{}_{}'.format(tier2, tier1),
                                  line1[i][1], line1[i][2]))
                 else:
-                    ftos.append(('B12_{}_{}'.format(tier1, tier2)
+                    ftos.append(('W12_{}_{}'.format(tier1, tier2)
                                  if line1[i-1][0] == '1' else
-                                 'B21_{}_{}'.format(tier2, tier1),
+                                 'W21_{}_{}'.format(tier2, tier1),
                                  line1[i][1], line1[i][2]))
         return [f for f in ftos if maxlen == -1 or abs(f[2] - f[1]) < maxlen]
 
