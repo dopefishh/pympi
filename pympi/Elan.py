@@ -710,9 +710,9 @@ class Eaf:
                                  'O21_{}_{}'.format(tier2, tier1),
                                  line1[i][1], line1[i][2]))
                 else:
-                    ftos.append(('W12_{}_{}'.format(tier1, tier2)
+                    ftos.append(('W21_{}_{}'.format(tier1, tier2)
                                  if line1[i-1][0] == '1' else
-                                 'W21_{}_{}'.format(tier2, tier1),
+                                 'W12_{}_{}'.format(tier2, tier1),
                                  line1[i][1], line1[i][2]))
         return [f for f in ftos if maxlen == -1 or abs(f[2] - f[1]) < maxlen]
 

@@ -53,18 +53,25 @@ class TextGrid:
     :var list tiers: Internal (unsorted) list of tiers.
     :var str codec: Codec of the input file.
     """
-    def __init__(self, file_path=None, codec='ascii', stream=False):
+    def __init__(self, file_path=None, xmin=0, xmax=None, codec='ascii',
+                 stream=False):
         """Construct either a new TextGrid object or read one from a
         file/stream.
 
         :param str file_path: Path to read from, - for stdin. If ``None`` an
                               empty TextGrid will be created.
         :param str codec: Text encoding for the input.
+        :raises Exception: If filepath is specified but no xmax
         """
         self.tiers = []
         self.codec = codec
+        self.minmaxfix = False
         if not file_path:
-            self.xmin, self.xmax, self.tier_num = [0]*3
+            if xmax is None:
+                raise Exception('No xmax specified')
+            self.tier_num = 0
+            self.xmin = xmin
+            self.xmax = xmax
         elif stream:
             self.from_stream(file_path, codec)
         else:
@@ -96,12 +103,8 @@ class TextGrid:
             name = rename.search(lines.next()).group(1)
             self.tiers.append(Tier(name, tier_type, number, lines, codec))
 
-    def __update(self):
+    def update(self):
         """Update the xmin, xmax and number of tiers value"""
-        self.xmin = 0 if not self.tiers else\
-            min(tier.xmin for tier in self.tiers)
-        self.xmax = 0 if not self.tiers else\
-            max(tier.xmax for tier in self.tiers)
         self.tier_num = len(self.tiers)
 
     def add_tier(self, name, tier_type='IntervalTier', number=None):
@@ -129,7 +132,7 @@ class TextGrid:
                 if tier.number >= number:
                     tier.number += 1
         self.tiers.append(Tier(name, tier_type, number))
-        self.__update()
+        self.update()
         return self.tiers[-1]
 
     def remove_tier(self, name_num):
@@ -218,7 +221,7 @@ class TextGrid:
         """
         for t in self.tiers:
             t.update()
-        self.__update()
+        self.update()
         f.write(u"""\
 File Type = "ooTextFile
 Object class = "TextGrid"
@@ -228,7 +231,7 @@ xmax = {:f}
 tiers? <exists>
 size = {:d}
 item []:
-""".format(self.xmin, self.xmax, self.tier_num))
+""".format(float(self.xmin), float(self.xmax), self.tier_num))
         for tier in sorted(self.tiers, key=lambda x: x.number):
             f.write(u'{:>4}item [{:d}]:\n'.format(' ', tier.number))
             f.write(u'{:>8}class = "{}"\n'.format(' ', tier.tier_type))
@@ -246,6 +249,8 @@ item []:
                     if ints and ints[-1][1] < i[0]:
                         ints.append((ints[-1][1], i[0], ''))
                     ints.append(i)
+                if ints and ints[-1][1] < self.xmax:
+                    ints.append((ints[-1][1], self.xmax, ''))
                 f.write(
                     u'{:>8}intervals: size = {:d}\n'.format(' ', len(ints)))
                 for i, c in enumerate(ints):

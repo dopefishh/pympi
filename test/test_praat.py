@@ -9,7 +9,7 @@ from pympi.Praat import TierNotFoundException, TierTypeException
 
 class PraatTest(unittest.TestCase):
     def setUp(self):
-        self.tg = TextGrid()
+        self.tg = TextGrid(xmax=20)
 
 # Test all the Praat.TextGrid functions
     def test_add_tier(self):
@@ -120,7 +120,7 @@ class PraatTest(unittest.TestCase):
 
     def test_to_file(self):
         for codec in ['ascii', 'utf-8', 'utf-16', 'latin_1', 'mac_roman']:
-            self.tg = TextGrid(codec=codec)
+            self.tg = TextGrid(codec=codec, xmax=20)
             tier1 = self.tg.add_tier('tier')
             tier1.add_interval(1, 2, 'i1'.encode(codec))
             tier1.add_interval(2, 3, 'i2'.encode(codec))
