@@ -8,7 +8,8 @@ for the older 2.7 format please go to the branch ```eaf_file_2.7```.
 NOTE ON VERSION
 ===============
 From version 1 the api will not change anymore. This is currently on version
-0.99 not yet the case
+0.99 not yet the case. The TextGrid module is already finalized and will always
+ensure compatibility with newer versions.
 
 Contents
 ========
@@ -17,8 +18,6 @@ Full API documentation at: http://dopefishh.github.io/pympi/
     - A python class to read, write, edit and create praat's TextGrid files.
 - ./pympi/Elan.py 
     - A python class to edit and create ELAN's eaf files.
-- ./pympi/EafIO.py 
-    - A python class to write and read ELAN's eaf files.
 
 Installation
 ============
@@ -29,8 +28,9 @@ If you don't have super user right you can install it in your home directory by
 running: `$ python setup.py install --prefix=/home/user/bin`
 
 and then add `export PYTHONPATH=~/home/user/bin/lib/python2.7/site-packages` to
-your `~/.bashrc`
+your `~/.bashrc`(or equivalent in mac)
 
 ##Windows
-This package is not tested on windows, it should work on windows because the
-package doesn't use os exclusive functions as far as we know...
+Run command prompt(possibly with adminstrative privileges...) and type:
+``cd C:\directory\where\you\extracted\the\zip
+	python setup.py install``

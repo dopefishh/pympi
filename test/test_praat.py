@@ -158,7 +158,24 @@ class PraatTest(unittest.TestCase):
             self.assertEqual(tg2, tg1)
 
     def test_to_eaf(self):
-        pass
+        tier1 = self.tg.add_tier('tier1')
+        tier2 = self.tg.add_tier('tier2', tier_type='TextTier')
+        tier1.add_interval(0, 1, 'int1')
+        tier1.add_interval(2, 3, 'int2')
+        tier1.add_interval(4, 5, 'int3')
+        tier2.add_point(1.5, 'point1')
+        tier2.add_point(2.5, 'point2')
+        tier2.add_point(3.5, 'point3')
+        eaf = self.tg.to_eaf(0.03)
+        self.assertRaises(ValueError, self.tg.to_eaf, -1)
+        self.assertEquals(sorted(eaf.get_tier_names()),
+                          sorted(['default', 'tier1', 'tier2']))
+        self.assertEquals(sorted(eaf.get_annotation_data_for_tier('tier1')),
+                          sorted([(0, 1000, 'int1'), (4000, 5000, 'int3'),
+                                  (2000, 3000, 'int2')]))
+        self.assertEquals(eaf.get_annotation_data_for_tier('tier2'),
+                          [(2500, 2530, 'point2'), (1500, 1530, 'point1'),
+                           (3500, 3530, 'point3')])
 
 # Test all the Praat.Tier functions
     def setup_tier(self):

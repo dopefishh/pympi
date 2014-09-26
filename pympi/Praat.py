@@ -6,7 +6,7 @@ import itertools
 import re
 import sys
 
-VERSION = 0.99
+VERSION = 1.0
 
 rexmin = re.compile(r'xmin = ([0-9.]*)')
 rexmax = re.compile(r'xmax = ([0-9.]*)')
@@ -269,20 +269,26 @@ item []:
                     f.write(u'{:>12}mark = "{}"\n'.format(
                         ' ', c[1].replace('"', '""').decode(codec)))
 
-    def to_eaf(self):
+    def to_eaf(self, pointlength=0.1):
         """Convert the object to an pympi.Elan.Eaf object
 
+        :param int pointlength: Length of respective interval from points in
+                                seconds
         :returns: :class:`pympi.Elan.Eaf` object
         :raises ImportError: If the Eaf module can't be loaded.
+        :raises ValueError: If the pointlength is not strictly positive.
         """
         from pympi.Elan import Eaf
         eaf_out = Eaf()
-        for tier in self.tiers:
+        if pointlength <= 0:
+            raise ValueError('Pointlength should be positive')
+        for tier in self.get_tiers():
             eaf_out.add_tier(tier.name)
-            for annotation in tier.intervals:
-                eaf_out.insert_annotation(tier.name, int(annotation[0]*1000),
-                                          int(annotation[1]*1000),
-                                          annotation[2])
+            for ann in tier.get_intervals(True):
+                if tier.tier_type == 'TextTier':
+                    ann = (ann[0], ann[0]+pointlength, ann[1])
+                eaf_out.insert_annotation(tier.name, int(ann[0]*1000),
+                                          int(ann[1]*1000), ann[2])
         return eaf_out
 
 
