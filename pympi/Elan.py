@@ -136,7 +136,7 @@ class Eaf:
             for intv in self.get_annotation_data_for_tier(tier):
                 if intv[0] == intv[1]:
                     continue
-                ctier.add_intv(intv[0]/1000.0, intv[1]/1000.0, intv[2])
+                ctier.add_interval(intv[0]/1000.0, intv[1]/1000.0, intv[2])
         return tgout
 
     def extract(self, start, end):
