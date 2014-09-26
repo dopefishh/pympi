@@ -13,24 +13,16 @@ API Documentation:
 
    Praat
    Elan
-   
-Installation
-============
-Run: ``# python setup.py install``
-
-If you don't have right on your system to install in the default package
-location for python you can specify your own package location:
-``$ python setup.py install --prefix=/home/user/bin``
-
-.. note:: You have to add 
-          ``export PYTHONPATH=~/home/user/bin/lib/python2.7/site-packages``
-          to your ``~/.bashrc``
 
 Changelog
 =========
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 2014-09-26 | 0.99a   | Unit tests for Praat finished and Praat module is on |
+|            |         | version 1.0, meaning no api changes in the future    |
+|            |         | that break compatibility                             |
++------------+---------+------------------------------------------------------+
 | 2014-09-11 | 0.99    | Unit tests for Praat and Elan and from version 1.0   |
 |            |         | no api changes.                                      |
 +------------+---------+------------------------------------------------------+
