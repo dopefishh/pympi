@@ -56,7 +56,9 @@ class TextGrid:
     def __init__(self, file_path=None, xmin=0, xmax=None, codec='ascii',
                  stream=False):
         """Construct either a new TextGrid object or read one from a
-        file/stream.
+        file/stream. When you create an empty TextGrid you must at least
+        specify the xmax.
+
 
         :param str file_path: Path to read from, - for stdin. If ``None`` an
                               empty TextGrid will be created.
