@@ -26,12 +26,12 @@ The development version can be found on github[4].
 4. https://github.com/dopefishh/pympi"""
 
 classifiers = [
-    'Classifier: Development Status :: 4 - Beta',
-    'Classifier: Environment :: Console',
-    'Classifier: Natural Language :: English',
-    'Classifier: Operating System :: OS Independent',
-    'Classifier: Programming Language :: Python :: 2.7',
-    'Classifier: Topic :: Text Processing :: Linguistic']
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Natural Language :: English',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 2.7',
+    'Topic :: Text Processing :: Linguistic']
 
 
 setup(name='pympi-ling',
