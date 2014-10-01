@@ -3,6 +3,7 @@
 import time
 from xml.etree import ElementTree as etree
 import sys
+import re
 import os
 
 VERSION = 0.99
@@ -394,10 +395,12 @@ class Eaf:
             self.last_ann = new
         else:
             new = 1
-            anns = [int(ann[1:]) for tier in self.tiers.itervalues()
-                    for ann in tier[0]] +\
-                   [int(ann[1:]) for tier in self.tiers.itervalues()
-                    for ann in tier[1]]
+            anns = []
+            norm = [ann for tier in self.tiers.itervalues() for ann in tier[0]]
+            refs = [ann for tier in self.tiers.itervalues() for ann in tier[1]]
+            for ann in norm+refs:
+                if re.match('a\d+', ann):
+                    anns.append(int(ann[1:]))
             if len(anns) > 0:
                 newann = set(xrange(1, max(anns))).difference(anns)
                 if len(newann) == 0:
@@ -511,8 +514,8 @@ class Eaf:
         e.clean_time_slots()
         return e
 
-    def filterAnnotations(self, tier, tier_name=None, filtin=None,
-                          filtex=None):
+    def filter_annotations(self, tier, tier_name=None, filtin=None,
+                           filtex=None):
         """Filter annotations in a tier
 
         :param str tier: Name of the tier:
@@ -823,7 +826,8 @@ def parse_eaf(file_path, eaf_obj):
                     for elem2 in elem1:
                         if elem2.tag == 'ALIGNABLE_ANNOTATION':
                             annot_id = elem2.attrib['ANNOTATION_ID']
-                            if int(annot_id[1:]) > eaf_obj.new_ann:
+                            if re.match('a\d+', annot_id) and\
+                                    int(annot_id[1:]) > eaf_obj.new_ann:
                                 eaf_obj.new_ann = int(annot_id[1:])
                             annot_start = elem2.attrib['TIME_SLOT_REF1']
                             annot_end = elem2.attrib['TIME_SLOT_REF2']
@@ -837,7 +841,8 @@ def parse_eaf(file_path, eaf_obj):
                             previous = elem2.attrib.get('PREVIOUS_ANNOTATION',
                                                         None)
                             annotId = elem2.attrib['ANNOTATION_ID']
-                            if int(annot_id[1:]) > eaf_obj.new_ann:
+                            if re.match('a\d+', annot_id) and\
+                                    int(annot_id[1:]) > eaf_obj.new_ann:
                                 eaf_obj.new_ann = int(annot_id[1:])
                             svg_ref = elem2.attrib.get('SVG_REF', None)
                             ref[annotId] = (annotRef,

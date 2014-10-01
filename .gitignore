@@ -1,6 +1,7 @@
 *.[Tt]ext[Gg]rid
 *.eaf
 *.pyc
+*.cha
 build/
 dist/
 doc/build/
