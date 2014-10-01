@@ -35,7 +35,7 @@ classifiers = [
 
 
 setup(name='pympi-ling',
-      version='0.99c',
+      version='0.99d',
       description='Python Linguistic Modules',
       author='Mart Lubbers',
       long_description=long_description,
