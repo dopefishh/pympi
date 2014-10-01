@@ -62,7 +62,11 @@ class TextGrid:
 
         :param str file_path: Path to read from, - for stdin. If ``None`` an
                               empty TextGrid will be created.
+        :param int xmin: Xmin value, only needed when not loading from file.
+        :param int xmax: Xmax value, needed when not loading from file.
         :param str codec: Text encoding for the input.
+        :param bool stream: Flag for loading from a stream(not used, only for
+                            debugging purposes)
         :raises Exception: If filepath is specified but no xmax
         """
         self.tiers = []
@@ -110,7 +114,7 @@ class TextGrid:
         self.tier_num = len(self.tiers)
 
     def add_tier(self, name, tier_type='IntervalTier', number=None):
-        """Add an Interval or a PointTier on the specified location.
+        """Add an IntervalTier or a TextTier on the specified location.
 
         :param str name: Name of the tier, duplicate names is allowed.
         :param str tier_type: Type of the tier. ('IntervalTier', 'TextTier')
