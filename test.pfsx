@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences version="1.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/Prefs_v1.1.xsd">
+    <pref key="MediaTime">
+        <Long>6700</Long>
+    </pref>
+    <prefList key="MultiTierViewer.TierOrder">
+        <String>default</String>
+        <String>A</String>
+        <String>B</String>
+        <String>GAOS</String>
+    </prefList>
+    <prefGroup key="Text-to-Speech alignment">
+        <pref key="model">
+            <String>English</String>
+        </pref>
+        <pref key="audio">
+            <String>///home/marlub/documents/dutch/corpus/00/BC_00_cam.wav</String>
+        </pref>
+    </prefGroup>
+    <pref key="LayoutManager.VisibleMultiTierViewer">
+        <String>mpi.eudico.client.annotator.viewer.TimeLineViewer</String>
+    </pref>
+    <pref key="LayoutManager.SplitPaneDividerLocation">
+        <Int>70</Int>
+    </pref>
+    <pref key="SignalViewer.ZoomLevel">
+        <Float>469.0</Float>
+    </pref>
+    <pref key="FrameSize">
+        <Object class="java.awt.Dimension">1920,1163</Object>
+    </pref>
+    <pref key="TimeLineViewer.ZoomLevel">
+        <Float>469.0</Float>
+    </pref>
+    <pref key="LayoutManager.SelectedTabIndex">
+        <Int>6</Int>
+    </pref>
+    <prefGroup key="TierColors">
+        <pref key="default">
+            <Object class="java.awt.Color">0,90,0</Object>
+        </pref>
+        <pref key="A">
+            <Object class="java.awt.Color">90,160,0</Object>
+        </pref>
+        <pref key="B">
+            <Object class="java.awt.Color">160,90,90</Object>
+        </pref>
+        <pref key="GAOS">
+            <Object class="java.awt.Color">0,0,90</Object>
+        </pref>
+    </prefGroup>
+    <pref key="FrameLocation">
+        <Object class="java.awt.Point">1280,18</Object>
+    </pref>
+    <pref key="MultiTierViewer.ActiveTierName">
+        <String>default</String>
+    </pref>
+    <pref key="SelectionBeginTime">
+        <Long>6010</Long>
+    </pref>
+    <pref key="LayoutManager.CurrentMode">
+        <Int>1</Int>
+    </pref>
+    <pref key="TimeScaleBeginTime">
+        <Long>0</Long>
+    </pref>
+    <prefList key="MultiTierViewer.HiddenTiers"/>
+    <pref key="ActiveAudioRecognizerName">
+        <String>Text-to-Speech alignment</String>
+    </pref>
+    <pref key="SelectionEndTime">
+        <Long>6390</Long>
+    </pref>
+</preferences>

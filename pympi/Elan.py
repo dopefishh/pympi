@@ -302,7 +302,7 @@ class Eaf:
                 self.timeslots[m[0]] <= time and
                 self.timeslots[m[1]] >= time])
 
-    def get_annotation_datas_between_times(self, id_tier, start, end):
+    def get_annotation_data_between_times(self, id_tier, start, end):
         """Gives the annotations within the times.
 
         :param str id_tier: Name of the tier.
@@ -713,9 +713,9 @@ class Eaf:
                                  'O21_{}_{}'.format(tier2, tier1),
                                  line1[i][1], line1[i][2]))
                 else:
-                    ftos.append(('W21_{}_{}'.format(tier1, tier2)
+                    ftos.append(('W12_{}_{}'.format(tier1, tier2)
                                  if line1[i-1][0] == '1' else
-                                 'W12_{}_{}'.format(tier2, tier1),
+                                 'W21_{}_{}'.format(tier2, tier1),
                                  line1[i][1], line1[i][2]))
         return [f for f in ftos if maxlen == -1 or abs(f[2] - f[1]) < maxlen]
 
