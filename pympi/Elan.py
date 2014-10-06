@@ -128,7 +128,8 @@ class Eaf:
         :raises ImportError: If the pympi.Praat module can't be loaded.
         """
         from pympi.Praat import TextGrid
-        tgout = TextGrid()
+        start, end = self.get_full_time_interval()
+        tgout = TextGrid(xmax=end)
         tiers = [a for a in self.tiers if a not in excluded_tiers]
         if included_tiers:
             tiers = [a for a in tiers if a in included_tiers]
