@@ -1,15 +1,9 @@
-# pympi version 0.99d, 2014-09-26
+# pympi version 0.1, 2014-10-08
 
 WARNING
 =======
 This version is already updated for Eaf file format 2.8. If you need the class
 for the older 2.7 format please go to the branch ```eaf_file_2.7```.
-
-NOTE ON VERSION
-===============
-From version 1 the api will not change anymore. This is currently on version
-0.99 not yet the case. The TextGrid module is already finalized and will always
-ensure compatibility with newer versions.
 
 Contents
 ========
@@ -28,7 +22,7 @@ If you don't have super user right you can install it in your home directory by
 running: `$ python setup.py install --prefix=/home/user/bin`
 
 and then add `export PYTHONPATH=~/home/user/bin/lib/python2.7/site-packages` to
-your `~/.bashrc`(or equivalent in mac)
+your `~/.bashrc`(or equivalent)
 
 ##Windows
 Run command prompt(possibly with adminstrative privileges...) and type:

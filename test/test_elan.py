@@ -37,17 +37,18 @@ class Elan(unittest.TestCase):
                          self.eaf.media_descriptors)
 
     def test_add_tier(self):
-        self.assertEqual(len(self.eaf.tiers), 1)
+        self.assertEqual(len(self.eaf.get_tier_names()), 1)
         self.eaf.add_tier('tier1', 'default-lt')
-        self.assertEqual(len(self.eaf.tiers), 2)
+        self.assertEqual(len(self.eaf.get_tier_names()), 2)
         self.assertEqual(self.eaf.tiers['tier1'][2]['LINGUISTIC_TYPE_REF'],
                          'default-lt')
 
         self.eaf.add_tier('tier2', 'non-existing-linguistic-type')
-        self.assertEqual(len(self.eaf.tiers), 3)
+        self.assertEqual(len(self.eaf.get_tier_names()), 3)
         self.assertEqual(self.eaf.tiers['tier2'][2]['LINGUISTIC_TYPE_REF'],
                          'default-lt')
-        self.assertEqual(['default', 'tier1', 'tier2'], self.eaf.tiers.keys())
+        self.assertEqual(['default', 'tier1', 'tier2'],
+                         self.eaf.get_tier_names())
 
         self.eaf.add_tier('tier3', None, 'tier1', 'en', 'person', 'person2')
         self.assertEqual(self.eaf.tiers['tier3'][2], {
@@ -68,13 +69,453 @@ class Elan(unittest.TestCase):
             self.assertEqual(self.eaf.tiers[tier][0], {})
             self.assertEqual(self.eaf.tiers[tier][1], {})
 
+        self.assertRaises(ValueError, self.eaf.add_tier, '')
+
     def test_remove_tiers(self):
-    #    self.eaf.add_tier('tier1')
-    #    self.eaf.add_tier('tier2')
-    #    self.eaf.add_tier('tier3')
-    #    self.eaf.add_tier('tier4')
+        self.eaf.add_tier('tier1')
+        self.eaf.add_tier('tier2')
+        self.eaf.add_tier('tier3')
+        self.eaf.add_tier('tier4')
+        self.eaf.remove_tiers(['default', 'tier4', 'tier1'])
+        self.assertEqual(sorted(self.eaf.get_tier_names()), ['tier2', 'tier3'])
+        self.assertRaises(KeyError, self.eaf.remove_tiers, ['tier1'])
+        self.eaf.remove_tiers(['tier2', 'tier3'])
+        self.assertEqual(self.eaf.get_tier_names(), [])
+
+    def test_remove_tier(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.add_tier('tier2')
+        self.eaf.add_tier('tier3')
+        self.eaf.add_tier('tier4')
+        self.eaf.remove_tier('tier1')
+        self.assertEqual(sorted(self.eaf.get_tier_names()),
+                         ['default', 'tier2', 'tier3', 'tier4'])
+        self.assertRaises(KeyError, self.eaf.remove_tier, 'tier1')
+
+    def test_get_tier_names(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.add_tier('tier2')
+        self.eaf.add_tier('tier3')
+        self.eaf.add_tier('tier4')
+        self.assertEqual(sorted(self.eaf.get_tier_names()),
+                         ['default', 'tier1', 'tier2', 'tier3', 'tier4'])
+
+    def test_get_parameters_for_tier(self):
+        self.eaf.add_tier('tier1', 'default-lt', 'tier1', 'en', 'person',
+                          'person2')
+        self.eaf.add_tier('tier2')
+        self.assertEqual(self.eaf.get_parameters_for_tier('tier1'), {
+            'ANNOTATOR': 'person2', 'DEFAULT_LOCALE': 'en',
+            'LINGUISTIC_TYPE_REF': 'default-lt', 'PARENT_REF': 'tier1',
+            'PARTICIPANT': 'person', 'TIER_ID': 'tier1'})
+        self.assertEqual(self.eaf.get_parameters_for_tier('tier2'), {
+            'PARTICIPANT': None, 'DEFAULT_LOCALE': None,
+            'LINGUISTIC_TYPE_REF': 'default-lt', 'ANNOTATOR': None,
+            'PARENT_REF': None, 'TIER_ID': 'tier2'})
+
+    def test_child_tiers_for(self):
+        self.eaf.add_tier('parent1')
+        self.eaf.add_tier('parent2')
+        self.eaf.add_tier('child11', parent='parent1')
+        self.eaf.add_tier('child12', parent='parent1')
+        self.eaf.add_tier('child13', parent='parent1')
+        self.eaf.add_tier('orphan21')
+        self.eaf.add_tier('orphan22')
+        self.eaf.add_tier('orphan23')
+        self.assertEqual(sorted(self.eaf.child_tiers_for('parent1')),
+                         ['child11', 'child12', 'child13'])
+        self.assertEqual(sorted(self.eaf.child_tiers_for('parent2')), [])
+        self.assertRaises(KeyError, self.eaf.child_tiers_for, 'parent3')
+
+    def test_get_annotation_data_for_tier(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a1')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a1')
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1')),
+            sorted([(0, 1000, 'a1'), (2000, 3000, 'a1'), (1000, 2000, 'a1')]))
+        self.assertRaises(KeyError,
+                          self.eaf.get_annotation_data_for_tier, 'tier2')
+
+    def test_get_annotation_data_at_time(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_at_time('tier1', 500)),
+            [(0, 1000, 'a1')])
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_at_time('tier1', 1000)),
+            sorted([(0, 1000, 'a1'), (1000, 2000, 'a2')]))
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_at_time('tier1', 3001)), [])
+        self.assertRaises(KeyError,
+                          self.eaf.get_annotation_data_at_time, 'tier2', 0)
+
+    def test_get_annotation_data_between_times(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.assertEqual(sorted(self.eaf.get_annotation_data_between_times(
+            'tier1', 1500, 2500)), [(1000, 2000, 'a2'), (2000, 3000, 'a3')])
+        self.assertEqual(sorted(self.eaf.get_annotation_data_between_times(
+            'tier1', 1000, 2000)), [(0, 1000, 'a1'),
+                                    (1000, 2000, 'a2'), (2000, 3000, 'a3')])
+        self.assertEqual(sorted(self.eaf.get_annotation_data_between_times(
+            'tier1', 4001, 30000)), [])
+        self.assertRaises(
+            KeyError, self.eaf.get_annotation_data_between_times, 'ter1', 0, 1)
+
+    def test_remove_all_annotations_from_tier(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.eaf.remove_all_annotations_from_tier('tier1')
+        self.assertEquals(self.eaf.get_annotation_data_for_tier('tier1'), [])
+
+    def test_insert_annotation(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 0, 1)
+        self.assertEquals(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1')),
+            [(0, 1, '')])
+        self.eaf.insert_annotation('tier1', 1, 2, 'abc')
+        self.assertEquals(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1')),
+            sorted([(0, 1, ''), (1, 2, 'abc')]))
+        self.assertRaises(KeyError, self.eaf.insert_annotation, 't1', 0, 0)
+        self.assertRaises(ValueError,
+                          self.eaf.insert_annotation, 'tier1', 1, 1)
+        self.assertRaises(ValueError,
+                          self.eaf.insert_annotation, 'tier1', 2, 1)
+        self.assertRaises(ValueError,
+                          self.eaf.insert_annotation, 'tier1', -1, 1)
+        self.eaf.add_tier('tier2')
+        self.eaf.insert_ref_annotation('tier2', 'a1', 'r1')
+        self.assertRaises(ValueError,
+                          self.eaf.insert_annotation, 'tier2', 0, 1)
+
+    def test_remove_annotation(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.assertEquals(self.eaf.remove_annotation('tier1', 500), 1)
+        self.assertEquals(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1')),
+            sorted([(1000, 2000, 'a2'), (2000, 3000, 'a3'),
+                    (3000, 4000, 'a4')]))
+
+        self.assertEquals(self.eaf.remove_annotation('tier1', 2000), 2)
+        self.assertEquals(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1')),
+            sorted([(3000, 4000, 'a4')]))
+        self.assertEquals(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1')),
+            sorted([(3000, 4000, 'a4')]))
+        self.assertRaises(KeyError, self.eaf.remove_annotation, 'tier2', 0)
+
+    def test_generate_annotation_id(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.add_tier('tier2')
+        self.eaf.insert_annotation('tier1', 0, 1, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.eaf.insert_ref_annotation('tier2', 'a1', 'b1')
+        self.eaf.insert_ref_annotation('tier2', 'a2', 'b2')
+        self.eaf.insert_ref_annotation('tier2', 'a3', 'b3')
+        self.eaf.insert_ref_annotation('tier2', 'a4', 'b4')
+        annids = [a for y in self.eaf.tiers.values() for x in y[:2] for a in x]
+        self.assertEqual(len(annids), len(set(annids)))
+
+    def test_generate_ts_id(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.add_tier('tier2')
+        self.eaf.insert_annotation('tier1', 0, 1, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        ts = [x for x in self.eaf.timeslots]
+        self.assertEqual(len(ts), len(set(ts)))
+        ts.append(self.eaf.generate_ts_id())
+        self.assertEqual(len(ts), len(set(ts)))
+        self.assertEqual(self.eaf.timeslots[ts[-1]], None)
+        ts.append(self.eaf.generate_ts_id(1337))
+        self.assertEqual(len(ts), len(set(ts)))
+        self.assertEqual(self.eaf.timeslots[ts[-1]], 1337)
+        self.assertRaises(ValueError, self.eaf.generate_ts_id, -1)
+
+    def test_clean_time_slots(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.add_tier('tier2')
+        self.eaf.insert_annotation('tier1', 0, 1, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        ts = [x for x in self.eaf.timeslots]
+        self.eaf.remove_annotation('tier1', 1500, False)
+        self.assertEqual(len(ts), len(self.eaf.timeslots))
+        self.eaf.clean_time_slots()
+        self.assertEqual(len(ts)-2, len(self.eaf.timeslots))
+
+    def test_merge_tiers(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.add_tier('tier2')
+        self.eaf.add_tier('tier3')
+        # Overlap
+        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('tier2', 500, 1500, 'b1')
+
+        # Gap
+        self.eaf.insert_annotation('tier1', 2000, 2500, 'a2')
+        self.eaf.insert_annotation('tier2', 3000, 4000, 'b2')
+
+        # Within
+        self.eaf.insert_annotation('tier1', 5000, 6000, 'a3')
+        self.eaf.insert_annotation('tier2', 5100, 5900, 'b3')
+
+        # Three
+        self.eaf.insert_annotation('tier1', 6050, 6250, 'c')
+        self.eaf.insert_annotation('tier1', 6250, 6500, 'c')
+        self.eaf.insert_annotation('tier1', 6500, 6750, 'c')
+        self.eaf.insert_annotation('tier3', 6100, 6800, 'd')
+
+        # Gap of 5 ms
+        self.eaf.insert_annotation('tier1', 7000, 7995, 'a4')
+        self.eaf.insert_annotation('tier2', 8000, 9000, 'b4')
+
+        self.eaf.merge_tiers(['tier1', 'tier2'], 'm_0')
+        self.eaf.merge_tiers(['tier1'], 'm_a', 5)
+        self.eaf.merge_tiers(['tier1', 'tier2'], 'm_5', 5)
+        self.eaf.merge_tiers(['tier1', 'tier2'], 'm_6', 6)
+        self.eaf.merge_tiers(['tier1', 'tier2', 'tier3'], 'mm')
+
+        m0 = [(0, 1500, 'a1_b1'), (2000, 2500, 'a2'), (3000, 4000, 'b2'),
+              (5000, 6000, 'a3_b3'), (6050, 6250, 'c'), (6250, 6500, 'c'),
+              (6500, 6750, 'c'), (7000, 7995, 'a4'), (8000, 9000, 'b4')]
+        m5 = [(0, 1500, 'a1_b1'), (2000, 2500, 'a2'), (3000, 4000, 'b2'),
+              (5000, 6000, 'a3_b3'), (6050, 6750, 'c_c_c'), (7000, 7995, 'a4'),
+              (8000, 9000, 'b4')]
+        m6 = [(0, 1500, 'a1_b1'), (2000, 2500, 'a2'), (3000, 4000, 'b2'),
+              (5000, 6000, 'a3_b3'), (6050, 6750, 'c_c_c'),
+              (7000, 9000, 'a4_b4')]
+        mm = [(0, 1500, 'a1_b1'), (2000, 2500, 'a2'), (3000, 4000, 'b2'),
+              (5000, 6000, 'a3_b3'), (6050, 6800, 'c_d_c_c'),
+              (7000, 7995, 'a4'), (8000, 9000, 'b4')]
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('m_0')), m0)
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('m_5')), m5)
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('m_6')), m6)
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('mm')), mm)
+        self.assertRaises(KeyError, self.eaf.merge_tiers, ['a', 'b'])
+
+    def test_shift_annotations(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.add_tier('tier2')
+        # Overlap
+        self.eaf.insert_annotation('tier1', 0, 100, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier2', 500, 1500, 'b1')
+        self.eaf.insert_annotation('tier2', 0, 150, 'b1')
+        d1 = self.eaf.get_annotation_data_for_tier('tier1')
+        d2 = self.eaf.get_annotation_data_for_tier('tier2')
+        self.eaf.shift_annotations(0)
+        self.assertEqual(d1, self.eaf.get_annotation_data_for_tier('tier1'))
+        self.assertEqual(d2, self.eaf.get_annotation_data_for_tier('tier2'))
+
+        self.eaf.shift_annotations(100)
+        self.assertEqual(self.eaf.get_annotation_data_for_tier('tier1'),
+                         [(x+100, y+100, v) for x, y, v in d1])
+        self.assertEqual(self.eaf.get_annotation_data_for_tier('tier2'),
+                         [(x+100, y+100, v) for x, y, v in d2])
+        self.assertEqual(self.eaf.shift_annotations(-200),
+                         ([('tier2', 100, 250, 'b1')],
+                          [('tier1', 100, 200, 'a1')]))
+
+    def test_filter_annotations(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 0, 1, '1')
+        self.eaf.insert_annotation('tier1', 1, 2, '2')
+        self.eaf.insert_annotation('tier1', 2, 3, '3')
+        self.eaf.insert_annotation('tier1', 3, 4, '4')
+        self.eaf.insert_annotation('tier1', 4, 5, 'a')
+        self.eaf.insert_annotation('tier1', 5, 6, 'b')
+        self.eaf.insert_annotation('tier1', 6, 7, 'c')
+        self.eaf.insert_annotation('tier1', 7, 8, 'd')
+
+        # No in or exclude
+        self.eaf.filter_annotations('tier1')
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1_filter')),
+            sorted(self.eaf.get_annotation_data_for_tier('tier1')))
+
+        # Inclusion
+        self.eaf.filter_annotations('tier1', filtin=['1', '2', '3'])
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1_filter')),
+            sorted([(0, 1, '1'), (2, 3, '3'), (1, 2, '2')]))
+        self.eaf.filter_annotations('tier1', filtin=['[123]'], regex=True)
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1_filter')),
+            sorted([(0, 1, '1'), (2, 3, '3'), (1, 2, '2')]))
+
+        # Exclusion
+        self.eaf.filter_annotations('tier1', filtex=['1', '2', '3', '4'])
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1_filter')),
+            sorted([(4, 5, 'a'), (6, 7, 'c'), (5, 6, 'b'), (7, 8, 'd')]))
+        self.eaf.filter_annotations('tier1', filtex=['[1234]'], regex=True)
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1_filter')),
+            sorted([(4, 5, 'a'), (6, 7, 'c'), (5, 6, 'b'), (7, 8, 'd')]))
+
+        # Combination
+        self.eaf.filter_annotations('tier1', filtin=['1', '2', '3', '4'],
+                                    filtex=['1', '2'])
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tier1_filter')),
+            sorted([(2, 3, '3'), (3, 4, '4')]))
+        self.eaf.filter_annotations('tier1', tier_name='t', filtin=['[1234]'],
+                                    filtex=['[12]'], regex=True)
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('t')),
+            sorted([(2, 3, '3'), (3, 4, '4')]))
+
+        self.assertRaises(KeyError, self.eaf.filter_annotations, 'a')
+
+    def test_get_full_time_interval(self):
+        self.assertEqual(self.eaf.get_full_time_interval(), (0, 0))
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 100, 500, 'a')
+        self.eaf.insert_annotation('tier1', 500, 1000, 'b')
+        self.assertEqual(self.eaf.get_full_time_interval(), (100, 1000))
+
+    def test_create_gaps_and_overlaps_tier(self):
+        self.eaf.add_tier('t1')
+        self.eaf.add_tier('t2')
+        # Pause
+        self.eaf.insert_annotation('t1', 0, 1000)
+        self.eaf.insert_annotation('t1', 1200, 2000)
+        # Gap
+        self.eaf.insert_annotation('t2', 2200, 3000)
+        # Overlap
+        self.eaf.insert_annotation('t1', 2800, 4000)
+        # Exact fto
+        self.eaf.insert_annotation('t2', 4000, 5000)
+        # Within overlap
+        self.eaf.insert_annotation('t1', 4200, 4800)
+        # Long pause
+        self.eaf.insert_annotation('t2', 14800, 15000)
+        # Long gap
+        self.eaf.insert_annotation('t1', 20000, 20500)
+        self.eaf.create_gaps_and_overlaps_tier('t1', 't2')
+        self.eaf.create_gaps_and_overlaps_tier('t1', 't2', 'tt', 3000)
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('t1_t2_ftos')),
+            [(1001, 1199, 'P1_t1'), (2001, 2199, 'G12_t1_t2'),
+             (2800, 3000, 'O21_t2_t1'), (4200, 4800, 'W21_t2_t1'),
+             (5001, 14799, 'P2_t2'), (15001, 19999, 'G21_t2_t1')])
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tt')),
+            [(1001, 1199, 'P1_t1'), (2001, 2199, 'G12_t1_t2'),
+             (2800, 3000, 'O21_t2_t1'), (4200, 4800, 'W21_t2_t1')])
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('t1_t2_ftos') +
+                   [(4000, 4000, 'O12_t1_t2')]),
+            list(self.eaf.get_gaps_and_overlaps('t1', 't2')))
+        self.assertEqual(
+            sorted(self.eaf.get_annotation_data_for_tier('tt') +
+                   [(4000, 4000, 'O12_t1_t2')]),
+            list(self.eaf.get_gaps_and_overlaps('t1', 't2', 3000)))
+        self.eaf.to_file('test.eaf')
+
+    def test_get_gaps_and_overlaps(self):
+        pass
+        # This is a placeholder, the real testing happens in:
+        #   def test_create_gaps_and_overlaps_tier(self):
+
+    def test_get_tier_ids_for_linguistic_type(self):
+        self.eaf.add_linguistic_type('l1')
+        self.eaf.add_linguistic_type('l2')
+        self.eaf.add_tier('t1', 'l1')
+        self.eaf.add_tier('t2', 'l2')
+        self.eaf.add_tier('t3', 'l2')
+        self.eaf.add_tier('t4', parent='t1')
+        self.eaf.add_tier('t5', 'l1', parent='t1')
+        self.eaf.add_tier('t6')
+        self.assertEqual(sorted(self.eaf.get_tier_ids_for_linguistic_type(
+                         'l1')), ['t1', 't5'])
+        self.assertEqual(sorted(self.eaf.get_tier_ids_for_linguistic_type(
+                                'l2')), ['t2', 't3'])
+        self.assertEqual(sorted(self.eaf.get_tier_ids_for_linguistic_type(
+                                'default-lt', 't1')), ['t4'])
+
+    def test_remove_linguistic_type(self):
+        self.eaf.add_linguistic_type('l1')
+        self.eaf.add_linguistic_type('l2')
+        self.eaf.add_linguistic_type('l3')
+        self.eaf.remove_linguistic_type('l2')
+        self.assertEquals(sorted(self.eaf.get_linguistic_type_names()),
+                          ['default-lt', 'l1', 'l3'])
+        self.assertRaises(KeyError, self.eaf.remove_linguistic_type, 'a')
+
+    def test_add_linguistic_type(self):
+        self.eaf.add_linguistic_type('l1')
+        self.eaf.add_linguistic_type('l2', ['Time_Subdivision'], False, True)
+        self.assertEquals(
+            self.eaf.linguistic_types['l1'], {
+                'CONSTRAINTS': None, 'TIME_ALIGNABLE': 'true',
+                'LINGUISTIC_TYPE_ID': 'l1', 'GRAPHIC_REFERENCES': 'false'})
+        self.assertEquals(
+            self.eaf.linguistic_types['l2'], {
+                'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
+                'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
+        self.eaf.add_linguistic_type('l3', param_dict={
+            'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
+            'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
+        self.assertEqual(self.eaf.get_parameters_for_linguistic_type('l3'), {
+            'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
+            'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
+
+        self.assertRaises(KeyError, self.eaf.add_linguistic_type, 'l2', ['a'])
+
+    def test_get_linguistic_types_names(self):
+        self.assertEqual(self.eaf.get_linguistic_type_names(), ['default-lt'])
+        self.eaf.add_linguistic_type('l1')
+        self.eaf.add_linguistic_type('l2')
+        self.eaf.add_linguistic_type('l3')
+        self.assertEqual(sorted(self.eaf.get_linguistic_type_names()),
+                         ['default-lt', 'l1', 'l2', 'l3'])
+
+    def test_get_parameters_for_linguistic_type(self):
+        self.eaf.add_tier('tier2')
+        self.eaf.add_linguistic_type('l2', ['Time_Subdivision'], False, True)
+        self.assertEqual(self.eaf.get_parameters_for_linguistic_type('l2'), {
+            'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
+            'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
+
+    def test_create_controlled_vocabulary(self):
         pass
 
+    def test_insert_ref_annotation(self):
+        pass
+
+    def test_get_ref_annotation_data_for_tier(self):
+        pass
+
+    def test_remove_controlled_vocabulary(self):
+        pass
 
     def test_copy_tier(self):
         pass
@@ -88,6 +529,11 @@ class Elan(unittest.TestCase):
     def test_to_file(self):
         pass
 
+    def test_to_eaf(self):
+        pass
+
+    def test_parse_eaf(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
