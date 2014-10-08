@@ -1,4 +1,4 @@
-# pympi version 0.1, 2014-10-08
+# pympi version 1.0, 2014-10-08
 
 WARNING
 =======
