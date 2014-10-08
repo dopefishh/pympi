@@ -21,12 +21,14 @@ Testing
 Elan
 ~~~~
 To be implemented:
+
 - copy_tier
 - extract
 - to_textgrid
 - to_file(Will require a xml validation library, have to look into that).
 
 Because the functions are incomplete:
+
 - create_controlled_vocabulary
 - insert_ref_annotation
 - get_ref_annotation_data_for_tier
