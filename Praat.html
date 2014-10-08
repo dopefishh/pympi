@@ -90,7 +90,11 @@ specify the xmax.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>file_path</strong> (<em>str</em>) &#8211; Path to read from, - for stdin. If <tt class="docutils literal"><span class="pre">None</span></tt> an
 empty TextGrid will be created.</li>
+<li><strong>xmin</strong> (<em>int</em>) &#8211; Xmin value, only needed when not loading from file.</li>
+<li><strong>xmax</strong> (<em>int</em>) &#8211; Xmax value, needed when not loading from file.</li>
 <li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding for the input.</li>
+<li><strong>stream</strong> (<em>bool</em>) &#8211; Flag for loading from a stream(not used, only for
+debugging purposes)</li>
 </ul>
 </td>
 </tr>

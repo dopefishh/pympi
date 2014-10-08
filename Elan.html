@@ -131,19 +131,27 @@ empty Eaf file will be created.</li>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.add_linguistic_type">
-<tt class="descname">add_linguistic_type</tt><span class="sig-paren">(</span><em>lingtype</em>, <em>constraints=None</em>, <em>timealignable=True</em>, <em>graphicreferences=False</em>, <em>extref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_linguistic_type" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_linguistic_type</tt><span class="sig-paren">(</span><em>lingtype</em>, <em>constraints=None</em>, <em>timealignable=True</em>, <em>graphicreferences=False</em>, <em>extref=None</em>, <em>param_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_linguistic_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a linguistic type.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>lingtype</strong> (<em>str</em>) &#8211; Name of the linguistic type.</li>
 <li><strong>constraints</strong> (<em>list</em>) &#8211; Constraint names.</li>
 <li><strong>timealignable</strong> (<em>bool</em>) &#8211; Flag for time alignable.</li>
 <li><strong>graphicreferences</strong> (<em>bool</em>) &#8211; Flag for graphic references.</li>
 <li><strong>extref</strong> (<em>str</em>) &#8211; External reference.</li>
+<li><strong>param_dict</strong> (<em>dict</em>) &#8211; TAG attributes, when this is not <tt class="docutils literal"><span class="pre">None</span></tt> it
+will ignore all other options. Please only use
+dictionaries coming from the
+<a class="reference internal" href="#pympi.Elan.Eaf.get_parameters_for_linguistic_type" title="pympi.Elan.Eaf.get_parameters_for_linguistic_type"><tt class="xref py py-func docutils literal"><span class="pre">get_parameters_for_linguistic_type()</span></tt></a></li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If a constraint is not defined</p>
 </td>
 </tr>
 </tbody>
@@ -188,7 +196,7 @@ be the first in the list.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>tier_id</strong> (<em>str</em>) &#8211; Name of the tier.</li>
 <li><strong>ling</strong> (<em>str</em>) &#8211; Linguistic type, if the type is not available it will
 warn and pick the first available type.</li>
@@ -197,8 +205,14 @@ warn and pick the first available type.</li>
 <li><strong>part</strong> (<em>str</em>) &#8211; Participant.</li>
 <li><strong>ann</strong> (<em>str</em>) &#8211; Annotator.</li>
 <li><strong>tier_dict</strong> (<em>dict</em>) &#8211; TAG attributes, when this is not <tt class="docutils literal"><span class="pre">None</span></tt> it
-will ignore all other options.</li>
+will ignore all other options. Please only use
+dictionaries coming from the
+<a class="reference internal" href="#pympi.Elan.Eaf.get_parameters_for_tier" title="pympi.Elan.Eaf.get_parameters_for_tier"><tt class="xref py py-func docutils literal"><span class="pre">get_parameters_for_tier()</span></tt></a></li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier_id is empty</p>
 </td>
 </tr>
 </tbody>
@@ -284,7 +298,7 @@ performed afterwards.</div></blockquote>
 <dt id="pympi.Elan.Eaf.create_gaps_and_overlaps_tier">
 <tt class="descname">create_gaps_and_overlaps_tier</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>tier_name=None</em>, <em>maxlen=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.create_gaps_and_overlaps_tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a tier with the gaps and overlaps of the annotations.
-For types see <a class="reference internal" href="#pympi.Elan.Eaf.get_gaps_and_overlaps_duration" title="pympi.Elan.Eaf.get_gaps_and_overlaps_duration"><tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps_duration()</span></tt></a></p>
+For types see <tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps_duration()</span></tt></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -335,8 +349,8 @@ no maximum will be used.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Elan.Eaf.filterAnnotations">
-<tt class="descname">filterAnnotations</tt><span class="sig-paren">(</span><em>tier</em>, <em>tier_name=None</em>, <em>filtin=None</em>, <em>filtex=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.filterAnnotations" title="Permalink to this definition">¶</a></dt>
+<dt id="pympi.Elan.Eaf.filter_annotations">
+<tt class="descname">filter_annotations</tt><span class="sig-paren">(</span><em>tier</em>, <em>tier_name=None</em>, <em>filtin=None</em>, <em>filtex=None</em>, <em>regex=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.filter_annotations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filter annotations in a tier</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -350,39 +364,13 @@ be generated.</li>
 annotations all is included.</li>
 <li><strong>filtex</strong> (<em>list</em>) &#8211; List of strings to be excluded, if None no strings
 are excluded.</li>
+<li><strong>regex</strong> (<em>bool</em>) &#8211; If this flag is set, the filters are seen as regex
+matches.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pympi.Elan.Eaf.generate_annotation_concat">
-<tt class="descname">generate_annotation_concat</tt><span class="sig-paren">(</span><em>tiers</em>, <em>start</em>, <em>end</em>, <em>sep='-'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.generate_annotation_concat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give a string of concatenated annotation values for annotations
-within a timeframe.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tiers</strong> (<em>list</em>) &#8211; List of tier names.</li>
-<li><strong>start</strong> (<em>int</em>) &#8211; Start time.</li>
-<li><strong>end</strong> (<em>int</em>) &#8211; End time.</li>
-<li><strong>sep</strong> (<em>str</em>) &#8211; Separator string to use.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">String containing a concatenation of annotation values.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">If a tier is non existent.</p>
 </td>
 </tr>
 </tbody>
@@ -405,7 +393,10 @@ internally</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>int</em>) &#8211; Initial time to assign to the timeslot</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>int</em>) &#8211; Initial time to assign to the timeslot.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the time is negative.</td>
 </tr>
 </tbody>
 </table>
@@ -437,25 +428,8 @@ internally</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Elan.Eaf.get_annotation_data_for_tier">
-<tt class="descname">get_annotation_data_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_for_tier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gives a list of annotations of the form: <tt class="docutils literal"><span class="pre">(begin,</span> <span class="pre">end,</span> <span class="pre">value)</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier is non existent.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pympi.Elan.Eaf.get_annotation_datas_between_times">
-<tt class="descname">get_annotation_datas_between_times</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_datas_between_times" title="Permalink to this definition">¶</a></dt>
+<dt id="pympi.Elan.Eaf.get_annotation_data_between_times">
+<tt class="descname">get_annotation_data_between_times</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_between_times" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gives the annotations within the times.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -480,6 +454,23 @@ internally</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Elan.Eaf.get_annotation_data_for_tier">
+<tt class="descname">get_annotation_data_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_for_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives a list of annotations of the form: <tt class="docutils literal"><span class="pre">(begin,</span> <span class="pre">end,</span> <span class="pre">value)</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier is non existent.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Elan.Eaf.get_full_time_interval">
 <tt class="descname">get_full_time_interval</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_full_time_interval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give the full time interval of the file.</p>
@@ -494,8 +485,8 @@ internally</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Elan.Eaf.get_gaps_and_overlaps_duration">
-<tt class="descname">get_gaps_and_overlaps_duration</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>maxlen=-1</em>, <em>progressbar=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_gaps_and_overlaps_duration" title="Permalink to this definition">¶</a></dt>
+<dt id="pympi.Elan.Eaf.get_gaps_and_overlaps">
+<tt class="descname">get_gaps_and_overlaps</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>maxlen=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_gaps_and_overlaps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give gaps and overlaps. The return types are shown in the table
 below. The string will be of the format: <tt class="docutils literal"><span class="pre">id_tiername_tiername</span></tt>.</p>
 <p>For example when a gap occurs between tier1 and tier2 and they are
@@ -554,13 +545,10 @@ doi:10.1016/j.wocn.2010.08.002</em></div>
 <li><strong>tier2</strong> (<em>str</em>) &#8211; Name of the second tier.</li>
 <li><strong>maxlen</strong> (<em>int</em>) &#8211; Maximum length of gaps (skip longer ones), if <tt class="docutils literal"><span class="pre">-1</span></tt>
 no maximum will be used.</li>
-<li><strong>progressbar</strong> (<em>bool</em>) &#8211; Flag for debugging purposes that shows the
-progress during the process.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of gaps and overlaps of the form:
-<tt class="docutils literal"><span class="pre">[(type,</span> <span class="pre">start,</span> <span class="pre">end)]</span></tt>.</p>
+<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><p class="first">Tuples of the form <tt class="docutils literal"><span class="pre">[(start,</span> <span class="pre">end,</span> <span class="pre">type)]</span></tt>.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
@@ -574,8 +562,8 @@ progress during the process.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Elan.Eaf.get_linguistic_types">
-<tt class="descname">get_linguistic_types</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_linguistic_types" title="Permalink to this definition">¶</a></dt>
+<dt id="pympi.Elan.Eaf.get_linguistic_type_names">
+<tt class="descname">get_linguistic_type_names</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_linguistic_type_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give a list of available linguistic types.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -591,6 +579,24 @@ progress during the process.</li>
 <dt id="pympi.Elan.Eaf.get_linked_files">
 <tt class="descname">get_linked_files</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_linked_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give all linked files.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_parameters_for_linguistic_type">
+<tt class="descname">get_parameters_for_linguistic_type</tt><span class="sig-paren">(</span><em>lingtype</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_parameters_for_linguistic_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give the parameter dictionary, this is usable in
+<a class="reference internal" href="#pympi.Elan.Eaf.add_linguistic_type" title="pympi.Elan.Eaf.add_linguistic_type"><tt class="xref py py-func docutils literal"><span class="pre">add_linguistic_type()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lingtype</strong> (<em>str</em>) &#8211; Name of the linguistic type.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the linguistic type doesn&#8217;t exist.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -671,34 +677,6 @@ this option will be ignored.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Elan.Eaf.glue_annotations_in_tier">
-<tt class="descname">glue_annotations_in_tier</tt><span class="sig-paren">(</span><em>tier</em>, <em>tier_name=None</em>, <em>treshhold=85</em>, <em>filtin=None</em>, <em>filtex=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.glue_annotations_in_tier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Glue annotatotions together in a tier.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
-<li><strong>tier_name</strong> (<em>str</em>) &#8211; Name of the new tier, if <tt class="docutils literal"><span class="pre">None</span></tt> the name will
-be generated.</li>
-<li><strong>threshhold</strong> (<em>int</em>) &#8211; Threshhold for the maximum gap to still glue.</li>
-<li><strong>filtin</strong> (<em>list</em>) &#8211; List of strings to be included, if None all
-annotations all is included.</li>
-<li><strong>filtex</strong> (<em>list</em>) &#8211; List of strings to be excluded, if None no strings
-are excluded.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="pympi.Elan.Eaf.insert_annotation">
 <tt class="descname">insert_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>start</em>, <em>end</em>, <em>value=''</em>, <em>svg_ref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_annotation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert an annotation.</p>
@@ -715,8 +693,12 @@ are excluded.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>KeyError</strong> &#8211; If the tier is non existent.</li>
+<li><strong>ValueError</strong> &#8211; If one of the values is negative or start is bigger
+then end or if the tiers already contains ref
+annotations.</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -725,8 +707,10 @@ are excluded.</li>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.insert_ref_annotation">
-<tt class="descname">insert_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>ref</em>, <em>value</em>, <em>prev</em>, <em>svg_ref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_ref_annotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Insert a reference annotation.</p>
+<tt class="descname">insert_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>ref</em>, <em>value</em>, <em>prev=None</em>, <em>svg_ref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_ref_annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert a reference annotation.
+NOTE THAT THIS IS NOT VERY USABLE BECAUSE YOU DON&#8217;T KNOW THE INTERNAL
+ANNOTATION ID&#8217;S</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -740,8 +724,10 @@ are excluded.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>KeyError</strong> &#8211; If the tier is non existent.</li>
+<li><strong>ValueError</strong> &#8211; If the tier already contains normal annotations.</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -750,7 +736,7 @@ are excluded.</li>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.merge_tiers">
-<tt class="descname">merge_tiers</tt><span class="sig-paren">(</span><em>tiers</em>, <em>tiernew=None</em>, <em>gaptresh=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.merge_tiers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">merge_tiers</tt><span class="sig-paren">(</span><em>tiers</em>, <em>tiernew=None</em>, <em>gapt=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.merge_tiers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merge tiers into a new tier and when the gap is lower then the
 threshhold glue the annotations together.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -761,14 +747,13 @@ threshhold glue the annotations together.</p>
 <li><strong>tiers</strong> (<em>list</em>) &#8211; List of tier names.</li>
 <li><strong>tiernew</strong> (<em>str</em>) &#8211; Name for the new tier, if <tt class="docutils literal"><span class="pre">None</span></tt> the name will be
 generated.</li>
-<li><strong>gapthresh</strong> (<em>int</em>) &#8211; Threshhold for the gaps.</li>
+<li><strong>gapt</strong> (<em>int</em>) &#8211; Threshhold for the gaps, if the this is set to 10 it
+means that all gaps below 10 are ignored.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><strong>KeyError</strong> &#8211; If a tier is non existent.</li>
-<li><strong>TypeError</strong> &#8211; If there are no annotations within the tiers.</li>
-</ul>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If a tier is non existent.</p>
 </td>
 </tr>
 </tbody>
@@ -777,7 +762,7 @@ generated.</li>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.remove_all_annotations_from_tier">
-<tt class="descname">remove_all_annotations_from_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_all_annotations_from_tier" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">remove_all_annotations_from_tier</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>clean=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_all_annotations_from_tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>remove all annotations from a tier</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -809,7 +794,10 @@ to clean the timeslots after the last removal.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">If the tier is non existent.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of removed annotations.</p>
 </td>
 </tr>
 </tbody>
@@ -842,6 +830,9 @@ to clean the timeslots after the last removal.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ling_type</strong> (<em>str</em>) &#8211; Name of the linguistic type.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">When the linguistic type doesn&#8217;t exist.</td>
 </tr>
 </tbody>
 </table>
@@ -890,14 +881,16 @@ them individually because of the delayed cleaning of timeslots.</p>
 <dl class="method">
 <dt id="pympi.Elan.Eaf.shift_annotations">
 <tt class="descname">shift_annotations</tt><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.shift_annotations" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shift all annotations in time, this creates a new object.</p>
+<dd><p>Shift all annotations in time. Annotations that are in the beginning
+and a left shift is applied can be squashed or discarded.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>int</em>) &#8211; Time shift width, negative numbers make a right shift.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>int</em>) &#8211; Time shift width, negative numbers make a left shift.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Shifted <a class="reference internal" href="#pympi.Elan.Eaf" title="pympi.Elan.Eaf"><tt class="xref py py-class docutils literal"><span class="pre">pympi.Elan.Eaf</span></tt></a> object.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Tuple of a list of squashed annotations and a list of removed
+annotations in the format: <tt class="docutils literal"><span class="pre">(tiername,</span> <span class="pre">start,</span> <span class="pre">end,</span> <span class="pre">value)</span></tt>.</td>
 </tr>
 </tbody>
 </table>

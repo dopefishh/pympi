@@ -14,11 +14,78 @@ API Documentation:
    Praat
    Elan
 
+Todo
+====
+Testing
+-------
+Elan
+~~~~
+To be implemented:
+- copy_tier
+- extract
+- to_textgrid
+- to_file(Will require a xml validation library, have to look into that).
+
+Because the functions are incomplete:
+- create_controlled_vocabulary
+- insert_ref_annotation
+- get_ref_annotation_data_for_tier
+- remove_controlled_vocabulary
+
+TextGrid
+~~~~~~~~
+- Currently nothing...
+
+Functionality in order of priority per category
+-----------------------------------------------
+General
+~~~~~~~
+- Python 3 support
+Elan
+~~~~
+- Reference annotations, easy functions
+- Controlled vocabularies, easy functions
+- External and lexicon reference functions
+- Locale functions
+- Properties functions
+- Licence functions
+- Import from CLAN's .cha files.
+
+TextGrid
+~~~~~~~~
+- Currently nothing...
+- Binary textgrids(long shot...)
+
+
 Changelog
 =========
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 2014-10-08 | 1.0     | - Glue annotations is removed(you can get the same   |
+|            |         |   functionality by using merge tiers.                |
+|            |         | - Merge tiers is rewritten and much faster(plans for |
+|            |         |   using the same algorithm in the gaps and overlaps. |
+|            |         | - Unit tests for all classes.                        |
+|            |         | - Reference annotations work but not very usable,    |
+|            |         |   this is on the todo list.                          |
+|            |         | - Idem for controlled vocabularies.                  |
+|            |         | - Shift annotations now returns a tuple of lists     |
+|            |         |   instead of an entire eaf object.                   |
+|            |         | - get_annotation_datas_between_times is renamed to   |
+|            |         |   get_annotation_data_between_times.                 |
+|            |         | - Filter annotations now has a regex option.         |
+|            |         | - TextGrid constructor now requires xmax for         |
+|            |         |   creating a new TextGrid.                           |
+|            |         | - Added a parameter dict function for linguistic     |
+|            |         |   types.                                             |
+|            |         | - Changed the function name: get_linguistic_types to |
+|            |         |   get_linguistic_type_names.                         |
+|            |         | - Added todo section for list of things that don't   |
+|            |         |   have unit tests yet(or incomplete ones) or for     |
+|            |         |   things that are to be implemented.                 |
+|            |         | - Fixed typo in the to_textgrid function.            |
++------------+---------+------------------------------------------------------+
 | 2014-09-26 | 0.99a   | Unit tests for Praat finished and Praat module is on |
 |            |         | version 1.0, meaning no api changes in the future    |
 |            |         | that break compatibility                             |
