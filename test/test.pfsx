@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences version="1.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/Prefs_v1.1.xsd">
+    <pref key="MediaTime">
+        <Long>0</Long>
+    </pref>
+    <prefList key="MultiTierViewer.TierOrder">
+        <String>default</String>
+        <String>a1</String>
+        <String>p1</String>
+    </prefList>
+    <pref key="LayoutManager.VisibleMultiTierViewer">
+        <String>mpi.eudico.client.annotator.viewer.TimeLineViewer</String>
+    </pref>
+    <pref key="LayoutManager.SplitPaneDividerLocation">
+        <Int>1</Int>
+    </pref>
+    <pref key="FrameSize">
+        <Object class="java.awt.Dimension">960,1163</Object>
+    </pref>
+    <pref key="LayoutManager.SelectedTabIndex">
+        <Int>5</Int>
+    </pref>
+    <prefGroup key="TierColors">
+        <pref key="default">
+            <Object class="java.awt.Color">0,0,90</Object>
+        </pref>
+        <pref key="p1">
+            <Object class="java.awt.Color">90,160,160</Object>
+        </pref>
+    </prefGroup>
+    <pref key="FrameLocation">
+        <Object class="java.awt.Point">1250,18</Object>
+    </pref>
+    <pref key="MultiTierViewer.ActiveTierName">
+        <String>default</String>
+    </pref>
+    <pref key="SelectionBeginTime">
+        <Long>0</Long>
+    </pref>
+    <pref key="TimeScaleBeginTime">
+        <Long>0</Long>
+    </pref>
+    <pref key="LayoutManager.CurrentMode">
+        <Int>1</Int>
+    </pref>
+    <pref key="SelectionEndTime">
+        <Long>0</Long>
+    </pref>
+</preferences>
