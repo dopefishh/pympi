@@ -1,0 +1,23 @@
+pympi version 1.1, 2014-10-15
+
+Automatic installation
+	*NIX
+		# pip install pympi-ling
+		# easy_install pympi-ling
+	
+	Windows(elevated command prompt)
+		> pip install pympi-ling
+		> easy_install pympi-ling
+
+Manual Installation
+	*NIX
+		# cd /dir/where/you/untarred
+		# python setup.py install
+	
+		If you don't have root access you can do:
+			$ python setup.py install --prefix=/home/user/bin
+			$ echo 'export PYTHONPATH=~/home/user/bin/lib/python2.7/site-packages' >> ~/.bashrc
+
+	Windows(elevated command prompt)
+		cd C:\directory\where\you\extracted\the\zip
+		python setup.py install
