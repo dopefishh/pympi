@@ -41,7 +41,10 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
-|            | 1.1     | - Faster filter_annotions functions                  |
+| 14-10-17   | 1.1a    | - Fixed bugs in ref annotations.                     |
+|            |         | - Updated repo description.                          |
++------------+---------+------------------------------------------------------+
+| 14-10-17   | 1.1     | - Faster filter_annotions functions                  |
 |            |         | - to_textgrid unit test and added regex option       |
 |            |         | - Rewritten the gaps and overlaps function, the      |
 |            |         |   method is now different, if you want to use the    |
