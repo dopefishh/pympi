@@ -6,7 +6,7 @@ import re
 import sys
 import time
 
-VERSION = 1.1
+VERSION = '1.1a'
 
 CONSTRAINTS = {
     'Time_Subdivision': 'Time subdivision of parent annotation\'s time interva'
@@ -308,22 +308,30 @@ class Eaf:
 
     def get_annotation_data_for_tier(self, id_tier):
         """Gives a list of annotations of the form: ``(begin, end, value)``
+        When th tier contains reference annotations this will be returned,
+        check :func:`get_ref_annotation_data_for_tier` for the format.
 
         :param str id_tier: Name of the tier.
         :raises KeyError: If the tier is non existent.
         """
+        if self.tiers[id_tier][1]:
+            return self.get_ref_annotation_data_for_tier(id_tier, time)
         a = self.tiers[id_tier][0]
         return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2])
                 for b in a]
 
     def get_annotation_data_at_time(self, id_tier, time):
-        """Give the annotations at the given time.
+        """Give the annotations at the given time. When the tier contains
+        reference annotations this will be returned, check
+        :func:`get_ref_annotation_data_at_time` for the format.
 
         :param str id_tier: Name of the tier.
         :param int time: Time of the annotation.
         :returns: List of annotations at that time.
         :raises KeyError: If the tier is non existent.
         """
+        if self.tiers[id_tier][1]:
+            return self.get_ref_annotation_at_time(id_tier, time)
         anns = self.tiers[id_tier][0]
         return sorted(
             [(self.timeslots[m[0]], self.timeslots[m[1]], m[2])
@@ -343,10 +351,6 @@ class Eaf:
         anns = ((self.timeslots[a[0]], self.timeslots[a[1]], a[2])
                 for a in self.tiers[id_tier][0].itervalues())
         return sorted(a for a in anns if a[1] >= start and a[0] <= end)
-#        return sorted([
-#            (self.timeslots[m[0]], self.timeslots[m[1]], m[2])
-#            for m in anns.itervalues() if self.timeslots[m[1]] >= start and
-#            self.timeslots[m[0]] <= end])
 
     def remove_all_annotations_from_tier(self, id_tier, clean=True):
         """remove all annotations from a tier
@@ -410,7 +414,7 @@ class Eaf:
             self.clean_time_slots()
         return removed
 
-    def insert_ref_annotation(self, id_tier, tier2, time, value,
+    def insert_ref_annotation(self, id_tier, tier2, time, value='',
                               prev=None, svg=None):
         """Insert a reference annotation.
 
@@ -427,7 +431,7 @@ class Eaf:
         if self.tiers[id_tier][0]:
             raise ValueError('This tier already contains normal annotations.')
         ann = None
-        for aid, (begin, end, value, _) in self.tiers[tier2][0].iteritems():
+        for aid, (begin, end, _, _) in self.tiers[tier2][0].iteritems():
             begin = self.timeslots[begin]
             end = self.timeslots[end]
             if begin <= time and end >= time:
@@ -445,15 +449,18 @@ class Eaf:
 
         :param str id_tier: Name of the tier.
         :raises KeyError: If the tier is non existent.
-        :yields: Reference annotations within that tier.
+        :returns: Reference annotations within that tier.
         """
-        for aid, (ref, value, prev, _) in self.tiers[id_tier][1]:
+        bucket = []
+        for aid, (ref, value, prev, _) in self.tiers[id_tier][1].iteritems():
             refann = self.tiers[self.annotations[ref]][0][ref]
-            yield (self.timeslots[refann[0]], self.timeslots[refann[1]],
-                   value, refann[2])
+            bucket.append((self.timeslots[refann[0]],
+                           self.timeslots[refann[1]], value, refann[2]))
+        return bucket
 
     def get_ref_annotation_at_time(self, tier, time):
-        """Give the ref annotations at the given time.
+        """Give the ref annotations at the given time of the form
+        ``[(start, end, value, refvalue)]``
 
         :param str tier: Name of the tier.
         :param int time: Time of the annotation of the parent.
@@ -461,12 +468,12 @@ class Eaf:
         :raises KeyError: If the tier is non existent.
         """
         bucket = []
-        for aid, (ref, _, _, _) in self.tiers[tier][1].iteritems():
-            begin, end, value, _ = self.tiers[self.annotations[ref]][0][ref]
+        for aid, (ref, value, _, _) in self.tiers[tier][1].iteritems():
+            begin, end, rvalue, _ = self.tiers[self.annotations[ref]][0][ref]
             begin = self.timeslots[begin]
             end = self.timeslots[end]
             if begin <= time and end >= time:
-                bucket.append((begin, end, value))
+                bucket.append((begin, end, value, rvalue))
         return bucket
 
     def remove_controlled_vocabulary(self, cv):
