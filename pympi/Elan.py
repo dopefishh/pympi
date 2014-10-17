@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from xml.etree import ElementTree as etree
+from xml.etree import cElementTree as etree
 import os
 import re
 import sys
@@ -75,6 +75,8 @@ class Eaf:
             empty Eaf file will be created.
         :param str author: Author of the file.
         """
+        self.maxts = None
+        self.maxaid = None
         self.annotation_document = {
             'AUTHOR': author,
             'DATE': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
@@ -338,11 +340,13 @@ class Eaf:
         :returns: List of annotations within that time.
         :raises KeyError: If the tier is non existent.
         """
-        anns = self.tiers[id_tier][0]
-        return sorted([
-            (self.timeslots[m[0]], self.timeslots[m[1]], m[2])
-            for m in anns.itervalues() if self.timeslots[m[1]] >= start and
-            self.timeslots[m[0]] <= end])
+        anns = ((self.timeslots[a[0]], self.timeslots[a[1]], a[2])
+                for a in self.tiers[id_tier][0].itervalues())
+        return sorted(a for a in anns if a[1] >= start and a[0] <= end)
+#        return sorted([
+#            (self.timeslots[m[0]], self.timeslots[m[1]], m[2])
+#            for m in anns.itervalues() if self.timeslots[m[1]] >= start and
+#            self.timeslots[m[0]] <= end])
 
     def remove_all_annotations_from_tier(self, id_tier, clean=True):
         """remove all annotations from a tier
@@ -477,12 +481,14 @@ class Eaf:
         """Generate the next annotation id, this function is mainly used
         internally.
         """
-        new = 1
-        anns = [int(a[1:]) for y in self.tiers.itervalues()
-                for x in y[:2] for a in x]
-        if anns:
-            new = max(anns)+1
-        return 'a{:d}'.format(new)
+        if self.maxaid is None:
+            self.maxaid = 1
+            valid_anns = [a for a in self.annotations if re.match('.\d+', a)]
+            if valid_anns:
+                self.maxaid = max(int(x[1:]) for x in valid_anns)+1
+        else:
+            self.maxaid += 1
+        return 'a{:d}'.format(self.maxaid)
 
     def generate_ts_id(self, time=None):
         """Generate the next timeslot id, this function is mainly used
@@ -493,11 +499,14 @@ class Eaf:
         """
         if time and time < 0:
             raise ValueError('Time is negative...')
-        new = 1
-        tss = {int(x[2:]) for x in self.timeslots}
-        if tss:
-            new = max(tss)+1
-        ts = 'ts{:d}'.format(new)
+        if self.maxts is None:
+            self.maxts = 1
+            valid_ts = [a for a in self.timeslots if re.match('..\d+', a)]
+            if valid_ts:
+                self.maxts = max(int(x[2:]) for x in valid_ts)+1
+        else:
+            self.maxts += 1
+        ts = 'ts{:d}'.format(self.maxts)
         self.timeslots[ts] = time
         return ts
 
@@ -508,13 +517,13 @@ class Eaf:
         for cleaning in the functions so that the cleaning is only performed
         afterwards.
         """
-        ts_in_tier = set(sum([a[0:2] for tier in self.tiers.itervalues()
-                              for a in tier[0].itervalues()], ()))
-        ts_avail = set(self.timeslots)
-        for a in ts_in_tier.symmetric_difference(ts_avail):
+        ts_in_tier = ((a[0], a[1]) for tier in self.tiers.itervalues() for a in
+                      tier[0].itervalues())
+        ts_in_tier = {a for b in ts_in_tier for a in b}
+        for a in ts_in_tier.symmetric_difference(self.timeslots):
             del(self.timeslots[a])
 
-    def merge_tiers(self, tiers, tiernew=None, gapt=0, sep='_'):
+    def merge_tiers(self, tiers, tiernew=None, gapt=0, sep='_', safe=False):
         """Merge tiers into a new tier and when the gap is lower then the
         threshhold glue the annotations together.
 
@@ -524,28 +533,29 @@ class Eaf:
         :param int gapt: Threshhold for the gaps, if the this is set to 10 it
                          means that all gaps below 10 are ignored.
         :param str sep: Separator for the merged annotations.
+        :param bool safe: Ignore zero length annotations(when working with
+            possible malformed data).
         :raises KeyError: If a tier is non existent.
         """
         if tiernew is None:
             tiernew = '{}_merged'.format('_'.join(tiers))
-        if tiernew in self.tiers:
-            self.remove_tier(tiernew)
         self.add_tier(tiernew)
-        ad = map(sorted, map(self.get_annotation_data_for_tier, tiers))
-        while any(ad):
-            current = []
-            queue = [(a[0], i) for i, a in enumerate(ad) if a]
-            while queue:
-                queue.sort()
-                a, i = queue.pop(0)
-                if not current or a[0] < max(x[1] for x in current) + gapt:
-                    current.append(ad[i].pop(ad[i].index(a)))
-                    if ad[i]:
-                        queue.append((ad[i][0], i))
-            start = min(x[0] for x in current)
-            end = max(x[1] for x in current)
-            self.insert_annotation(tiernew, start, end,
-                                   sep.join(x[2] for x in current))
+        aa = [(sys.maxint, sys.maxint, None)] + sorted((
+            a for t in tiers for a in self.get_annotation_data_for_tier(t)),
+            reverse=True)
+        l = None
+        while aa:
+            begin, end, value = aa.pop()
+            if l is None:
+                l = [begin, end, [value]]
+            elif begin - l[1] >= gapt:
+                if not safe or l[1] > l[0]:
+                    self.insert_annotation(tiernew, l[0], l[1], sep.join(l[2]))
+                l = [begin, end, [value]]
+            else:
+                if end > l[1]:
+                    l[1] = end
+                l[2].append(value)
 
     def shift_annotations(self, time):
         """Shift all annotations in time. Annotations that are in the beginning
@@ -578,7 +588,7 @@ class Eaf:
         return total_sq, total_re
 
     def filter_annotations(self, tier, tier_name=None, filtin=None,
-                           filtex=None, regex=False):
+                           filtex=None, regex=False, safe=False):
         """Filter annotations in a tier using an exclusive and/or inclusive
         filter.
 
@@ -591,19 +601,21 @@ class Eaf:
             are excluded.
         :param bool regex: If this flag is set, the filters are seen as regex
             matches.
+        :param bool safe: Ignore zero length annotations(when working with
+            possible malformed data).
         :raises KeyError: If the tier is non existent.
         """
         if tier_name is None:
             tier_name = '{}_filter'.format(tier)
-        if tier_name in self.tiers:
-            self.remove_tier(tier_name)
         self.add_tier(tier_name)
         func = (lambda x, y: re.match(x, y)) if regex else lambda x, y: x == y
         for begin, end, value in self.get_annotation_data_for_tier(tier):
             if (filtin and not any(func(f, value) for f in filtin)) or\
                     (filtex and any(func(f, value) for f in filtex)):
                 continue
-            self.insert_annotation(tier_name, begin, end, value)
+            if not safe or end > begin:
+                self.insert_annotation(tier_name, begin, end, value)
+        self.clean_time_slots()
 
     def get_full_time_interval(self):
         """Give the full time interval of the file.
@@ -633,8 +645,6 @@ class Eaf:
         """
         if tier_name is None:
             tier_name = '{}_{}_ftos'.format(tier1, tier2)
-        if tier_name in self.tiers:
-            self.remove_tier(tier_name)
         self.add_tier(tier_name)
         ftos = []
         ftogen = self.get_gaps_and_overlaps2(tier1, tier2, maxlen) if fast else\
@@ -643,6 +653,7 @@ class Eaf:
             ftos.append(fto)
             if fto[1]-fto[0] >= 1:
                 self.insert_annotation(tier_name, fto[0], fto[1], fto[2])
+        self.clean_time_slots()
         return ftos
 
     def get_gaps_and_overlaps(self, tier1, tier2, maxlen=-1):

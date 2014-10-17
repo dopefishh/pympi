@@ -352,6 +352,7 @@ class Elan(unittest.TestCase):
         mm = [(0, 1500, 'a1_b1'), (2000, 2500, 'a2'), (3000, 4000, 'b2'),
               (5000, 6000, 'a3_b3'), (6050, 6800, 'c_d_c_c'),
               (7000, 7995, 'a4'), (8000, 9000, 'b4')]
+        self.eaf.to_file('test.eaf')
         self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('m_0')), m0)
         self.assertEqual(
