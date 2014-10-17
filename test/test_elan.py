@@ -675,6 +675,8 @@ class Elan(unittest.TestCase):
         self.eaf.insert_annotation('p1', 3000, 4000, 'a3')
         self.eaf.insert_ref_annotation('a1', 'p1', 500, 'ref1')
         self.eaf.insert_ref_annotation('a1', 'p1', 3000, 'ref2')
+        self.assertEquals(self.eaf.get_ref_annotation_at_time('a1', 500),
+                          [(0, 1000, 'ref1', 'a1')])
         self.assertEquals(self.eaf.get_ref_annotation_at_time('p1', 2500), [])
         self.assertRaises(KeyError,
                           self.eaf.get_ref_annotation_at_time, 'eau', 0)
@@ -687,7 +689,11 @@ class Elan(unittest.TestCase):
         self.eaf.insert_annotation('p1', 1000, 2000, 'a2')
         self.eaf.insert_annotation('p1', 3000, 4000, 'a3')
         self.eaf.insert_ref_annotation('a1', 'p1', 500, 'ref1')
-        self.eaf.insert_ref_annotation('a1', 'p1', 3000, 'ref2')
+        self.eaf.insert_ref_annotation('a1', 'p1', 3000)
+        self.assertEqual(
+            sorted([(3000, 4000, '', 'a3'), (0, 1000, 'ref1', 'a1')]),
+            sorted(self.eaf.get_ref_annotation_data_for_tier('a1')))
+
         self.assertRaises(ValueError,
                           self.eaf.insert_ref_annotation, 'p1', 'a1', 0, 'r1')
         self.assertRaises(ValueError, self.eaf.insert_ref_annotation, 'a1',
@@ -695,10 +701,23 @@ class Elan(unittest.TestCase):
         self.assertRaises(KeyError,
                           self.eaf.insert_ref_annotation, 'aa', 'bb', 0, 'r1')
 
-    def test_create_controlled_vocabulary(self):
-        pass
-
     def test_get_ref_annotation_data_for_tier(self):
+        self.eaf.add_tier('p1')
+        self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
+        self.eaf.add_tier('a1', 'c', 'p1')
+        self.eaf.insert_annotation('p1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('p1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('p1', 3000, 4000, 'a3')
+        self.eaf.insert_ref_annotation('a1', 'p1', 500, 'ref1')
+        self.eaf.insert_ref_annotation('a1', 'p1', 3000)
+        self.assertEqual(
+            sorted([(3000, 4000, '', 'a3'), (0, 1000, 'ref1', 'a1')]),
+            sorted(self.eaf.get_ref_annotation_data_for_tier('a1')))
+        self.assertRaises(KeyError,
+                          self.eaf.get_ref_annotation_data_for_tier, 'aaa')
+        self.assertEqual(self.eaf.get_ref_annotation_data_for_tier('p1'), [])
+
+    def test_create_controlled_vocabulary(self):
         pass
 
     def test_remove_controlled_vocabulary(self):
