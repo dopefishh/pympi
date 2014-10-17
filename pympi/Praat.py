@@ -6,7 +6,7 @@ import itertools
 import re
 import sys
 
-VERSION = 1.0
+VERSION = 1.1
 
 rexmin = re.compile(r'xmin = ([0-9.]*)')
 rexmax = re.compile(r'xmax = ([0-9.]*)')
@@ -71,7 +71,6 @@ class TextGrid:
         """
         self.tiers = []
         self.codec = codec
-        self.minmaxfix = False
         if not file_path:
             if xmax is None:
                 raise Exception('No xmax specified')
@@ -84,7 +83,7 @@ class TextGrid:
             ifile = sys.stdin if file_path == '-' else\
                 codecs.open(file_path, 'r', codec)
             self.from_stream(ifile, codec)
-            if file_path == '-':
+            if file_path != '-':
                 ifile.close()
 
     def from_stream(self, ifile, codec='ascii'):
@@ -138,7 +137,6 @@ class TextGrid:
                 if tier.number >= number:
                     tier.number += 1
         self.tiers.append(Tier(name, tier_type, number))
-        self.update()
         return self.tiers[-1]
 
     def remove_tier(self, name_num):
@@ -285,14 +283,14 @@ item []:
         from pympi.Elan import Eaf
         eaf_out = Eaf()
         if pointlength <= 0:
-            raise ValueError('Pointlength should be positive')
+            raise ValueError('Pointlength should be strictly positive')
         for tier in self.get_tiers():
             eaf_out.add_tier(tier.name)
             for ann in tier.get_intervals(True):
                 if tier.tier_type == 'TextTier':
                     ann = (ann[0], ann[0]+pointlength, ann[1])
-                eaf_out.insert_annotation(tier.name, int(ann[0]*1000),
-                                          int(ann[1]*1000), ann[2])
+                eaf_out.insert_annotation(tier.name, int(round(ann[0]*1000)),
+                                          int(round(ann[1]*1000)), ann[2])
         return eaf_out
 
 
@@ -320,7 +318,7 @@ class Tier:
         :raises TierTypeException: If the tier type is unknown.
         """
         self.name = name
-        self.intervals = list()
+        self.intervals = []
         self.number = number
         self.tier_type = tier_type
         if lines is None:
@@ -375,7 +373,6 @@ class Tier:
             self.intervals.append((point, value))
         else:
             raise Exception('No overlap is allowed')
-        self.update()
 
     def add_interval(self, begin, end, value, check=True):
         """Add an interval to the IntervalTier.
@@ -389,14 +386,13 @@ class Tier:
         """
         if self.tier_type != 'IntervalTier':
             raise TierTypeException()
-        if check is False or len(
-                [i for i in self.intervals if begin < i[1] and end > i[0]]
-                ) == 0 and begin < end:
+        if check is False or\
+                not [i for i in self.intervals if begin < i[1] and end > i[0]]\
+                and begin < end:
             self.intervals.append((begin, end, value))
         else:
             raise Exception(
                 'No overlap is allowed!, and begin should be smaller then end')
-        self.update()
 
     def remove_interval(self, time):
         """Remove an interval, if no interval is found nothing happens.

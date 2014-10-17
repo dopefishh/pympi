@@ -244,12 +244,12 @@ class PraatTest(unittest.TestCase):
         self.tier1.add_interval(7, 8, 'c')
         self.tier1.add_interval(6, 7, 'b')
         self.assertEqual([(5, 6, 'a'), (6, 7, 'b'), (7, 8, 'c')],
-                         list(self.tier1.get_intervals()))
+                         sorted(self.tier1.get_intervals()))
         self.tier2.add_point(5, 'a')
         self.tier2.add_point(7, 'c')
         self.tier2.add_point(6, 'b')
         self.assertEqual([(5, 'a'), (6, 'b'), (7, 'c')],
-                         list(self.tier2.get_intervals()))
+                         sorted(self.tier2.get_intervals()))
 
     def test_clear_intervals(self):
         self.setup_tier()

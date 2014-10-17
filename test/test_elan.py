@@ -29,12 +29,85 @@ class Elan(unittest.TestCase):
 
         self.assertRaises(KeyError, self.eaf.add_linked_file, '/test.wierd')
 
+    def test_remove_linked_files(self):
+        self.eaf.add_linked_file('/some/file/path/test.wav',
+                                 './test.wav', time_origin=5, ex_from='ef1')
+        self.eaf.add_linked_file('/some/file/path/test2.wav',
+                                 './test2.wav', time_origin=10, ex_from='ef2')
+        self.eaf.add_linked_file('/some/file/path/test3.mpg',
+                                 './test3.mpg', time_origin=15, ex_from='ef3')
+        self.eaf.add_linked_file('/some/file/path/test4.mpg',
+                                 './test4.mpg', time_origin=20, ex_from='ef3')
+        self.eaf.remove_linked_files(mimetype='audio/x-wav')
+        self.assertEqual(len(self.eaf.get_linked_files()), 2)
+        self.eaf.remove_linked_files(ex_from='ef1')
+        self.assertEqual(len(self.eaf.get_linked_files()), 2)
+        self.eaf.remove_linked_files(file_path='/some/file/path/test4.mpg')
+        self.assertEqual(len(self.eaf.get_linked_files()), 1)
+        self.eaf.remove_linked_files(relpath='./test3.mpg')
+        self.assertEqual(self.eaf.get_linked_files(), [])
+
+    def test_remove_secondary_linked_files(self):
+        self.eaf.add_secondary_linked_file(
+            '/some/file/path/test.wav', './test.wav', time_origin=5,
+            assoc_with='ef1')
+        self.eaf.add_secondary_linked_file(
+            '/some/file/path/test2.wav', './test2.wav', time_origin=10,
+            assoc_with='ef2')
+        self.eaf.add_secondary_linked_file(
+            '/some/file/path/test3.mpg', './test3.mpg', time_origin=15,
+            assoc_with='ef3')
+        self.eaf.add_secondary_linked_file(
+            '/some/file/path/test4.mpg', './test4.mpg', time_origin=20,
+            assoc_with='ef3')
+        self.eaf.remove_secondary_linked_files(mimetype='audio/x-wav')
+        self.assertEqual(len(self.eaf.get_secondary_linked_files()), 2)
+        self.eaf.remove_secondary_linked_files(assoc_with='ef1')
+        self.assertEqual(len(self.eaf.get_secondary_linked_files()), 2)
+        self.eaf.remove_secondary_linked_files(
+            file_path='/some/file/path/test4.mpg')
+        self.assertEqual(len(self.eaf.get_secondary_linked_files()), 1)
+        self.eaf.remove_secondary_linked_files(relpath='./test3.mpg')
+        self.assertEqual(self.eaf.get_secondary_linked_files(), [])
+
+    def test_add_secondary_linked_file(self):
+        self.eaf.add_secondary_linked_file('/some/file/path/test.wav')
+        self.assertEqual(self.eaf.linked_file_descriptors[0]['MIME_TYPE'],
+                         'audio/x-wav')
+        self.eaf.add_secondary_linked_file(
+            '/some/file/path/test.mpg', './test.mpg',
+            time_origin=5, assoc_with='ef')
+        self.assertEqual(self.eaf.linked_file_descriptors[1]['MIME_TYPE'],
+                         'video/mpeg')
+        self.assertEqual(
+            self.eaf.linked_file_descriptors[1]['RELATIVE_LINK_URL'],
+            './test.mpg')
+        self.assertEqual(self.eaf.linked_file_descriptors[1]['TIME_ORIGIN'], 5)
+        self.assertEqual(
+            self.eaf.linked_file_descriptors[1]['ASSOCIATED_WITH'], 'ef')
+
+        self.eaf.add_secondary_linked_file('/some/file/path/test.wierd',
+                                           mimetype='none/wierd')
+        self.assertEqual(self.eaf.linked_file_descriptors[2]['MIME_TYPE'],
+                         'none/wierd')
+
+        self.assertRaises(KeyError,
+                          self.eaf.add_secondary_linked_file, '/test.wierd')
+
     def test_get_linked_files(self):
         self.eaf.add_linked_file('/some/file/path/test.wav')
         self.eaf.add_linked_file('/some/file/path/test.mpg', './test.mpg',
                                  time_origin=5, ex_from='ef')
         self.assertEqual(self.eaf.get_linked_files(),
                          self.eaf.media_descriptors)
+
+    def test_get_secondary_linked_files(self):
+        self.eaf.add_secondary_linked_file('/some/file/path/test.wav')
+        self.eaf.add_secondary_linked_file(
+            '/some/file/path/test.mpg', './test.mpg', time_origin=5,
+            assoc_with='ef')
+        self.assertEqual(self.eaf.get_secondary_linked_files(),
+                         self.eaf.linked_file_descriptors)
 
     def test_add_tier(self):
         self.assertEqual(len(self.eaf.get_tier_names()), 1)
@@ -197,7 +270,7 @@ class Elan(unittest.TestCase):
         self.assertRaises(ValueError,
                           self.eaf.insert_annotation, 'tier1', -1, 1)
         self.eaf.add_tier('tier2')
-        self.eaf.insert_ref_annotation('tier2', 'a1', 'r1')
+        self.eaf.insert_ref_annotation('tier2', 'tier1', 0, 'r1')
         self.assertRaises(ValueError,
                           self.eaf.insert_annotation, 'tier2', 0, 1)
 
@@ -221,37 +294,6 @@ class Elan(unittest.TestCase):
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             sorted([(3000, 4000, 'a4')]))
         self.assertRaises(KeyError, self.eaf.remove_annotation, 'tier2', 0)
-
-    def test_generate_annotation_id(self):
-        self.eaf.add_tier('tier1')
-        self.eaf.add_tier('tier2')
-        self.eaf.insert_annotation('tier1', 0, 1, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
-        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
-        self.eaf.insert_ref_annotation('tier2', 'a1', 'b1')
-        self.eaf.insert_ref_annotation('tier2', 'a2', 'b2')
-        self.eaf.insert_ref_annotation('tier2', 'a3', 'b3')
-        self.eaf.insert_ref_annotation('tier2', 'a4', 'b4')
-        annids = [a for y in self.eaf.tiers.values() for x in y[:2] for a in x]
-        self.assertEqual(len(annids), len(set(annids)))
-
-    def test_generate_ts_id(self):
-        self.eaf.add_tier('tier1')
-        self.eaf.add_tier('tier2')
-        self.eaf.insert_annotation('tier1', 0, 1, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
-        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
-        ts = [x for x in self.eaf.timeslots]
-        self.assertEqual(len(ts), len(set(ts)))
-        ts.append(self.eaf.generate_ts_id())
-        self.assertEqual(len(ts), len(set(ts)))
-        self.assertEqual(self.eaf.timeslots[ts[-1]], None)
-        ts.append(self.eaf.generate_ts_id(1337))
-        self.assertEqual(len(ts), len(set(ts)))
-        self.assertEqual(self.eaf.timeslots[ts[-1]], 1337)
-        self.assertRaises(ValueError, self.eaf.generate_ts_id, -1)
 
     def test_clean_time_slots(self):
         self.eaf.add_tier('tier1')
@@ -310,6 +352,7 @@ class Elan(unittest.TestCase):
         mm = [(0, 1500, 'a1_b1'), (2000, 2500, 'a2'), (3000, 4000, 'b2'),
               (5000, 6000, 'a3_b3'), (6050, 6800, 'c_d_c_c'),
               (7000, 7995, 'a4'), (8000, 9000, 'b4')]
+        self.eaf.to_file('test.eaf')
         self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('m_0')), m0)
         self.assertEqual(
@@ -438,12 +481,40 @@ class Elan(unittest.TestCase):
             sorted(self.eaf.get_annotation_data_for_tier('tt') +
                    [(4000, 4000, 'O12_t1_t2')]),
             list(self.eaf.get_gaps_and_overlaps('t1', 't2', 3000)))
-        self.eaf.to_file('test.eaf')
 
     def test_get_gaps_and_overlaps(self):
         pass
         # This is a placeholder, the real testing happens in:
         #   def test_create_gaps_and_overlaps_tier(self):
+
+    def test_get_gaps_and_overlaps2(self):
+        self.eaf.add_tier('t1')
+        self.eaf.add_tier('t2')
+        # Pause
+        self.eaf.insert_annotation('t1', 0, 1000)
+        self.eaf.insert_annotation('t1', 1200, 2000)
+        # Gap
+        self.eaf.insert_annotation('t2', 2200, 3000)
+        # Overlap
+        self.eaf.insert_annotation('t1', 2800, 4000)
+        # Exact fto
+        self.eaf.insert_annotation('t2', 4000, 5000)
+        # Within overlap
+        self.eaf.insert_annotation('t1', 4200, 4800)
+        # Long pause
+        self.eaf.insert_annotation('t2', 14800, 15000)
+        # Long gap
+        self.eaf.insert_annotation('t1', 20000, 20500)
+        g1 = self.eaf.get_gaps_and_overlaps2('t1', 't2')
+        g2 = self.eaf.get_gaps_and_overlaps2('t1', 't2', 3000)
+        self.assertEqual(sorted(g1), [
+            (1000, 1200, 'P1'), (2000, 2200, 'G12'), (2800, 3000, 'O21'),
+            (4200, 4800, 'W21'), (5000, 14800, 'P2'), (15000, 20000, 'G21')])
+        self.assertEqual(sorted(g2), [
+            (1000, 1200, 'P1'), (2000, 2200, 'G12'),
+            (2800, 3000, 'O21'), (4200, 4800, 'W21')])
+        self.assertRaises(KeyError, list,
+                          self.eaf.get_gaps_and_overlaps2('2', '3'))
 
     def test_get_tier_ids_for_linguistic_type(self):
         self.eaf.add_linguistic_type('l1')
@@ -505,10 +576,126 @@ class Elan(unittest.TestCase):
             'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
             'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
 
-    def test_create_controlled_vocabulary(self):
-        pass
+    def test_to_textgrid(self):
+        self.eaf.remove_tier('default')
+        tg = self.eaf.to_textgrid()
+        self.assertEqual(tg.get_tier_name_num(), [])
+        self.eaf.add_tier('t1')
+        self.eaf.insert_annotation('t1', 0, 100, 'a11')
+        self.eaf.insert_annotation('t1', 100, 200, 'a21')
+        self.eaf.insert_annotation('t1', 200, 300, 'a31')
+        self.eaf.insert_annotation('t1', 300, 400, 'a41')
+        self.eaf.add_tier('t2')
+        self.eaf.insert_annotation('t2', 0, 100, 'a12')
+        self.eaf.insert_annotation('t2', 100, 200, 'a22')
+        self.eaf.insert_annotation('t2', 200, 300, 'a32')
+        self.eaf.insert_annotation('t2', 300, 400, 'a42')
+        self.eaf.add_tier('t3')
+        self.eaf.insert_annotation('t3', 0, 100, 'a13')
+        self.eaf.insert_annotation('t3', 100, 200, 'a23')
+        self.eaf.insert_annotation('t3', 200, 300, 'a33')
+        self.eaf.insert_annotation('t3', 300, 400, 'a43')
+        self.eaf.add_tier('t4')
+        self.eaf.insert_annotation('t4', 0, 100, 'a14')
+        self.eaf.insert_annotation('t4', 100, 200, 'a24')
+        self.eaf.insert_annotation('t4', 200, 300, 'a34')
+        self.eaf.insert_annotation('t4', 300, 400, 'a44')
+        self.eaf.add_tier('t5')
+        self.eaf.insert_annotation('t5', 0, 100, 'a15')
+        self.eaf.insert_annotation('t5', 100, 200, 'a25')
+        self.eaf.insert_annotation('t5', 200, 300, 'a35')
+        self.eaf.insert_annotation('t5', 300, 400, 'a45')
+        self.eaf.add_tier('t6')
+        self.eaf.insert_annotation('t6', 0, 100, 'a16')
+        self.eaf.insert_annotation('t6', 100, 200, 'a26')
+        self.eaf.insert_annotation('t6', 200, 300, 'a36')
+        self.eaf.insert_annotation('t6', 300, 400, 'a46')
+        tg = self.eaf.to_textgrid()
+        self.assertEqual(sorted(a[1] for a in tg.get_tier_name_num()),
+                         ['t1', 't2', 't3', 't4', 't5', 't6'])
+        tg = self.eaf.to_textgrid(filtin=['t1', 't2', 't3'])
+        self.assertEqual(sorted(a[1] for a in tg.get_tier_name_num()),
+                         ['t1', 't2', 't3'])
+        tg = self.eaf.to_textgrid(filtex=['t1', 't2', 't3'])
+        self.assertEqual(sorted(a[1] for a in tg.get_tier_name_num()),
+                         ['t4', 't5', 't6'])
+        tg = self.eaf.to_textgrid(filtin=['t[123]'], regex=True)
+        self.assertEqual(sorted(a[1] for a in tg.get_tier_name_num()),
+                         ['t1', 't2', 't3'])
+        tg = self.eaf.to_textgrid(filtex=['t[123]'], regex=True)
+        self.assertEqual(sorted(a[1] for a in tg.get_tier_name_num()),
+                         ['t4', 't5', 't6'])
+        self.eaf.add_tier('t7')
+        tg = self.eaf.to_textgrid()
+        self.assertEqual(sorted(a[1] for a in tg.get_tier_name_num()),
+                         ['t1', 't2', 't3', 't4', 't5', 't6', 't7'])
+        self.assertEqual(list(tg.get_tier('t1').get_intervals(sort=True)),
+                         [(0.0, 0.1, 'a11'), (0.1, 0.2, 'a21'),
+                          (0.2, 0.3, 'a31'), (0.3, 0.4, 'a41')])
+        self.assertEqual(list(tg.get_tier('t7').get_intervals()), [])
+
+    def test_extract(self):
+        self.eaf.add_tier('tier1')
+        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.eaf.add_tier('tier2')
+        e1 = self.eaf.extract(1500, 2500)
+        self.assertEqual(e1.annotation_document, self.eaf.annotation_document)
+        self.assertEqual(e1.licences, self.eaf.licences)
+        self.assertEqual(e1.header, self.eaf.header)
+        self.assertEqual(e1.media_descriptors, self.eaf.media_descriptors)
+        self.assertEqual(e1.linked_file_descriptors,
+                         self.eaf.linked_file_descriptors)
+        self.assertEqual(e1.linguistic_types, self.eaf.linguistic_types)
+        self.assertEqual(e1.locales, self.eaf.locales)
+        self.assertEqual(e1.constraints, self.eaf.constraints)
+        self.assertEqual(e1.controlled_vocabularies,
+                         self.eaf.controlled_vocabularies)
+        self.assertEqual(e1.external_refs, self.eaf.external_refs)
+        self.assertEqual(e1.lexicon_refs, self.eaf.lexicon_refs)
+        self.assertEqual(e1.get_tier_names(), self.eaf.get_tier_names())
+        self.assertEqual(sorted(e1.get_annotation_data_between_times(
+            'tier1', 1500, 2500)), [(1000, 2000, 'a2'), (2000, 3000, 'a3')])
+        e1 = self.eaf.extract(1000, 2000)
+        self.assertEqual(sorted(e1.get_annotation_data_between_times(
+            'tier1', 1000, 2000)),
+            [(0, 1000, 'a1'), (1000, 2000, 'a2'), (2000, 3000, 'a3')])
+        e1 = self.eaf.extract(4001, 30000)
+        self.assertEqual(sorted(e1.get_annotation_data_between_times(
+            'tier1', 4001, 30000)), [])
+
+    def test_get_ref_annotation_at_time(self):
+        self.eaf.add_tier('p1')
+        self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
+        self.eaf.add_tier('a1', 'c', 'p1')
+        self.eaf.insert_annotation('p1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('p1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('p1', 3000, 4000, 'a3')
+        self.eaf.insert_ref_annotation('a1', 'p1', 500, 'ref1')
+        self.eaf.insert_ref_annotation('a1', 'p1', 3000, 'ref2')
+        self.assertEquals(self.eaf.get_ref_annotation_at_time('p1', 2500), [])
+        self.assertRaises(KeyError,
+                          self.eaf.get_ref_annotation_at_time, 'eau', 0)
 
     def test_insert_ref_annotation(self):
+        self.eaf.add_tier('p1')
+        self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
+        self.eaf.add_tier('a1', 'c', 'p1')
+        self.eaf.insert_annotation('p1', 0, 1000, 'a1')
+        self.eaf.insert_annotation('p1', 1000, 2000, 'a2')
+        self.eaf.insert_annotation('p1', 3000, 4000, 'a3')
+        self.eaf.insert_ref_annotation('a1', 'p1', 500, 'ref1')
+        self.eaf.insert_ref_annotation('a1', 'p1', 3000, 'ref2')
+        self.assertRaises(ValueError,
+                          self.eaf.insert_ref_annotation, 'p1', 'a1', 0, 'r1')
+        self.assertRaises(ValueError, self.eaf.insert_ref_annotation, 'a1',
+                          'p1', 2500, 'r')
+        self.assertRaises(KeyError,
+                          self.eaf.insert_ref_annotation, 'aa', 'bb', 0, 'r1')
+
+    def test_create_controlled_vocabulary(self):
         pass
 
     def test_get_ref_annotation_data_for_tier(self):
@@ -518,12 +705,6 @@ class Elan(unittest.TestCase):
         pass
 
     def test_copy_tier(self):
-        pass
-
-    def test_extract(self):
-        pass
-
-    def test_to_textgrid(self):
         pass
 
     def test_to_file(self):
