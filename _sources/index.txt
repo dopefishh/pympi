@@ -16,54 +16,70 @@ API Documentation:
 
 Todo
 ====
-Testing
--------
-Elan
-~~~~
-To be implemented:
+- Elan
 
-- copy_tier
-- extract
-- to_textgrid
-- to_file(Will require a xml validation library, have to look into that).
+  - Controlled vocabularies, easy functions
+  - External and lexicon reference functions
+  - Locale functions
+  - Properties functions
+  - Licence functions
+  - Import from CLAN's .cha files.
+  - Test: copy_tier
+  - Test: to_file(Will require a xml validation library, have to look into
+    that).
 
-Because the functions are incomplete:
+- Praat
 
-- create_controlled_vocabulary
-- insert_ref_annotation
-- get_ref_annotation_data_for_tier
-- remove_controlled_vocabulary
+  - Binary textgrids(long shot...)
 
-TextGrid
-~~~~~~~~
-- Currently nothing...
+- General
 
-Functionality in order of priority per category
------------------------------------------------
-General
-~~~~~~~
-- Python 3 support
-Elan
-~~~~
-- Reference annotations, easy functions
-- Controlled vocabularies, easy functions
-- External and lexicon reference functions
-- Locale functions
-- Properties functions
-- Licence functions
-- Import from CLAN's .cha files.
-
-TextGrid
-~~~~~~~~
-- Currently nothing...
-- Binary textgrids(long shot...)
-
+  - Python 3 support
 
 Changelog
 =========
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+|            | 1.1     | - Faster filter_annotions functions                  |
+|            |         | - to_textgrid unit test and added regex option       |
+|            |         | - Rewritten the gaps and overlaps function, the      |
+|            |         |   method is now different, if you want to use the    |
+|            |         |   exact heldner and edlund method you can still use  |
+|            |         |   :func:`get_gaps_and_overlaps`. If you want to      |
+|            |         |   benefit from speed you can use                     |
+|            |         |   :func:`get_gaps_and_overlaps2`. They yield almost  |
+|            |         |   the same result but the second one is almost 10    |
+|            |         |   times faster.                                      |
+|            |         | - Added two new functions for adding and viewing     |
+|            |         |   secondary linked files:                            |
+|            |         |   :func:`get_secondary_linked_files` and             |
+|            |         |   :func:`add_secondary_linked_file`.                 |
+|            |         | - Added two functions to remove linked files:        |
+|            |         |   :func:`remove_linked_files` and                    |
+|            |         |   :func:`remove_secondary_linked_files`              |
+|            |         | - Added :func:`get_ref_annotation_at_time` for finer |
+|            |         |   control over ref annotations.                      |
+|            |         | - Adapted :func:`insert_ref_annotation` to work with |
+|            |         |   the other ref annotation functions                 |
+|            |         | - Adapted :func:`get_ref_annotation_data_for_tier`   |
+|            |         |   so that it returns more information, check the     |
+|            |         |   documentation for the exact specification.         |
+|            |         | - After contact with the elan programmers we've      |
+|            |         |   dumbed down the id generation so everything is     |
+|            |         |   much faster for big files. Analysis with           |
+|            |         |   kcachegrind made everything almost ten times       |
+|            |         |   faster.                                            |
+|            |         | - Added on how to cite.                              |
+|            |         | - Even faster merge tiers.                           |
+|            |         | - Used cElementTree instead of ElementTree for more  |
+|            |         |   speed.                                             |
+|            |         | - Extract function is now also tested.               |
+|            |         | - Added safe option for merging and filtering so     |
+|            |         |   that if you eaf is malformed by something else     |
+|            |         |   because it has zero length annotations then these  |
+|            |         |   will be discarded in a merge or filter.            |
++------------+---------+------------------------------------------------------+
 | 2014-10-08 | 1.0     | - Glue annotations is removed(you can get the same   |
 |            |         |   functionality by using merge tiers.                |
 |            |         | - Merge tiers is rewritten and much faster(plans for |

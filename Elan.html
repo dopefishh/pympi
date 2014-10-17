@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Elan &mdash; pympi 0.91d documentation</title>
+    <title>Elan &mdash; pympi 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.91d',
+        VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 0.91d documentation" href="index.html" />
+    <link rel="top" title="pympi 1.1 documentation" href="index.html" />
     <link rel="prev" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="Praat.html" title="Praat"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">pympi 0.91d documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,40 +71,34 @@ form: <tt class="docutils literal"><span class="pre">{attrib}</span></tt>.</li>
 <li><strong>properties</strong> (<em>list</em>) &#8211; Properties, where every property is of the form:
 <tt class="docutils literal"><span class="pre">(value,</span> <span class="pre">{attrib})</span></tt>.</li>
 <li><strong>linked_file_descriptors</strong> (<em>list</em>) &#8211; Secondary linked files, where every
-linked file is of the form:
-<tt class="docutils literal"><span class="pre">{attrib}</span></tt>.</li>
-<li><strong>timeslots</strong> (<em>dict</em>) &#8211; Timeslot data of the form:
-<tt class="docutils literal"><span class="pre">{TimslotID</span> <span class="pre">-&gt;</span> <span class="pre">time(ms)}</span></tt>.</li>
-<li><strong>tiers</strong> (<em>dict</em>) &#8211; <p>Tier data of the form:
-<tt class="docutils literal"><span class="pre">{tier_name</span> <span class="pre">-&gt;</span> <span class="pre">(aligned_annotations,</span>
-<span class="pre">reference_annotations,</span> <span class="pre">attributes,</span> <span class="pre">ordinal)}</span></tt>,</p>
-<p>aligned_annotations of the form:
-<tt class="docutils literal"><span class="pre">[{annotation_id</span> <span class="pre">-&gt;</span>
-<span class="pre">(begin_ts,</span> <span class="pre">end_ts,</span> <span class="pre">value,</span> <span class="pre">svg_ref)}]</span></tt>,</p>
-<p>reference annotations of the form:
-<tt class="docutils literal"><span class="pre">[{annotation_id</span> <span class="pre">-&gt;</span>
-<span class="pre">(reference,</span> <span class="pre">value,</span> <span class="pre">previous,</span> <span class="pre">svg_ref)}]</span></tt>.</p>
+linked file is of the form: <tt class="docutils literal"><span class="pre">{attrib}</span></tt>.</li>
+<li><strong>timeslots</strong> (<em>dict</em>) &#8211; Timeslot data of the form: <tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span> <span class="pre">time(ms)}</span></tt>.</li>
+<li><strong>tiers</strong> (<em>dict</em>) &#8211; <p>Tiers, where every tier is of the form:
+<tt class="docutils literal"><span class="pre">{tier_name</span> <span class="pre">-&gt;</span> <span class="pre">(aligned_annotations,</span> <span class="pre">reference_annotations,</span>
+<span class="pre">attributes,</span> <span class="pre">ordinal)}</span></tt>,</p>
+<p>aligned_annotations of the form: <tt class="docutils literal"><span class="pre">[{id</span> <span class="pre">-&gt;</span> <span class="pre">(begin_ts,</span> <span class="pre">end_ts,</span> <span class="pre">value,</span>
+<span class="pre">svg_ref)}]</span></tt>,</p>
+<p>reference annotations of the form: <tt class="docutils literal"><span class="pre">[{id</span> <span class="pre">-&gt;</span> <span class="pre">(reference,</span> <span class="pre">value,</span>
+<span class="pre">previous,</span> <span class="pre">svg_ref)}]</span></tt>.</p>
 </li>
 <li><strong>linguistic_types</strong> (<em>list</em>) &#8211; Linguistic types, where every type is of the
 form: <tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span> <span class="pre">attrib}</span></tt>.</li>
-<li><strong>locales</strong> (<em>list</em>) &#8211; Locales, where every locale is of the form:
-<tt class="docutils literal"><span class="pre">{attrib}</span></tt>.</li>
-<li><strong>constraints</strong> (<em>dict</em>) &#8211; Constraint data of the form:
+<li><strong>locales</strong> (<em>list</em>) &#8211; Locales, every locale is of the form: <tt class="docutils literal"><span class="pre">{attrib}</span></tt>.</li>
+<li><strong>constraints</strong> (<em>dict</em>) &#8211; Constraints, every constraint is of the form:
 <tt class="docutils literal"><span class="pre">{stereotype</span> <span class="pre">-&gt;</span> <span class="pre">description}</span></tt>.</li>
-<li><strong>controlled_vocabularies</strong> (<em>dict</em>) &#8211; <p>Controlled vocabulary data of the
-form: <tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span>
-<span class="pre">(descriptions,</span> <span class="pre">entries,</span> <span class="pre">ext_ref)}</span></tt>,</p>
-<p>descriptions of the form:
-<tt class="docutils literal"><span class="pre">[(lang_ref,</span> <span class="pre">text)]</span></tt>,</p>
-<p>entries of the form:
-<tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span> <span class="pre">(values,</span> <span class="pre">ext_ref)}</span></tt>,</p>
-<p>values of the form:
-<tt class="docutils literal"><span class="pre">[(lang_ref,</span> <span class="pre">description,</span> <span class="pre">text)]</span></tt>.</p>
+<li><strong>controlled_vocabularies</strong> (<em>dict</em>) &#8211; <p>Controlled vocabulary, where every
+controlled vocabulary is of the form: <tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span> <span class="pre">(descriptions,</span> <span class="pre">entries,</span>
+<span class="pre">ext_ref)}</span></tt>,</p>
+<p>descriptions of the form: <tt class="docutils literal"><span class="pre">[(lang_ref,</span> <span class="pre">text)]</span></tt>,</p>
+<p>entries of the form: <tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span> <span class="pre">(values,</span> <span class="pre">ext_ref)}</span></tt>,</p>
+<p>values of the form:  <tt class="docutils literal"><span class="pre">[(lang_ref,</span> <span class="pre">description,</span> <span class="pre">text)]</span></tt>.</p>
 </li>
 <li><strong>external_refs</strong> (<em>list</em>) &#8211; External references, where every reference is of
 the form <tt class="docutils literal"><span class="pre">[id,</span> <span class="pre">type,</span> <span class="pre">value]</span></tt>.</li>
 <li><strong>lexicon_refs</strong> (<em>list</em>) &#8211; Lexicon references, where every reference is of
 the form: <tt class="docutils literal"><span class="pre">[{attribs}]</span></tt>.</li>
+<li><strong>annotations</strong> (<em>dict</em>) &#8211; Dictionary of annotations of the form:
+{id -&gt; tier}``, this is only used internally.</li>
 </ul>
 </td>
 </tr>
@@ -170,10 +164,38 @@ dictionaries coming from the
 <li><strong>file_path</strong> (<em>str</em>) &#8211; Path of the file.</li>
 <li><strong>relpath</strong> (<em>str</em>) &#8211; Relative path of the file.</li>
 <li><strong>mimetype</strong> (<em>str</em>) &#8211; Mimetype of the file, if <tt class="docutils literal"><span class="pre">None</span></tt> it tries to
-guess it according to the file extension which
-currently only works for wav, mpg, mpeg and xml.</li>
+guess it according to the file extension which currently only works
+for wav, mpg, mpeg and xml.</li>
 <li><strong>time_origin</strong> (<em>int</em>) &#8211; Time origin for the media file.</li>
 <li><strong>ex_from</strong> (<em>str</em>) &#8211; Extracted from field.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If mimetype had to be guessed and a non standard
+extension or an unknown mimetype.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.add_secondary_linked_file">
+<tt class="descname">add_secondary_linked_file</tt><span class="sig-paren">(</span><em>file_path</em>, <em>relpath=None</em>, <em>mimetype=None</em>, <em>time_origin=None</em>, <em>assoc_with=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_secondary_linked_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a secondary linked file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Path of the file.</li>
+<li><strong>relpath</strong> (<em>str</em>) &#8211; Relative path of the file.</li>
+<li><strong>mimetype</strong> (<em>str</em>) &#8211; Mimetype of the file, if <tt class="docutils literal"><span class="pre">None</span></tt> it tries to
+guess it according to the file extension which currently only works
+for wav, mpg, mpeg and xml.</li>
+<li><strong>time_origin</strong> (<em>int</em>) &#8211; Time origin for the media file.</li>
+<li><strong>assoc_with</strong> (<em>str</em>) &#8211; Associated with field.</li>
 </ul>
 </td>
 </tr>
@@ -242,11 +264,10 @@ dictionaries coming from the
 <dt id="pympi.Elan.Eaf.clean_time_slots">
 <tt class="descname">clean_time_slots</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.clean_time_slots" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clean up all unused timeslots.
-.. warning:: This can and will take time for larger tiers. When you</p>
-<blockquote>
-<div>want to do a lot of operations on a lot of tiers please unset the
-flags for cleaning in the functions so that the cleaning is only
-performed afterwards.</div></blockquote>
+.. warning:: This can and will take time for larger tiers. When you
+want to do a lot of operations on a lot of tiers please unset the flags
+for cleaning in the functions so that the cleaning is only performed
+afterwards.</p>
 </dd></dl>
 
 <dl class="method">
@@ -275,9 +296,8 @@ performed afterwards.</div></blockquote>
 <dt id="pympi.Elan.Eaf.create_controlled_vocabulary">
 <tt class="descname">create_controlled_vocabulary</tt><span class="sig-paren">(</span><em>cv_id</em>, <em>descriptions</em>, <em>entries</em>, <em>ext_ref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.create_controlled_vocabulary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a controlled vocabulary.
-.. warning:: This is a very raw implementation and you should check the</p>
-<blockquote>
-<div>Eaf file format specification for the entries.</div></blockquote>
+.. warning:: This is a very raw implementation and you should check the
+Eaf file format specification for the entries.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -296,9 +316,9 @@ performed afterwards.</div></blockquote>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.create_gaps_and_overlaps_tier">
-<tt class="descname">create_gaps_and_overlaps_tier</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>tier_name=None</em>, <em>maxlen=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.create_gaps_and_overlaps_tier" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_gaps_and_overlaps_tier</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>tier_name=None</em>, <em>maxlen=-1</em>, <em>fast=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.create_gaps_and_overlaps_tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a tier with the gaps and overlaps of the annotations.
-For types see <tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps_duration()</span></tt></p>
+For types see <a class="reference internal" href="#pympi.Elan.Eaf.get_gaps_and_overlaps" title="pympi.Elan.Eaf.get_gaps_and_overlaps"><tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps()</span></tt></a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -310,6 +330,7 @@ For types see <tt class="xref py py-func docutils literal"><span class="pre">get
 be generated.</li>
 <li><strong>maxlen</strong> (<em>int</em>) &#8211; Maximum length of gaps (skip longer ones), if <tt class="docutils literal"><span class="pre">-1</span></tt>
 no maximum will be used.</li>
+<li><strong>fast</strong> (<em>bool</em>) &#8211; Flag for using the fast method.</li>
 </ul>
 </td>
 </tr>
@@ -350,22 +371,25 @@ no maximum will be used.</li>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.filter_annotations">
-<tt class="descname">filter_annotations</tt><span class="sig-paren">(</span><em>tier</em>, <em>tier_name=None</em>, <em>filtin=None</em>, <em>filtex=None</em>, <em>regex=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.filter_annotations" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filter annotations in a tier</p>
+<tt class="descname">filter_annotations</tt><span class="sig-paren">(</span><em>tier</em>, <em>tier_name=None</em>, <em>filtin=None</em>, <em>filtex=None</em>, <em>regex=False</em>, <em>safe=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.filter_annotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter annotations in a tier using an exclusive and/or inclusive
+filter.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tier</strong> (<em>str</em>) &#8211; Name of the tier:</li>
-<li><strong>tier_name</strong> (<em>str</em>) &#8211; Name of the new tier, when <tt class="docutils literal"><span class="pre">None</span></tt> the name will
-be generated.</li>
+<li><strong>tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
+<li><strong>tier_name</strong> (<em>str</em>) &#8211; Name of the output tier, when <tt class="docutils literal"><span class="pre">None</span></tt> the name
+will be generated.</li>
 <li><strong>filtin</strong> (<em>list</em>) &#8211; List of strings to be included, if None all
 annotations all is included.</li>
 <li><strong>filtex</strong> (<em>list</em>) &#8211; List of strings to be excluded, if None no strings
 are excluded.</li>
 <li><strong>regex</strong> (<em>bool</em>) &#8211; If this flag is set, the filters are seen as regex
 matches.</li>
+<li><strong>safe</strong> (<em>bool</em>) &#8211; Ignore zero length annotations(when working with
+possible malformed data).</li>
 </ul>
 </td>
 </tr>
@@ -489,6 +513,10 @@ internally</p>
 <tt class="descname">get_gaps_and_overlaps</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>maxlen=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_gaps_and_overlaps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give gaps and overlaps. The return types are shown in the table
 below. The string will be of the format: <tt class="docutils literal"><span class="pre">id_tiername_tiername</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There is also a faster method: <a class="reference internal" href="#pympi.Elan.Eaf.get_gaps_and_overlaps2" title="pympi.Elan.Eaf.get_gaps_and_overlaps2"><tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps2()</span></tt></a></p>
+</div>
 <p>For example when a gap occurs between tier1 and tier2 and they are
 called <tt class="docutils literal"><span class="pre">speakerA</span></tt> and <tt class="docutils literal"><span class="pre">speakerB</span></tt> the annotation value of that gap
 will be <tt class="docutils literal"><span class="pre">G12_speakerA_speakerB</span></tt>.</p>
@@ -562,6 +590,33 @@ no maximum will be used.</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Elan.Eaf.get_gaps_and_overlaps2">
+<tt class="descname">get_gaps_and_overlaps2</tt><span class="sig-paren">(</span><em>tier1</em>, <em>tier2</em>, <em>maxlen=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_gaps_and_overlaps2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Faster variant of <a class="reference internal" href="#pympi.Elan.Eaf.get_gaps_and_overlaps" title="pympi.Elan.Eaf.get_gaps_and_overlaps"><tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tier1</strong> (<em>str</em>) &#8211; Name of the first tier.</li>
+<li><strong>tier2</strong> (<em>str</em>) &#8211; Name of the second tier.</li>
+<li><strong>maxlen</strong> (<em>int</em>) &#8211; Maximum length of gaps (skip longer ones), if <tt class="docutils literal"><span class="pre">-1</span></tt>
+no maximum will be used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><p class="first">Tuples of the form <tt class="docutils literal"><span class="pre">[(start,</span> <span class="pre">end,</span> <span class="pre">type)]</span></tt>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">If a tier is non existent.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Elan.Eaf.get_linguistic_type_names">
 <tt class="descname">get_linguistic_type_names</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_linguistic_type_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give a list of available linguistic types.</p>
@@ -619,10 +674,35 @@ no maximum will be used.</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Elan.Eaf.get_ref_annotation_at_time">
+<tt class="descname">get_ref_annotation_at_time</tt><span class="sig-paren">(</span><em>tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_ref_annotation_at_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give the ref annotations at the given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
+<li><strong>time</strong> (<em>int</em>) &#8211; Time of the annotation of the parent.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of annotations at that time.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Elan.Eaf.get_ref_annotation_data_for_tier">
 <tt class="descname">get_ref_annotation_data_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_ref_annotation_data_for_tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>&#8220;Give a list of all reference annotations of the form:
-<tt class="docutils literal"><span class="pre">[{id</span> <span class="pre">-&gt;</span> <span class="pre">(ref,</span> <span class="pre">value,</span> <span class="pre">previous,</span> <span class="pre">svg_ref}]</span></tt></p>
+<tt class="docutils literal"><span class="pre">[(start,</span> <span class="pre">end,</span> <span class="pre">value,</span> <span class="pre">refvalue)]</span></tt></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -632,8 +712,16 @@ no maximum will be used.</li>
 <tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier is non existent.</td>
 </tr>
+<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body">Reference annotations within that tier.</td>
+</tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_secondary_linked_files">
+<tt class="descname">get_secondary_linked_files</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_secondary_linked_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give all linked files.</p>
 </dd></dl>
 
 <dl class="method">
@@ -707,17 +795,16 @@ annotations.</li>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.insert_ref_annotation">
-<tt class="descname">insert_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>ref</em>, <em>value</em>, <em>prev=None</em>, <em>svg_ref=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_ref_annotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Insert a reference annotation.
-NOTE THAT THIS IS NOT VERY USABLE BECAUSE YOU DON&#8217;T KNOW THE INTERNAL
-ANNOTATION ID&#8217;S</p>
+<tt class="descname">insert_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>tier2</em>, <em>time</em>, <em>value</em>, <em>prev=None</em>, <em>svg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_ref_annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert a reference annotation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
-<li><strong>ref</strong> (<em>str</em>) &#8211; Id of the referenced annotation.</li>
+<li><strong>tier2</strong> (<em>str</em>) &#8211; Tier of the referenced annotation.</li>
+<li><strong>time</strong> (<em>int</em>) &#8211; Time of the referenced annotation.</li>
 <li><strong>value</strong> (<em>str</em>) &#8211; Value of the annotation.</li>
 <li><strong>prev</strong> (<em>str</em>) &#8211; Id of the previous annotation.</li>
 <li><strong>svg_ref</strong> (<em>str</em>) &#8211; Svg reference.</li>
@@ -726,7 +813,8 @@ ANNOTATION ID&#8217;S</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
 <li><strong>KeyError</strong> &#8211; If the tier is non existent.</li>
-<li><strong>ValueError</strong> &#8211; If the tier already contains normal annotations.</li>
+<li><strong>ValueError</strong> &#8211; If the tier already contains normal annotations or
+if there is no annotation in the tier on the time to reference to.</li>
 </ul>
 </td>
 </tr>
@@ -736,7 +824,7 @@ ANNOTATION ID&#8217;S</p>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.merge_tiers">
-<tt class="descname">merge_tiers</tt><span class="sig-paren">(</span><em>tiers</em>, <em>tiernew=None</em>, <em>gapt=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.merge_tiers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">merge_tiers</tt><span class="sig-paren">(</span><em>tiers</em>, <em>tiernew=None</em>, <em>gapt=0</em>, <em>sep='_'</em>, <em>safe=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.merge_tiers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merge tiers into a new tier and when the gap is lower then the
 threshhold glue the annotations together.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -749,6 +837,9 @@ threshhold glue the annotations together.</p>
 generated.</li>
 <li><strong>gapt</strong> (<em>int</em>) &#8211; Threshhold for the gaps, if the this is set to 10 it
 means that all gaps below 10 are ignored.</li>
+<li><strong>sep</strong> (<em>str</em>) &#8211; Separator for the merged annotations.</li>
+<li><strong>safe</strong> (<em>bool</em>) &#8211; Ignore zero length annotations(when working with
+possible malformed data).</li>
 </ul>
 </td>
 </tr>
@@ -839,6 +930,50 @@ to clean the timeslots after the last removal.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Elan.Eaf.remove_linked_files">
+<tt class="descname">remove_linked_files</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>relpath=None</em>, <em>mimetype=None</em>, <em>time_origin=None</em>, <em>ex_from=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_linked_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all linked files that match all the criteria, criterias that
+are <tt class="docutils literal"><span class="pre">None</span></tt> are ignored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Path of the file.</li>
+<li><strong>relpath</strong> (<em>str</em>) &#8211; Relative filepath.</li>
+<li><strong>mimetype</strong> (<em>str</em>) &#8211; Mimetype of the file.</li>
+<li><strong>time_origin</strong> (<em>int</em>) &#8211; Time origin.</li>
+<li><strong>ex_from</strong> (<em>str</em>) &#8211; Extracted from.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_secondary_linked_files">
+<tt class="descname">remove_secondary_linked_files</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>relpath=None</em>, <em>mimetype=None</em>, <em>time_origin=None</em>, <em>assoc_with=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_secondary_linked_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all secondary linked files that match all the criteria,
+criterias that are <tt class="docutils literal"><span class="pre">None</span></tt> are ignored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Path of the file.</li>
+<li><strong>relpath</strong> (<em>str</em>) &#8211; Relative filepath.</li>
+<li><strong>mimetype</strong> (<em>str</em>) &#8211; Mimetype of the file.</li>
+<li><strong>time_origin</strong> (<em>int</em>) &#8211; Time origin.</li>
+<li><strong>ex_from</strong> (<em>str</em>) &#8211; Extracted from.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Elan.Eaf.remove_tier">
 <tt class="descname">remove_tier</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>clean=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a tier.</p>
@@ -906,8 +1041,10 @@ be created with the <tt class="docutils literal"><span class="pre">.bak</span></
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>file_path</strong> (<em>str</em>) &#8211; Path to write to, - for stdout.</li>
-<li><strong>pretty</strong> (<em>bool</em>) &#8211; Flag for pretty XML printing.</li>
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Filepath to write to.</li>
+<li><strong>pretty</strong> (<em>bool</em>) &#8211; Flag for pretty XML printing (Only unset this if
+you are afraid of wasting bytes because it won&#8217;t print unneccesary
+whitespace).</li>
 </ul>
 </td>
 </tr>
@@ -917,16 +1054,17 @@ be created with the <tt class="docutils literal"><span class="pre">.bak</span></
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.to_textgrid">
-<tt class="descname">to_textgrid</tt><span class="sig-paren">(</span><em>excluded_tiers=[]</em>, <em>included_tiers=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.to_textgrid" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">to_textgrid</tt><span class="sig-paren">(</span><em>filtin=[]</em>, <em>filtex=[]</em>, <em>regex=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.to_textgrid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the object to a <a class="reference internal" href="Praat.html#pympi.Praat.TextGrid" title="pympi.Praat.TextGrid"><tt class="xref py py-class docutils literal"><span class="pre">pympi.Praat.TextGrid</span></tt></a> object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>excluded_tiers</strong> (<em>list</em>) &#8211; Specifically exclude these tiers.</li>
-<li><strong>included_tiers</strong> (<em>list</em>) &#8211; Only include this tiers, when empty all are
-included.</li>
+<li><strong>filtin</strong> (<em>list</em>) &#8211; Include only tiers in this list, if empty
+all tiers are included.</li>
+<li><strong>filtex</strong> (<em>list</em>) &#8211; Exclude all tiers in this list.</li>
+<li><strong>regex</strong> (<em>bool</em>) &#8211; If this flag is set the filters are seen as regexes.</li>
 </ul>
 </td>
 </tr>
@@ -1054,7 +1192,7 @@ included.</li>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              >previous</a> |</li>
-        <li><a href="index.html">pympi 0.91d documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

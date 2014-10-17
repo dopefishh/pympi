@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to pympi’s documentation! &mdash; pympi 0.91d documentation</title>
+    <title>Welcome to pympi’s documentation! &mdash; pympi 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.91d',
+        VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 0.91d documentation" href="#" />
+    <link rel="top" title="pympi 1.1 documentation" href="#" />
     <link rel="next" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="Praat.html" title="Praat"
              accesskey="N">next</a> |</li>
-        <li><a href="#">pympi 0.91d documentation</a> &raquo;</li> 
+        <li><a href="#">pympi 1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -60,60 +60,28 @@
 </div>
 <div class="section" id="todo">
 <h1>Todo<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="testing">
-<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="elan">
-<h3>Elan<a class="headerlink" href="#elan" title="Permalink to this headline">¶</a></h3>
-<p>To be implemented:</p>
 <ul class="simple">
-<li>copy_tier</li>
-<li>extract</li>
-<li>to_textgrid</li>
-<li>to_file(Will require a xml validation library, have to look into that).</li>
-</ul>
-<p>Because the functions are incomplete:</p>
-<ul class="simple">
-<li>create_controlled_vocabulary</li>
-<li>insert_ref_annotation</li>
-<li>get_ref_annotation_data_for_tier</li>
-<li>remove_controlled_vocabulary</li>
-</ul>
-</div>
-<div class="section" id="textgrid">
-<h3>TextGrid<a class="headerlink" href="#textgrid" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Currently nothing...</li>
-</ul>
-</div>
-</div>
-<div class="section" id="functionality-in-order-of-priority-per-category">
-<h2>Functionality in order of priority per category<a class="headerlink" href="#functionality-in-order-of-priority-per-category" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="general">
-<h3>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Python 3 support</li>
-</ul>
-</div>
-<div class="section" id="id1">
-<h3>Elan<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Reference annotations, easy functions</li>
+<li>Elan<ul>
 <li>Controlled vocabularies, easy functions</li>
 <li>External and lexicon reference functions</li>
 <li>Locale functions</li>
 <li>Properties functions</li>
 <li>Licence functions</li>
 <li>Import from CLAN&#8217;s .cha files.</li>
+<li>Test: copy_tier</li>
+<li>Test: to_file(Will require a xml validation library, have to look into
+that).</li>
 </ul>
-</div>
-<div class="section" id="id2">
-<h3>TextGrid<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Currently nothing...</li>
+</li>
+<li>Praat<ul>
 <li>Binary textgrids(long shot...)</li>
 </ul>
-</div>
-</div>
+</li>
+<li>General<ul>
+<li>Python 3 support</li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="section" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
@@ -130,7 +98,51 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>2014-10-08</td>
+<tr class="row-even"><td>&nbsp;</td>
+<td>1.1</td>
+<td><ul class="first last simple">
+<li>Faster filter_annotions functions</li>
+<li>to_textgrid unit test and added regex option</li>
+<li>Rewritten the gaps and overlaps function, the
+method is now different, if you want to use the
+exact heldner and edlund method you can still use
+<tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps()</span></tt>. If you want to
+benefit from speed you can use
+<tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps2()</span></tt>. They yield almost
+the same result but the second one is almost 10
+times faster.</li>
+<li>Added two new functions for adding and viewing
+secondary linked files:
+<tt class="xref py py-func docutils literal"><span class="pre">get_secondary_linked_files()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">add_secondary_linked_file()</span></tt>.</li>
+<li>Added two functions to remove linked files:
+<tt class="xref py py-func docutils literal"><span class="pre">remove_linked_files()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">remove_secondary_linked_files()</span></tt></li>
+<li>Added <tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_at_time()</span></tt> for finer
+control over ref annotations.</li>
+<li>Adapted <tt class="xref py py-func docutils literal"><span class="pre">insert_ref_annotation()</span></tt> to work with
+the other ref annotation functions</li>
+<li>Adapted <tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_data_for_tier()</span></tt>
+so that it returns more information, check the
+documentation for the exact specification.</li>
+<li>After contact with the elan programmers we&#8217;ve
+dumbed down the id generation so everything is
+much faster for big files. Analysis with
+kcachegrind made everything almost ten times
+faster.</li>
+<li>Added on how to cite.</li>
+<li>Even faster merge tiers.</li>
+<li>Used cElementTree instead of ElementTree for more
+speed.</li>
+<li>Extract function is now also tested.</li>
+<li>Added safe option for merging and filtering so
+that if you eaf is malformed by something else
+because it has zero length annotations then these
+will be discarded in a merge or filter.</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>2014-10-08</td>
 <td>1.0</td>
 <td><ul class="first last simple">
 <li>Glue annotations is removed(you can get the same
@@ -159,61 +171,61 @@ things that are to be implemented.</li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>2014-09-26</td>
+<tr class="row-even"><td>2014-09-26</td>
 <td>0.99a</td>
 <td>Unit tests for Praat finished and Praat module is on
 version 1.0, meaning no api changes in the future
 that break compatibility</td>
 </tr>
-<tr class="row-even"><td>2014-09-11</td>
+<tr class="row-odd"><td>2014-09-11</td>
 <td>0.99</td>
 <td>Unit tests for Praat and Elan and from version 1.0
 no api changes.</td>
 </tr>
-<tr class="row-odd"><td>2014-08-06</td>
+<tr class="row-even"><td>2014-08-06</td>
 <td>0.91d</td>
 <td>New documentation format(sphinx) and github pages.</td>
 </tr>
-<tr class="row-even"><td>2014-07-17</td>
+<tr class="row-odd"><td>2014-07-17</td>
 <td>0.91</td>
 <td>Controlled vocabularies (eaf file format 2.8) added
 and quickly tested.</td>
 </tr>
-<tr class="row-odd"><td>2014-07-16</td>
+<tr class="row-even"><td>2014-07-16</td>
 <td>0.9</td>
 <td>Added support for licences(eaf file format 2.8) and
 planned extended controlled vocabulary support.</td>
 </tr>
-<tr class="row-even"><td>2014-07-09</td>
+<tr class="row-odd"><td>2014-07-09</td>
 <td>0.7</td>
 <td>Changed the style to pep8 and thus some functions
 (read all) have changed name.</td>
 </tr>
-<tr class="row-odd"><td>2014-03-24</td>
+<tr class="row-even"><td>2014-03-24</td>
 <td>&nbsp;</td>
 <td>Fixed a lot of TextGrid bugs and have written a
 better parser using more regexp.</td>
 </tr>
-<tr class="row-even"><td>2014-02-17</td>
+<tr class="row-odd"><td>2014-02-17</td>
 <td>&nbsp;</td>
 <td>Started branching and fixed a few bugs.</td>
 </tr>
-<tr class="row-odd"><td>2014-02-03</td>
+<tr class="row-even"><td>2014-02-03</td>
 <td>&nbsp;</td>
 <td>Fixed the praat tofile function so that it writes
 silence intervals (that praat convention).</td>
 </tr>
-<tr class="row-even"><td>2014-01-27</td>
+<tr class="row-odd"><td>2014-01-27</td>
 <td>&nbsp;</td>
 <td>Added documentation via pdoc in html and cleaned up
 some documentation in EafIO.py.</td>
 </tr>
-<tr class="row-odd"><td>2013-12-02</td>
+<tr class="row-even"><td>2013-12-02</td>
 <td>&nbsp;</td>
 <td>IO is now in a different file, the old tofile is
 removed because the new one is much better.</td>
 </tr>
-<tr class="row-even"><td>2013-11-15</td>
+<tr class="row-odd"><td>2013-11-15</td>
 <td>&nbsp;</td>
 <td>Rewritten the tofile function, the old function is a
 bit faster but less reliable. The old function can
@@ -278,7 +290,7 @@ still be used by using tofileOLD().</td>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              >next</a> |</li>
-        <li><a href="#">pympi 0.91d documentation</a> &raquo;</li> 
+        <li><a href="#">pympi 1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
