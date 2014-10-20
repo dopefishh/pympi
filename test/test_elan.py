@@ -110,33 +110,42 @@ class Elan(unittest.TestCase):
                          self.eaf.linked_file_descriptors)
 
     def test_add_tier(self):
+        self.eaf.add_locale('ru')
+        self.eaf.add_language('RUS')
         self.assertEqual(len(self.eaf.get_tier_names()), 1)
-        self.eaf.add_tier('tier1', 'default-lt')
+        self.eaf.add_tier('tier1', 'default-lt', locale='ru', language='RUS')
         self.assertEqual(len(self.eaf.get_tier_names()), 2)
-        self.assertEqual(self.eaf.tiers['tier1'][2]['LINGUISTIC_TYPE_REF'],
-                         'default-lt')
+        self.assertEqual(
+            self.eaf.get_parameters_for_tier('tier1')['LINGUISTIC_TYPE_REF'],
+            'default-lt')
+        self.assertEqual(
+            self.eaf.get_parameters_for_tier('tier1')['DEFAULT_LOCALE'],
+            'ru')
+        self.assertEqual(
+            self.eaf.get_parameters_for_tier('tier1')['LANG_REF'], 'RUS')
 
         self.eaf.add_tier('tier2', 'non-existing-linguistic-type')
         self.assertEqual(len(self.eaf.get_tier_names()), 3)
-        self.assertEqual(self.eaf.tiers['tier2'][2]['LINGUISTIC_TYPE_REF'],
-                         'default-lt')
+        self.assertEqual(
+            self.eaf.get_parameters_for_tier('tier2')['LINGUISTIC_TYPE_REF'],
+            'default-lt')
         self.assertEqual(['default', 'tier1', 'tier2'],
                          self.eaf.get_tier_names())
 
         self.eaf.add_tier('tier3', None, 'tier1', 'en', 'person', 'person2')
-        self.assertEqual(self.eaf.tiers['tier3'][2], {
-            'ANNOTATOR': 'person2', 'DEFAULT_LOCALE': 'en',
+        self.assertEqual(self.eaf.get_parameters_for_tier('tier3'), {
+            'ANNOTATOR': 'person2', 'DEFAULT_LOCALE': None,
             'LINGUISTIC_TYPE_REF': 'default-lt', 'PARENT_REF': 'tier1',
-            'PARTICIPANT': 'person', 'TIER_ID': 'tier3'})
+            'LANG_REF': None, 'PARTICIPANT': 'person', 'TIER_ID': 'tier3'})
 
         self.eaf.add_tier('tier4', tier_dict={
             'ANNOTATOR': 'person2', 'DEFAULT_LOCALE': 'en',
             'LINGUISTIC_TYPE_REF': 'default-lt', 'PARENT_REF': 'tier1',
-            'PARTICIPANT': 'person', 'TIER_ID': 'tier4'})
-        self.assertEqual(self.eaf.tiers['tier4'][2], {
+            'PARTICIPANT': 'person', 'TIER_ID': 'tier4', 'LANG_ID': 'RUS'})
+        self.assertEqual(self.eaf.get_parameters_for_tier('tier4'), {
             'ANNOTATOR': 'person2', 'DEFAULT_LOCALE': 'en',
             'LINGUISTIC_TYPE_REF': 'default-lt', 'PARENT_REF': 'tier1',
-            'PARTICIPANT': 'person', 'TIER_ID': 'tier4'})
+            'PARTICIPANT': 'person', 'TIER_ID': 'tier4', 'LANG_ID': 'RUS'})
 
         for tier in ['tier1', 'tier2', 'tier3']:
             self.assertEqual(self.eaf.tiers[tier][0], {})
@@ -174,17 +183,17 @@ class Elan(unittest.TestCase):
                          ['default', 'tier1', 'tier2', 'tier3', 'tier4'])
 
     def test_get_parameters_for_tier(self):
-        self.eaf.add_tier('tier1', 'default-lt', 'tier1', 'en', 'person',
+        self.eaf.add_tier('tier1', 'default-lt', 'tier1', None, 'person',
                           'person2')
         self.eaf.add_tier('tier2')
         self.assertEqual(self.eaf.get_parameters_for_tier('tier1'), {
-            'ANNOTATOR': 'person2', 'DEFAULT_LOCALE': 'en',
+            'ANNOTATOR': 'person2', 'DEFAULT_LOCALE': None, 'LANG_REF': None,
             'LINGUISTIC_TYPE_REF': 'default-lt', 'PARENT_REF': 'tier1',
             'PARTICIPANT': 'person', 'TIER_ID': 'tier1'})
         self.assertEqual(self.eaf.get_parameters_for_tier('tier2'), {
             'PARTICIPANT': None, 'DEFAULT_LOCALE': None,
             'LINGUISTIC_TYPE_REF': 'default-lt', 'ANNOTATOR': None,
-            'PARENT_REF': None, 'TIER_ID': 'tier2'})
+            'LANG_REF': None, 'PARENT_REF': None, 'TIER_ID': 'tier2'})
 
     def test_child_tiers_for(self):
         self.eaf.add_tier('parent1')
@@ -352,7 +361,6 @@ class Elan(unittest.TestCase):
         mm = [(0, 1500, 'a1_b1'), (2000, 2500, 'a2'), (3000, 4000, 'b2'),
               (5000, 6000, 'a3_b3'), (6050, 6800, 'c_d_c_c'),
               (7000, 7995, 'a4'), (8000, 9000, 'b4')]
-        self.eaf.to_file('test.eaf')
         self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('m_0')), m0)
         self.assertEqual(
@@ -716,6 +724,88 @@ class Elan(unittest.TestCase):
         self.assertRaises(KeyError,
                           self.eaf.get_ref_annotation_data_for_tier, 'aaa')
         self.assertEqual(self.eaf.get_ref_annotation_data_for_tier('p1'), [])
+
+    def test_add_locale(self):
+        self.eaf.add_locale('ru', 'RUS', 'YAWERTY (Phonetic)')
+        self.eaf.add_locale('en')
+        self.assertEqual(
+            self.eaf.get_locales(),
+            {'ru': ('RUS', 'YAWERTY (Phonetic)'), 'en': (None, None)})
+
+    def test_remove_locale(self):
+        self.eaf.add_locale('ru', 'RUS', 'YAWERTY (Phonetic)')
+        self.eaf.add_locale('en')
+        self.eaf.remove_locale('ru')
+        self.assertEqual(self.eaf.get_locales(), {'en': (None, None)})
+        self.assertRaises(KeyError, self.eaf.remove_locale, 'ru')
+
+    def test_get_locales(self):
+        self.eaf.add_locale('ru', 'RUS', 'YAWERTY (Phonetic)')
+        self.eaf.add_locale('en')
+        self.assertEqual(
+            self.eaf.get_locales(),
+            {'ru': ('RUS', 'YAWERTY (Phonetic)'), 'en': (None, None)})
+
+    def test_add_language(self):
+        self.eaf.add_language('ru', 'RUS', 'YAWERTY (Phonetic)')
+        self.eaf.add_language('en')
+        self.assertEqual(
+            self.eaf.get_languages(),
+            {'ru': ('RUS', 'YAWERTY (Phonetic)'), 'en': (None, None)})
+
+    def test_remove_language(self):
+        self.eaf.add_language('ru', 'RUS', 'YAWERTY (Phonetic)')
+        self.eaf.add_language('en')
+        self.eaf.remove_language('ru')
+        self.assertEqual(self.eaf.get_languages(), {'en': (None, None)})
+        self.assertRaises(KeyError, self.eaf.remove_language, 'ru')
+
+    def test_get_languages(self):
+        self.eaf.add_language('ru', 'RUS', 'YAWERTY (Phonetic)')
+        self.eaf.add_language('en')
+        self.assertEqual(
+            self.eaf.get_languages(),
+            {'ru': ('RUS', 'YAWERTY (Phonetic)'), 'en': (None, None)})
+
+    def test_add_property(self):
+        self.eaf.add_property('k1', 'v1')
+        self.eaf.add_property('k2', 'v2')
+        self.assertEqual(self.eaf.get_properties(), [
+            ('lastUsedAnnotation', 0), ('k1', 'v1'), ('k2', 'v2')])
+
+    def test_remove_property(self):
+        self.eaf.add_property('k1', 'v1')
+        self.eaf.add_property('k2', 'v2')
+        self.eaf.add_property('k3', 'v3')
+        self.eaf.add_property('k4', 'v4')
+        self.eaf.add_property('k4', 'v5')
+        self.eaf.remove_property('a1')
+        self.assertEqual(self.eaf.get_properties(), [
+            ('lastUsedAnnotation', 0), ('k1', 'v1'), ('k2', 'v2'),
+            ('k3', 'v3'), ('k4', 'v4'), ('k4', 'v5')])
+        self.eaf.remove_property('k1')
+        self.assertEqual(self.eaf.get_properties(), [
+            ('lastUsedAnnotation', 0), ('k2', 'v2'), ('k3', 'v3'),
+            ('k4', 'v4'), ('k4', 'v5')])
+        self.eaf.remove_property(value='v2')
+        self.assertEqual(self.eaf.get_properties(), [
+            ('lastUsedAnnotation', 0), ('k3', 'v3'), ('k4', 'v4'),
+            ('k4', 'v5')])
+        self.eaf.remove_property('k4')
+        self.assertEqual(self.eaf.get_properties(), [
+            ('lastUsedAnnotation', 0), ('k3', 'v3')])
+        self.eaf.remove_property()
+        self.assertEqual(self.eaf.get_properties(), [])
+
+    def test_get_properties(self):
+        self.eaf.add_property('k1', 'v1')
+        self.eaf.add_property('k2', 'v2')
+        self.eaf.add_property('k3', 'v3')
+        self.eaf.add_property('k4', 'v4')
+        self.eaf.add_property('k4', 'v5')
+        self.assertEqual(self.eaf.get_properties(), [
+            ('lastUsedAnnotation', 0), ('k1', 'v1'), ('k2', 'v2'),
+            ('k3', 'v3'), ('k4', 'v4'), ('k4', 'v5')])
 
     def test_create_controlled_vocabulary(self):
         pass

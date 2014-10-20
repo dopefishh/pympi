@@ -1,5 +1,5 @@
 *.[Tt]ext[Gg]rid
-*.eaf
+*.eaf*
 *.001
 *.pfsx
 *.pyc

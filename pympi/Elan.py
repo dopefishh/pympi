@@ -6,7 +6,7 @@ import re
 import sys
 import time
 
-VERSION = '1.1a'
+VERSION = '1.19'
 
 CONSTRAINTS = {
     'Time_Subdivision': 'Time subdivision of parent annotation\'s time interva'
@@ -32,7 +32,7 @@ class Eaf:
     :var list media_descriptors: Linked files, where every file is of the
         form: ``{attrib}``.
     :var list properties: Properties, where every property is of the form:
-        ``(value, {attrib})``.
+        ``(key, value)``.
     :var list linked_file_descriptors: Secondary linked files, where every
         linked file is of the form: ``{attrib}``.
     :var dict timeslots: Timeslot data of the form: ``{id -> time(ms)}``.
@@ -47,7 +47,10 @@ class Eaf:
         previous, svg_ref)}]``.
     :var list linguistic_types: Linguistic types, where every type is of the
         form: ``{id -> attrib}``.
-    :var list locales: Locales, every locale is of the form: ``{attrib}``.
+    :var dict locales: Locales, of the form:
+        ``{lancode -> (countrycode, variant)}``.
+    :var dict languages: Languages, of the form:
+        ``{langid -> (langdef, langlabel)}``.
     :var dict constraints: Constraints, every constraint is of the form:
         ``{stereotype -> description}``.
     :var dict controlled_vocabularies: Controlled vocabulary, where every
@@ -65,7 +68,7 @@ class Eaf:
         the form: ``[{attribs}]``.
 
     :var dict annotations: Dictionary of annotations of the form:
-        {id -> tier}``, this is only used internally.
+        ``{id -> tier}``, this is only used internally.
     """
 
     def __init__(self, file_path=None, author='pympi'):
@@ -93,10 +96,11 @@ class Eaf:
         self.linguistic_types = {}
         self.tiers = {}
         self.timeslots = {}
+        self.locales = {}
+        self.languages = {}
         self.external_refs = []
         self.lexicon_refs = []
         self.linked_file_descriptors = []
-        self.locales = []
         self.media_descriptors = []
         self.properties = []
         self.new_time, self.new_ann = 0, 0
@@ -104,7 +108,7 @@ class Eaf:
         if file_path is None:
             self.add_linguistic_type('default-lt')
             self.constraints = CONSTRAINTS.copy()
-            self.properties.append(('0', {'NAME': 'lastUsedAnnotation'}))
+            self.properties.append(('lastUsedAnnotation', 0))
             self.add_tier('default')
         else:
             parse_eaf(file_path, self)
@@ -224,7 +228,7 @@ class Eaf:
             eaf_obj.insert_annotation(tier_name, ann[0], ann[1], ann[2])
 
     def add_tier(self, tier_id, ling='default-lt', parent=None, locale=None,
-                 part=None, ann=None, tier_dict=None):
+                 part=None, ann=None, language=None, tier_dict=None):
         """Add a tier. When no linguistic type is given and the default
         linguistic type is unavailable then the assigned linguistic type will
         be the first in the list.
@@ -233,9 +237,12 @@ class Eaf:
         :param str ling: Linguistic type, if the type is not available it will
                          warn and pick the first available type.
         :param str parent: Parent tier name.
-        :param str locale: Locale.
+        :param str locale: Locale, if the locale is not present this option is
+            ignored and the locale will not be set.
         :param str part: Participant.
         :param str ann: Annotator.
+        :param str language: Language , if the language is not present this
+            option is ignored and the language will not be set.
         :param dict tier_dict: TAG attributes, when this is not ``None`` it
                                will ignore all other options. Please only use
                                dictionaries coming from the
@@ -246,6 +253,10 @@ class Eaf:
             raise ValueError('Tier id is empty...')
         if ling not in self.linguistic_types:
             ling = self.linguistic_types.keys()[0]
+        if locale and locale not in self.locales:
+            locale = None
+        if language and language not in self.languages:
+            language = None
         if tier_dict is None:
             self.tiers[tier_id] = ({}, {}, {
                 'TIER_ID': tier_id,
@@ -253,6 +264,7 @@ class Eaf:
                 'PARENT_REF': parent,
                 'PARTICIPANT': part,
                 'DEFAULT_LOCALE': locale,
+                'LANG_REF': language,
                 'ANNOTATOR': ann}, len(self.tiers))
         else:
             self.tiers[tier_id] = ({}, {}, tier_dict, len(self.tiers))
@@ -923,6 +935,75 @@ class Eaf:
             del(self.linked_file_descriptors[
                 self.linked_file_descriptors.index(attrib)])
 
+    def add_locale(self, language_code, country_code=None, variant=None):
+        """Add a locale.
+
+        :param str language_code: The language code of the locale.
+        :param str country_code: The country code of the locale.
+        :param str variant: The variant of the locale.
+        """
+        self.locales[language_code] = (country_code, variant)
+
+    def remove_locale(self, language_code):
+        """Remove the locale matching the language code.
+
+        :param str language_code: Language code of the locale.
+        :throws KeyError: If there is no locale matching the language code.
+        """
+        del(self.locales[language_code])
+
+    def get_locales(self):
+        """Gives all the locales in the format: ``{language_code ->
+        (country_code, variant)}``
+        """
+        return self.locales
+
+    def add_language(self, lang_id, lang_def=None, lang_label=None):
+        """Add a language.
+
+        :param str lang_id: ID of the language.
+        :param str lang_def: Definition of the language(preferably ISO-639-3).
+        :param str lang_label: Label of the language.
+        """
+        self.languages[lang_id] = (lang_def, lang_label)
+
+    def remove_language(self, lang_id):
+        """Remove the language mathing the id.
+
+        :param str lang_id: Language id of the language.
+        :throws KeyError: If there is no language matching the language id.
+        """
+        del(self.languages[lang_id])
+
+    def get_languages(self):
+        """Gives all the languages in the format:
+        ``{lang_id -> (lang_def, lang_label)}``
+        """
+        return self.languages
+
+    def add_property(self, key, value):
+        """Add a property
+
+        :param str key: Key of the property.
+        :param str value: Value of the property.
+        """
+        self.properties.append((key, value))
+
+    def remove_property(self, key=None, value=None):
+        """Remove all properties matching both key and value.
+
+        :param str key: Key of the property.
+        :param str value: Value of the property.
+        """
+        for k, v in self.properties[:]:
+            if (key is None or key == k) and\
+                    (value is None or value == v):
+                del(self.properties[self.properties.index((k, v))])
+
+    def get_properties(self):
+        """Gives all the properties in the format: ``[(key, value)]``"""
+        return self.properties
+
 
 def parse_eaf(file_path, eaf_obj):
     """Parse an EAF file
@@ -953,7 +1034,8 @@ def parse_eaf(file_path, eaf_obj):
                 elif elem1.tag == 'LINKED_FILE_DESCRIPTOR':
                     eaf_obj.linked_file_descriptors.append(elem1.attrib)
                 elif elem1.tag == 'PROPERTY':
-                    eaf_obj.properties.append((elem1.text, elem1.attrib))
+                    eaf_obj.properties.append(
+                        (elem1.attrib['NAME'], elem1.text))
         # Time order
         elif elem.tag == 'TIME_ORDER':
             for elem1 in elem:
@@ -1004,7 +1086,14 @@ def parse_eaf(file_path, eaf_obj):
                 elem.attrib
         # Locale
         elif elem.tag == 'LOCALE':
-            eaf_obj.locales.append(elem.attrib)
+            eaf_obj.locales[elem.attrib['LANGUAGE_CODE']] =\
+                (elem.attrib.get('COUNTRY_CODE', None),
+                 elem.attrib.get('VARIANT', None))
+        # Language
+        elif elem.tag == 'LANGUAGE':
+            eaf_obj.languages[elem.attrib['LANG_ID']] =\
+                (elem.attrib.get('LANG_DEF', None),
+                 elem.attrib.get('LANG_LABEL', None))
         # Constraint
         elif elem.tag == 'CONSTRAINT':
             eaf_obj.constraints[elem.attrib['STEREOTYPE']] =\
@@ -1088,9 +1177,8 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     for m in eaf_obj.linked_file_descriptors:
         etree.SubElement(HEADER, 'LINKED_FILE_DESCRIPTOR', rm_none(m))
     # Properties
-    for m in eaf_obj.properties:
-        etree.SubElement(HEADER, 'PROPERTY', rm_none(m[1])).text = \
-            unicode(m[0])
+    for k, v in eaf_obj.properties:
+        etree.SubElement(HEADER, 'PROPERTY', {'NAME': k}).text = unicode(v)
 
     # Time order
     TIME_ORDER = etree.SubElement(ANNOTATION_DOCUMENT, 'TIME_ORDER')
@@ -1122,8 +1210,14 @@ def to_eaf(file_path, eaf_obj, pretty=True):
         etree.SubElement(ANNOTATION_DOCUMENT, 'LINGUISTIC_TYPE', rm_none(l))
 
     # Locales
-    for l in eaf_obj.locales:
-        etree.SubElement(ANNOTATION_DOCUMENT, 'LOCALE', l)
+    for lc, (cc, vr) in eaf_obj.locales.iteritems():
+        etree.SubElement(ANNOTATION_DOCUMENT, 'LOCALE', rm_none(
+            {'LANGUAGE_CODE': lc, 'COUNTRY_CODE': cc, 'VARIANT': vr}))
+
+    # Languages
+    for lid, (ldef, label) in eaf_obj.languages.iteritems():
+        etree.SubElement(ANNOTATION_DOCUMENT, 'LANGUAGE', rm_none(
+            {'LANG_ID': lid, 'LANG_DEF': ldef, 'LANG_LABEL': label}))
 
     # Constraints
     for l in eaf_obj.constraints.iteritems():
