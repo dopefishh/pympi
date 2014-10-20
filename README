@@ -1,5 +1,11 @@
 pympi version 1.1, 2014-10-15
 
+Full api documentation can be found on:
+	http://dopefishh.github.io/pympi/
+
+Pypi repository location can be found on:
+	https://pypi.python.org/pypi/pympi-ling/
+
 Automatic installation
 	*NIX
 		# pip install pympi-ling
