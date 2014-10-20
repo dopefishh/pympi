@@ -24,7 +24,7 @@ The development version can be found on github[4].
 
 How to cite:
 Lubbers, M. (2014) Python Linguistic Modules (Version {}) [Computer program].\
-Available at https://github.com/dopefishh/pympi (Accessed 2014-10-15)
+Available at https://github.com/dopefishh/pympi (Accessed YYYY-MM-DD)
 
 1. https://tla.mpi.nl/tools/tla-tools/elan/
 2. http://www.fon.hum.uva.nl/praat/
