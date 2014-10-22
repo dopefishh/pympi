@@ -1,29 +1,29 @@
 pympi version 1.1, 2014-10-15
 
 Full api documentation can be found on:
-	http://dopefishh.github.io/pympi/
+  http://dopefishh.github.io/pympi/
 
 Pypi repository location can be found on:
-	https://pypi.python.org/pypi/pympi-ling/
+  https://pypi.python.org/pypi/pympi-ling/
 
 Automatic installation
-	*NIX
-		# pip install pympi-ling
-		# easy_install pympi-ling
-	
-	Windows(elevated command prompt)
-		> pip install pympi-ling
-		> easy_install pympi-ling
+  *NIX
+    # pip install pympi-ling
+    # easy_install pympi-ling
+  
+  Windows(elevated command prompt)
+    > pip install pympi-ling
+    > easy_install pympi-ling
 
 Manual Installation
-	*NIX
-		# cd /dir/where/you/untarred
-		# python setup.py install
-	
-		If you don't have root access you can do:
-			$ python setup.py install --prefix=/home/user/bin
-			$ echo 'export PYTHONPATH=~/bin/lib/python2.7/site-packages' >> ~/.bashrc
+  *NIX
+    # cd /dir/where/you/untarred
+    # python setup.py install
+  
+    If you don't have root access you can do:
+      $ python setup.py install --prefix=/home/user/bin
+      $ echo 'export PYTHONPATH=~/bin/lib/python2.7/site-packages' >> ~/.bashrc
 
-	Windows(elevated command prompt)
-		cd C:\directory\where\you\extracted\the\zip
-		python setup.py install
+  Windows(elevated command prompt)
+    cd C:\directory\where\you\extracted\the\zip
+    python setup.py install
