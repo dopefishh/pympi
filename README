@@ -22,7 +22,7 @@ Manual Installation
 	
 		If you don't have root access you can do:
 			$ python setup.py install --prefix=/home/user/bin
-			$ echo 'export PYTHONPATH=~/home/user/bin/lib/python2.7/site-packages' >> ~/.bashrc
+			$ echo 'export PYTHONPATH=~/bin/lib/python2.7/site-packages' >> ~/.bashrc
 
 	Windows(elevated command prompt)
 		cd C:\directory\where\you\extracted\the\zip
