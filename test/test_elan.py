@@ -1,8 +1,10 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import unittest
+from lxml import etree
 from pympi import Eaf
+import tempfile
+import unittest
 
 
 class Elan(unittest.TestCase):
@@ -816,11 +818,17 @@ class Elan(unittest.TestCase):
     def test_copy_tier(self):
         pass
 
-    def test_to_file(self):
-        pass
+    def test_to_file_to_eaf(self):
+        x, filepath = tempfile.mkstemp()
 
-    def test_to_eaf(self):
-        pass
+        self.eaf.to_file(filepath)
+
+        with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
+            scheme_root = etree.XML(scheme_in.read())
+        schema = etree.XMLSchema(scheme_root)
+        xmlparser = etree.XMLParser(schema=schema)
+        with open(filepath, 'r') as xml_in:
+            etree.fromstring(xml_in.read(), xmlparser)
 
     def test_parse_eaf(self):
         pass

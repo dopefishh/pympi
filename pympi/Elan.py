@@ -78,11 +78,15 @@ class Eaf:
             empty Eaf file will be created.
         :param str author: Author of the file.
         """
+
+        ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
+            time.daylight else -time.timezone
         self.maxts = None
         self.maxaid = None
         self.annotation_document = {
             'AUTHOR': author,
-            'DATE': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
+                ctz / 3600, ctz % 3600),
             'VERSION': '2.8',
             'FORMAT': '2.8',
             'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
