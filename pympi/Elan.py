@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from xml.etree import cElementTree as etree
+# from xml.etree import ElementTree as etree
 import os
 import re
 import sys
@@ -27,7 +28,8 @@ class Eaf:
     .. note:: All times are in milliseconds and can't have decimals.
 
     :var dict annotation_document: Annotation document TAG entries.
-    :var dict licences: Licences included in the file.
+    :var list licenses: Licences included in the file of the form:
+        ``(name, url)``.
     :var dict header: XML header.
     :var list media_descriptors: Linked files, where every file is of the
         form: ``{attrib}``.
@@ -86,7 +88,7 @@ class Eaf:
         self.annotation_document = {
             'AUTHOR': author,
             'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
-                ctz / 3600, ctz % 3600),
+                ctz // 3600, ctz % 3600),
             'VERSION': '2.8',
             'FORMAT': '2.8',
             'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
@@ -96,7 +98,7 @@ class Eaf:
         self.annotations = {}
         self.controlled_vocabularies = {}
         self.header = {}
-        self.licences = {}
+        self.licenses = []
         self.linguistic_types = {}
         self.tiers = {}
         self.timeslots = {}
@@ -163,7 +165,7 @@ class Eaf:
         for t in eaf_out.get_tier_names():
             for ab, ae, value in eaf_out.get_annotation_data_for_tier(t):
                 if ab > end or ae < start:
-                    eaf_out.remove_annotation(t, (start-end)/2, False)
+                    eaf_out.remove_annotation(t, (start-end)//2, False)
         eaf_out.clean_time_slots()
         return eaf_out
 
@@ -227,9 +229,23 @@ class Eaf:
         if tier_name in eaf_obj.get_tier_names():
             eaf_obj.remove_tier(tier_name)
         eaf_obj.add_tier(tier_name,
-                         tier_dict=eaf_obj.get_parameters_for_tier(tier_name))
+                         tier_dict=self.get_parameters_for_tier(tier_name))
         for ann in self.get_annotation_data_for_tier(tier_name):
             eaf_obj.insert_annotation(tier_name, ann[0], ann[1], ann[2])
+
+    def rename_tier(self, id_from, id_to):
+        """Rename a tier. Note that this renames also the child tiers that have
+        the tier as a parent.
+
+        :param str id_from: Original name of the tier.
+        :param str id_to: Target name of the tier.
+        :throws KeyError: If the tier doesnt' exist.
+        """
+        childs = self.child_tiers_for(id_from)
+        self.tiers[id_to] = self.tiers.pop(id_from)
+        self.tiers[id_to][2]['TIER_ID'] = id_to
+        for child in childs:
+            self.tiers[child][2]['PARENT_REF'] = id_to
 
     def add_tier(self, tier_id, ling='default-lt', parent=None, locale=None,
                  part=None, ann=None, language=None, tier_dict=None):
@@ -535,7 +551,9 @@ class Eaf:
 
     def clean_time_slots(self):
         """Clean up all unused timeslots.
+
         .. warning:: This can and will take time for larger tiers. When you
+
         want to do a lot of operations on a lot of tiers please unset the flags
         for cleaning in the functions so that the cleaning is only performed
         afterwards.
@@ -1008,6 +1026,29 @@ class Eaf:
         """Gives all the properties in the format: ``[(key, value)]``"""
         return self.properties
 
+    def add_license(self, name, url):
+        """Add a license
+
+        :param str name: Name of the license.
+        :param str url: URL of the license.
+        """
+        self.licenses.append((name, url))
+
+    def remove_license(self, name=None, url=None):
+        """Remove all licenses matching both key and value.
+
+        :param str name: Name of the license.
+        :param str url: URL of the license.
+        """
+        for k, v in self.licenses[:]:
+            if (name is None or name == k) and\
+                    (url is None or url == v):
+                del(self.licenses[self.licenses.index((k, v))])
+
+    def get_licenses(self):
+        """Gives all the licenses in the format: ``[(name, url)]``"""
+        return self.licenses
+
 
 def parse_eaf(file_path, eaf_obj):
     """Parse an EAF file
@@ -1027,8 +1068,8 @@ def parse_eaf(file_path, eaf_obj):
     tier_number = 0
     for elem in tree_root:
         # Licence
-        if elem.tag == 'LICENCE':
-            eaf_obj.licences[elem.text] = elem.attrib
+        if elem.tag == 'LICENSE':
+            eaf_obj.licenses.append((elem.text, elem.attrib['LICENSE_URL']))
         # Header
         if elem.tag == 'HEADER':
             eaf_obj.header.update(elem.attrib)
@@ -1045,8 +1086,9 @@ def parse_eaf(file_path, eaf_obj):
             for elem1 in elem:
                 if int(elem1.attrib['TIME_SLOT_ID'][2:]) > eaf_obj.new_time:
                     eaf_obj.new_time = int(elem1.attrib['TIME_SLOT_ID'][2:])
+                ts = elem1.attrib.get('TIME_VALUE', None)
                 eaf_obj.timeslots[elem1.attrib['TIME_SLOT_ID']] =\
-                    int(elem1.attrib['TIME_VALUE'])
+                    ts if ts is None else int(ts)
         # Tier
         elif elem.tag == 'TIER':
             tier_id = elem.attrib['TIER_ID']
@@ -1168,8 +1210,9 @@ def to_eaf(file_path, eaf_obj, pretty=True):
                                         eaf_obj.annotation_document)
 
     # Licence
-    for m in eaf_obj.licences.iteritems():
-        n = etree.SubElement(ANNOTATION_DOCUMENT, 'LICENCE', m[1])
+    for m in eaf_obj.licenses:
+        n = etree.SubElement(ANNOTATION_DOCUMENT, 'LICENSE',
+                             {'LICENSE_URL': m[1]})
         n.text = m[0]
     # Header
     HEADER = etree.SubElement(ANNOTATION_DOCUMENT, 'HEADER', eaf_obj.header)

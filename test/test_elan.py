@@ -653,7 +653,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_tier('tier2')
         e1 = self.eaf.extract(1500, 2500)
         self.assertEqual(e1.annotation_document, self.eaf.annotation_document)
-        self.assertEqual(e1.licences, self.eaf.licences)
+        self.assertEqual(e1.licenses, self.eaf.licenses)
         self.assertEqual(e1.header, self.eaf.header)
         self.assertEqual(e1.media_descriptors, self.eaf.media_descriptors)
         self.assertEqual(e1.linked_file_descriptors,
@@ -809,17 +809,79 @@ class Elan(unittest.TestCase):
             ('lastUsedAnnotation', 0), ('k1', 'v1'), ('k2', 'v2'),
             ('k3', 'v3'), ('k4', 'v4'), ('k4', 'v5')])
 
+    def test_add_license(self):
+        self.eaf.add_license('k1', 'v1')
+        self.eaf.add_license('k2', 'v2')
+        self.assertEqual(self.eaf.get_licenses(), [
+            ('k1', 'v1'), ('k2', 'v2')])
+
+    def test_remove_license(self):
+        self.eaf.add_license('k1', 'v1')
+        self.eaf.add_license('k2', 'v2')
+        self.eaf.add_license('k3', 'v3')
+        self.eaf.add_license('k4', 'v4')
+        self.eaf.add_license('k4', 'v5')
+        self.eaf.remove_license('a1')
+        self.assertEqual(self.eaf.get_licenses(), [
+            ('k1', 'v1'), ('k2', 'v2'), ('k3', 'v3'), ('k4', 'v4'),
+            ('k4', 'v5')])
+        self.eaf.remove_license('k1')
+        self.assertEqual(self.eaf.get_licenses(), [
+            ('k2', 'v2'), ('k3', 'v3'), ('k4', 'v4'), ('k4', 'v5')])
+        self.eaf.remove_license(url='v2')
+        self.assertEqual(self.eaf.get_licenses(), [
+            ('k3', 'v3'), ('k4', 'v4'), ('k4', 'v5')])
+        self.eaf.remove_license('k4')
+        self.assertEqual(self.eaf.get_licenses(), [('k3', 'v3')])
+        self.eaf.remove_license()
+        self.assertEqual(self.eaf.get_licenses(), [])
+
+    def test_get_licenses(self):
+        self.eaf.add_license('k1', 'v1')
+        self.eaf.add_license('k2', 'v2')
+        self.eaf.add_license('k3', 'v3')
+        self.eaf.add_license('k4', 'v4')
+        self.eaf.add_license('k4', 'v5')
+        self.assertEqual(self.eaf.get_licenses(), [
+            ('k1', 'v1'), ('k2', 'v2'), ('k3', 'v3'), ('k4', 'v4'),
+            ('k4', 'v5')])
+
+    def test_rename_tier(self):
+        self.eaf.add_tier('child', parent='default')
+        self.eaf.add_tier('test1')
+        self.eaf.add_tier('test2')
+        self.eaf.add_tier('test3')
+        self.eaf.add_tier('test4')
+        self.eaf.rename_tier('test1', 'test1a')
+        self.eaf.rename_tier('default', 'test5')
+        self.assertEqual(sorted(self.eaf.get_tier_names()), sorted([
+            'child', 'test1a', 'test2', 'test3', 'test4', 'test5']))
+        self.assertEqual(sorted(self.eaf.child_tiers_for('test5')),
+                         sorted(['child']))
+
+    def test_copy_tier(self):
+        self.eaf.add_tier('test1')
+        self.eaf.insert_annotation('test1', 0, 100, 'a')
+        self.eaf.insert_annotation('test1', 100, 200, 'a')
+        self.eaf.add_tier('test2')
+        self.eaf.insert_annotation('test2', 0, 100, 'a')
+        self.eaf.insert_annotation('test2', 100, 200, 'a')
+        target = Eaf()
+        self.eaf.copy_tier(target, 'test2')
+        self.assertEqual(target.get_parameters_for_tier('test2'),
+                         self.eaf.get_parameters_for_tier('test2'))
+        self.assertEqual(target.get_annotation_data_for_tier('test2'),
+                         self.eaf.get_annotation_data_for_tier('test2'))
+
     def test_create_controlled_vocabulary(self):
         pass
 
     def test_remove_controlled_vocabulary(self):
         pass
 
-    def test_copy_tier(self):
-        pass
-
     def test_to_file_to_eaf(self):
         x, filepath = tempfile.mkstemp()
+        self.eaf = Eaf('./test/sample_2.8.eaf')
 
         self.eaf.to_file(filepath)
 
