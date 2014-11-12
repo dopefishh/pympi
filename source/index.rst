@@ -37,7 +37,7 @@ Changelog
 +============+=========+======================================================+
 |            | 1.2     | - Bugfixes.                                          |
 +------------+---------+------------------------------------------------------+
-|            | 1.19    | - Locale functions added: :func:`add_locale`,        |
+| 14-11-12   | 1.19    | - Locale functions added: :func:`add_locale`,        |
 |            |         |   :func:`remove_locale` and :func:`get_locales`.     |
 |            |         | - :func:`add_tier` extended so that you can only     |
 |            |         |   assign a locale to a tier when the locale is       |
