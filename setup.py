@@ -24,14 +24,14 @@ The development version can be found on github[4].
 
 How to cite::
 
-    @misc{pympi-ling,
-        author={Lubbers, Mart and Torreira, Francisco},
-        title={pympi-ling:\
-a Python module for processing ELAN and Praat annotation files.},
-        howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
-        year={2013-2014},
-        note={Version {}}
-    }
+    @misc{{pympi-ling,
+        author={{Lubbers, Mart and Torreira, Francisco}},
+        title={{pympi-ling:\
+a Python module for processing ELAN and Praat annotation files.}},
+        howpublished={{\url{{https://pypi.python.org/pypi/pympi-ling}}}},
+        year={{2013-2014}},
+        note={{Version {}}}
+    }}
 
 1. https://tla.mpi.nl/tools/tla-tools/elan/
 2. http://www.fon.hum.uva.nl/praat/
