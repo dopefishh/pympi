@@ -5,8 +5,7 @@ from xml.etree import cElementTree as etree
 import os
 import re
 import sys
-import time
-
+import time 
 VERSION = '1.19'
 
 CONSTRAINTS = {
