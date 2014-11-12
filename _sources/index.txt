@@ -20,13 +20,7 @@ Todo
 
   - Controlled vocabularies, easy functions
   - External and lexicon reference functions
-  - Locale functions
-  - Properties functions
-  - Licence functions
   - Import from CLAN's .cha files.
-  - Test: copy_tier
-  - Test: to_file(Will require a xml validation library, have to look into
-    that).
 
 - Praat
 
@@ -41,7 +35,35 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
-|            | 1.1     | - Faster filter_annotions functions                  |
+|            | 1.2     | - Bugfixes.                                          |
++------------+---------+------------------------------------------------------+
+|            | 1.19    | - Locale functions added: :func:`add_locale`,        |
+|            |         |   :func:`remove_locale` and :func:`get_locales`.     |
+|            |         | - :func:`add_tier` extended so that you can only     |
+|            |         |   assign a locale to a tier when the locale is       |
+|            |         |   available, if not no locale will be assigned.      |
+|            |         | - Language functions added: :func:`add_language`,    |
+|            |         |   :func:`remove_language` and :func:`get_languages`. |
+|            |         | - :func:`add_tier` extended so that you can only     |
+|            |         |   assign a language to a tier when the language is   |
+|            |         |   available, if not no language will be assigned.    |
+|            |         | - Property functions added: :func:`add_property`,    |
+|            |         |   :func:`remove_property` and                        |
+|            |         |   :func:`get_properties`.                            |
+|            |         | - Property functions added: :func:`add_license`,     |
+|            |         |   :func:`remove_license` and                         |
+|            |         |   :func:`get_licenses`.                              |
+|            |         | - File io in the elan class is now testable, this    |
+|            |         |   will require the lxml library. It uses a sample    |
+|            |         |   file that includes almost all data structures      |
+|            |         |   possible.                                          |
+|            |         | - Added a rename tier function: :func:`rename_tier`. |
+|            |         | - Updated how to cite with bibtex.                   |
++------------+---------+------------------------------------------------------+
+| 14-10-17   | 1.1a    | - Fixed bugs in ref annotations.                     |
+|            |         | - Updated repo description.                          |
++------------+---------+------------------------------------------------------+
+| 14-10-17   | 1.1     | - Faster filter_annotions functions                  |
 |            |         | - to_textgrid unit test and added regex option       |
 |            |         | - Rewritten the gaps and overlaps function, the      |
 |            |         |   method is now different, if you want to use the    |

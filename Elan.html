@@ -64,12 +64,13 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
 <li><strong>annotation_document</strong> (<em>dict</em>) &#8211; Annotation document TAG entries.</li>
-<li><strong>licences</strong> (<em>dict</em>) &#8211; Licences included in the file.</li>
+<li><strong>licenses</strong> (<em>list</em>) &#8211; Licences included in the file of the form:
+<tt class="docutils literal"><span class="pre">(name,</span> <span class="pre">url)</span></tt>.</li>
 <li><strong>header</strong> (<em>dict</em>) &#8211; XML header.</li>
 <li><strong>media_descriptors</strong> (<em>list</em>) &#8211; Linked files, where every file is of the
 form: <tt class="docutils literal"><span class="pre">{attrib}</span></tt>.</li>
 <li><strong>properties</strong> (<em>list</em>) &#8211; Properties, where every property is of the form:
-<tt class="docutils literal"><span class="pre">(value,</span> <span class="pre">{attrib})</span></tt>.</li>
+<tt class="docutils literal"><span class="pre">(key,</span> <span class="pre">value)</span></tt>.</li>
 <li><strong>linked_file_descriptors</strong> (<em>list</em>) &#8211; Secondary linked files, where every
 linked file is of the form: <tt class="docutils literal"><span class="pre">{attrib}</span></tt>.</li>
 <li><strong>timeslots</strong> (<em>dict</em>) &#8211; Timeslot data of the form: <tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span> <span class="pre">time(ms)}</span></tt>.</li>
@@ -83,7 +84,10 @@ linked file is of the form: <tt class="docutils literal"><span class="pre">{attr
 </li>
 <li><strong>linguistic_types</strong> (<em>list</em>) &#8211; Linguistic types, where every type is of the
 form: <tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span> <span class="pre">attrib}</span></tt>.</li>
-<li><strong>locales</strong> (<em>list</em>) &#8211; Locales, every locale is of the form: <tt class="docutils literal"><span class="pre">{attrib}</span></tt>.</li>
+<li><strong>locales</strong> (<em>dict</em>) &#8211; Locales, of the form:
+<tt class="docutils literal"><span class="pre">{lancode</span> <span class="pre">-&gt;</span> <span class="pre">(countrycode,</span> <span class="pre">variant)}</span></tt>.</li>
+<li><strong>languages</strong> (<em>dict</em>) &#8211; Languages, of the form:
+<tt class="docutils literal"><span class="pre">{langid</span> <span class="pre">-&gt;</span> <span class="pre">(langdef,</span> <span class="pre">langlabel)}</span></tt>.</li>
 <li><strong>constraints</strong> (<em>dict</em>) &#8211; Constraints, every constraint is of the form:
 <tt class="docutils literal"><span class="pre">{stereotype</span> <span class="pre">-&gt;</span> <span class="pre">description}</span></tt>.</li>
 <li><strong>controlled_vocabularies</strong> (<em>dict</em>) &#8211; <p>Controlled vocabulary, where every
@@ -98,7 +102,7 @@ the form <tt class="docutils literal"><span class="pre">[id,</span> <span class=
 <li><strong>lexicon_refs</strong> (<em>list</em>) &#8211; Lexicon references, where every reference is of
 the form: <tt class="docutils literal"><span class="pre">[{attribs}]</span></tt>.</li>
 <li><strong>annotations</strong> (<em>dict</em>) &#8211; Dictionary of annotations of the form:
-{id -&gt; tier}``, this is only used internally.</li>
+<tt class="docutils literal"><span class="pre">{id</span> <span class="pre">-&gt;</span> <span class="pre">tier}</span></tt>, this is only used internally.</li>
 </ul>
 </td>
 </tr>
@@ -116,6 +120,43 @@ the form: <tt class="docutils literal"><span class="pre">[{attribs}]</span></tt>
 <li><strong>file_path</strong> (<em>str</em>) &#8211; Path to read from, - for stdin. If <tt class="docutils literal"><span class="pre">None</span></tt> an
 empty Eaf file will be created.</li>
 <li><strong>author</strong> (<em>str</em>) &#8211; Author of the file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.add_language">
+<tt class="descname">add_language</tt><span class="sig-paren">(</span><em>lang_id</em>, <em>lang_def=None</em>, <em>lang_label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_language" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a language.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>lang_id</strong> (<em>str</em>) &#8211; ID of the language.</li>
+<li><strong>lang_def</strong> (<em>str</em>) &#8211; Definition of the language(preferably ISO-639-3).</li>
+<li><strong>lang_label</strong> (<em>str</em>) &#8211; Label of the language.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.add_license">
+<tt class="descname">add_license</tt><span class="sig-paren">(</span><em>name</em>, <em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_license" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a license</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of the license.</li>
+<li><strong>url</strong> (<em>str</em>) &#8211; URL of the license.</li>
 </ul>
 </td>
 </tr>
@@ -181,6 +222,43 @@ extension or an unknown mimetype.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Elan.Eaf.add_locale">
+<tt class="descname">add_locale</tt><span class="sig-paren">(</span><em>language_code</em>, <em>country_code=None</em>, <em>variant=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_locale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a locale.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>language_code</strong> (<em>str</em>) &#8211; The language code of the locale.</li>
+<li><strong>country_code</strong> (<em>str</em>) &#8211; The country code of the locale.</li>
+<li><strong>variant</strong> (<em>str</em>) &#8211; The variant of the locale.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.add_property">
+<tt class="descname">add_property</tt><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a property</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> (<em>str</em>) &#8211; Key of the property.</li>
+<li><strong>value</strong> (<em>str</em>) &#8211; Value of the property.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Elan.Eaf.add_secondary_linked_file">
 <tt class="descname">add_secondary_linked_file</tt><span class="sig-paren">(</span><em>file_path</em>, <em>relpath=None</em>, <em>mimetype=None</em>, <em>time_origin=None</em>, <em>assoc_with=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_secondary_linked_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a secondary linked file.</p>
@@ -210,7 +288,7 @@ extension or an unknown mimetype.</p>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.add_tier">
-<tt class="descname">add_tier</tt><span class="sig-paren">(</span><em>tier_id</em>, <em>ling='default-lt'</em>, <em>parent=None</em>, <em>locale=None</em>, <em>part=None</em>, <em>ann=None</em>, <em>tier_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_tier" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_tier</tt><span class="sig-paren">(</span><em>tier_id</em>, <em>ling='default-lt'</em>, <em>parent=None</em>, <em>locale=None</em>, <em>part=None</em>, <em>ann=None</em>, <em>language=None</em>, <em>tier_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a tier. When no linguistic type is given and the default
 linguistic type is unavailable then the assigned linguistic type will
 be the first in the list.</p>
@@ -223,9 +301,12 @@ be the first in the list.</p>
 <li><strong>ling</strong> (<em>str</em>) &#8211; Linguistic type, if the type is not available it will
 warn and pick the first available type.</li>
 <li><strong>parent</strong> (<em>str</em>) &#8211; Parent tier name.</li>
-<li><strong>locale</strong> (<em>str</em>) &#8211; Locale.</li>
+<li><strong>locale</strong> (<em>str</em>) &#8211; Locale, if the locale is not present this option is
+ignored and the locale will not be set.</li>
 <li><strong>part</strong> (<em>str</em>) &#8211; Participant.</li>
 <li><strong>ann</strong> (<em>str</em>) &#8211; Annotator.</li>
+<li><strong>language</strong> (<em>str</em>) &#8211; Language , if the language is not present this
+option is ignored and the language will not be set.</li>
 <li><strong>tier_dict</strong> (<em>dict</em>) &#8211; TAG attributes, when this is not <tt class="docutils literal"><span class="pre">None</span></tt> it
 will ignore all other options. Please only use
 dictionaries coming from the
@@ -263,9 +344,12 @@ dictionaries coming from the
 <dl class="method">
 <dt id="pympi.Elan.Eaf.clean_time_slots">
 <tt class="descname">clean_time_slots</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.clean_time_slots" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clean up all unused timeslots.
-.. warning:: This can and will take time for larger tiers. When you
-want to do a lot of operations on a lot of tiers please unset the flags
+<dd><p>Clean up all unused timeslots.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This can and will take time for larger tiers. When you</p>
+</div>
+<p>want to do a lot of operations on a lot of tiers please unset the flags
 for cleaning in the functions so that the cleaning is only performed
 afterwards.</p>
 </dd></dl>
@@ -429,7 +513,9 @@ internally</p>
 <dl class="method">
 <dt id="pympi.Elan.Eaf.get_annotation_data_at_time">
 <tt class="descname">get_annotation_data_at_time</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_at_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give the annotations at the given time.</p>
+<dd><p>Give the annotations at the given time. When the tier contains
+reference annotations this will be returned, check
+<tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_data_at_time()</span></tt> for the format.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -480,7 +566,9 @@ internally</p>
 <dl class="method">
 <dt id="pympi.Elan.Eaf.get_annotation_data_for_tier">
 <tt class="descname">get_annotation_data_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_for_tier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gives a list of annotations of the form: <tt class="docutils literal"><span class="pre">(begin,</span> <span class="pre">end,</span> <span class="pre">value)</span></tt></p>
+<dd><p>Gives a list of annotations of the form: <tt class="docutils literal"><span class="pre">(begin,</span> <span class="pre">end,</span> <span class="pre">value)</span></tt>
+When th tier contains reference annotations this will be returned,
+check <a class="reference internal" href="#pympi.Elan.Eaf.get_ref_annotation_data_for_tier" title="pympi.Elan.Eaf.get_ref_annotation_data_for_tier"><tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_data_for_tier()</span></tt></a> for the format.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -617,6 +705,19 @@ no maximum will be used.</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Elan.Eaf.get_languages">
+<tt class="descname">get_languages</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_languages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives all the languages in the format:
+<tt class="docutils literal"><span class="pre">{lang_id</span> <span class="pre">-&gt;</span> <span class="pre">(lang_def,</span> <span class="pre">lang_label)}</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_licenses">
+<tt class="descname">get_licenses</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_licenses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives all the licenses in the format: <tt class="docutils literal"><span class="pre">[(name,</span> <span class="pre">url)]</span></tt></p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Elan.Eaf.get_linguistic_type_names">
 <tt class="descname">get_linguistic_type_names</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_linguistic_type_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give a list of available linguistic types.</p>
@@ -634,6 +735,13 @@ no maximum will be used.</li>
 <dt id="pympi.Elan.Eaf.get_linked_files">
 <tt class="descname">get_linked_files</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_linked_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give all linked files.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.get_locales">
+<tt class="descname">get_locales</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_locales" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives all the locales in the format: <tt class="docutils literal"><span class="pre">{language_code</span> <span class="pre">-&gt;</span>
+<span class="pre">(country_code,</span> <span class="pre">variant)}</span></tt></p>
 </dd></dl>
 
 <dl class="method">
@@ -674,9 +782,16 @@ no maximum will be used.</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Elan.Eaf.get_properties">
+<tt class="descname">get_properties</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives all the properties in the format: <tt class="docutils literal"><span class="pre">[(key,</span> <span class="pre">value)]</span></tt></p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Elan.Eaf.get_ref_annotation_at_time">
 <tt class="descname">get_ref_annotation_at_time</tt><span class="sig-paren">(</span><em>tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_ref_annotation_at_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give the ref annotations at the given time.</p>
+<dd><p>Give the ref annotations at the given time of the form
+<tt class="docutils literal"><span class="pre">[(start,</span> <span class="pre">end,</span> <span class="pre">value,</span> <span class="pre">refvalue)]</span></tt></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -712,7 +827,7 @@ no maximum will be used.</li>
 <tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier is non existent.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body">Reference annotations within that tier.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Reference annotations within that tier.</td>
 </tr>
 </tbody>
 </table>
@@ -795,7 +910,7 @@ annotations.</li>
 
 <dl class="method">
 <dt id="pympi.Elan.Eaf.insert_ref_annotation">
-<tt class="descname">insert_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>tier2</em>, <em>time</em>, <em>value</em>, <em>prev=None</em>, <em>svg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_ref_annotation" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">insert_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>tier2</em>, <em>time</em>, <em>value=''</em>, <em>prev=None</em>, <em>svg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.insert_ref_annotation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert a reference annotation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -913,6 +1028,41 @@ to clean the timeslots after the last removal.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Elan.Eaf.remove_language">
+<tt class="descname">remove_language</tt><span class="sig-paren">(</span><em>lang_id</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_language" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the language mathing the id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lang_id</strong> (<em>str</em>) &#8211; Language id of the language.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Throws KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If there is no language matching the language id.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_license">
+<tt class="descname">remove_license</tt><span class="sig-paren">(</span><em>name=None</em>, <em>url=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_license" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all licenses matching both key and value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of the license.</li>
+<li><strong>url</strong> (<em>str</em>) &#8211; URL of the license.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Elan.Eaf.remove_linguistic_type">
 <tt class="descname">remove_linguistic_type</tt><span class="sig-paren">(</span><em>ling_type</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_linguistic_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a linguistic type.</p>
@@ -944,6 +1094,41 @@ are <tt class="docutils literal"><span class="pre">None</span></tt> are ignored.
 <li><strong>mimetype</strong> (<em>str</em>) &#8211; Mimetype of the file.</li>
 <li><strong>time_origin</strong> (<em>int</em>) &#8211; Time origin.</li>
 <li><strong>ex_from</strong> (<em>str</em>) &#8211; Extracted from.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_locale">
+<tt class="descname">remove_locale</tt><span class="sig-paren">(</span><em>language_code</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_locale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the locale matching the language code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>language_code</strong> (<em>str</em>) &#8211; Language code of the locale.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Throws KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If there is no locale matching the language code.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.remove_property">
+<tt class="descname">remove_property</tt><span class="sig-paren">(</span><em>key=None</em>, <em>value=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all properties matching both key and value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> (<em>str</em>) &#8211; Key of the property.</li>
+<li><strong>value</strong> (<em>str</em>) &#8211; Value of the property.</li>
 </ul>
 </td>
 </tr>
@@ -1008,6 +1193,29 @@ them individually because of the delayed cleaning of timeslots.</p>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body">If a tier is non existent.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Elan.Eaf.rename_tier">
+<tt class="descname">rename_tier</tt><span class="sig-paren">(</span><em>id_from</em>, <em>id_to</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.rename_tier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename a tier. Note that this renames also the child tiers that have
+the tier as a parent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id_from</strong> (<em>str</em>) &#8211; Original name of the tier.</li>
+<li><strong>id_to</strong> (<em>str</em>) &#8211; Target name of the tier.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Throws KeyError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier doesnt&#8217; exist.</p>
+</td>
 </tr>
 </tbody>
 </table>
