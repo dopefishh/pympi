@@ -33,7 +33,7 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
-|            | 1.2     | - Bugfixes.                                          |
+| 14-11-13   | 1.2     | - Bugfixes.                                          |
 |            |         | - Changed the names of the insert functions, the old |
 |            |         |   names are still usable. But the preferable method  |
 |            |         |   is to use the new functions:                       |
