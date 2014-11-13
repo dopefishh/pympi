@@ -18,8 +18,6 @@ Todo
 ====
 - Elan
 
-  - Controlled vocabularies, easy functions
-  - External and lexicon reference functions
   - Import from CLAN's .cha files.
 
 - Praat
@@ -35,7 +33,35 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
-|            | 1.2     | - Bugfixes.                                          |
+| 14-11-13   | 1.2     | - Bugfixes.                                          |
+|            |         | - Changed the names of the insert functions, the old |
+|            |         |   names are still usable. But the preferable method  |
+|            |         |   is to use the new functions:                       |
+|            |         |   :func:`add_annotation` and                         |
+|            |         |   :func:`add_ref_annotation`.                        |
+|            |         | - Added controlled vocabulary functions:             |
+|            |         |                                                      |
+|            |         |   - :func:`add_controlled_vocabulary`                |
+|            |         |   - :func:`add_cv_entry`                             |
+|            |         |   - :func:`add_cv_description`                       |
+|            |         |   - :func:`get_controlled_vocabulary_names`          |
+|            |         |   - :func:`get_cv_entries`                           |
+|            |         |   - :func:`get_cv_descriptions`                      |
+|            |         |   - :func:`remove_controlled_vocabulary`             |
+|            |         |   - :func:`remove_cv_entry`                          |
+|            |         |   - :func:`remove_cv_description`                    |
+|            |         | - Added external reference functions:                |
+|            |         |                                                      |
+|            |         |   - :func:`add_external_ref`                         |
+|            |         |   - :func:`get_external_ref_names`                   |
+|            |         |   - :func:`get_external_ref`                         |
+|            |         |   - :func:`remove_external_ref`                      |
+|            |         | - Added lexicon reference functions:                 |
+|            |         |                                                      |
+|            |         |   - :func:`add_lexicon_ref`                          |
+|            |         |   - :func:`get_lexicon_ref_names`                    |
+|            |         |   - :func:`get_lexicon_ref`                          |
+|            |         |   - :func:`remove_lexicon_ref`                       |
 +------------+---------+------------------------------------------------------+
 | 14-11-12   | 1.19    | - Locale functions added: :func:`add_locale`,        |
 |            |         |   :func:`remove_locale` and :func:`get_locales`.     |
@@ -166,3 +192,5 @@ Changelog
 Author
 ======
 Mart Lubbers(``mart at martlubbers.net``)
+
+Supervision: Francisco Toreirra(``francisco.torreira at mpi.nl``)
