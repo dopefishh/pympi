@@ -5,8 +5,9 @@ from xml.etree import cElementTree as etree
 import os
 import re
 import sys
-import time 
-VERSION = '1.19'
+import time
+
+VERSION = '1.2'
 
 CONSTRAINTS = {
     'Time_Subdivision': 'Time subdivision of parent annotation\'s time interva'
@@ -58,7 +59,7 @@ class Eaf:
         controlled vocabulary is of the form: ``{id -> (descriptions, entries,
         ext_ref)}``,
 
-        descriptions of the form: ``[(lang_ref, text)]``,
+        descriptions of the form: ``[(value, lang_ref, description)]``,
 
         entries of the form: ``{id -> (values, ext_ref)}``,
 
@@ -93,18 +94,18 @@ class Eaf:
             'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:noNamespaceSchemaLocation':
                 'http://www.mpi.nl/tools/elan/EAFv2.8.xsd'}
-        self.constraints = {}
         self.annotations = {}
+        self.constraints = {}
         self.controlled_vocabularies = {}
         self.header = {}
-        self.licenses = []
+        self.languages = {}
         self.linguistic_types = {}
+        self.locales = {}
         self.tiers = {}
         self.timeslots = {}
-        self.locales = {}
-        self.languages = {}
         self.external_refs = []
         self.lexicon_refs = []
+        self.licenses = []
         self.linked_file_descriptors = []
         self.media_descriptors = []
         self.properties = []
@@ -118,84 +119,119 @@ class Eaf:
         else:
             parse_eaf(file_path, self)
 
-    def to_file(self, file_path, pretty=True):
-        """Write the object to a file, if the file already exists a backup will
-        be created with the ``.bak`` suffix.
+    def add_annotation(self, id_tier, start, end, value='', svg_ref=None):
+        """Add an annotation.
 
-        :param str file_path: Filepath to write to.
-        :param bool pretty: Flag for pretty XML printing (Only unset this if
-            you are afraid of wasting bytes because it won't print unneccesary
-            whitespace).
+        :param str id_tier: Name of the tier.
+        :param int start: Start time of the annotation.
+        :param int end: End time of the annotation.
+        :param str value: Value of the annotation.
+        :param str svg_ref: Svg reference.
+        :raises KeyError: If the tier is non existent.
+        :raises ValueError: If one of the values is negative or start is bigger
+                            then end or if the tiers already contains ref
+                            annotations.
         """
-        to_eaf(file_path, self, pretty)
+        if self.tiers[id_tier][1]:
+            raise ValueError('Tier already contains ref annotations...')
+        if start == end:
+            raise ValueError('Annotation length is zero...')
+        if start > end:
+            raise ValueError('Annotation length is negative...')
+        if start < 0:
+            raise ValueError('Start is negative...')
+        start_ts = self.generate_ts_id(start)
+        end_ts = self.generate_ts_id(end)
+        aid = self.generate_annotation_id()
+        self.annotations[aid] = id_tier
+        self.tiers[id_tier][0][aid] = (start_ts, end_ts, value, svg_ref)
 
-    def to_textgrid(self, filtin=[], filtex=[], regex=False):
-        """Convert the object to a :class:`pympi.Praat.TextGrid` object.
+    def add_controlled_vocabulary(self, cv_id, ext_ref=None):
+        """Add a controlled vocabulary. This will initialize the controlled
+        vocabulary without entries.
 
-        :param list filtin: Include only tiers in this list, if empty
-            all tiers are included.
-        :param list filtex: Exclude all tiers in this list.
-        :param bool regex: If this flag is set the filters are seen as regexes.
-        :returns: :class:`pympi.Praat.TextGrid` representation.
-        :raises ImportError: If the pympi.Praat module can't be loaded.
+        :param str cv_id: Name of the controlled vocabulary.
+        :param str ext_ref: External reference.
         """
-        from pympi.Praat import TextGrid
-        _, end = self.get_full_time_interval()
-        tgout = TextGrid(xmax=end)
-        func = (lambda x, y: re.match(x, y)) if regex else lambda x, y: x == y
-        for tier in self.tiers:
-            if (filtin and not any(func(f, tier) for f in filtin)) or\
-                    (filtex and any(func(f, tier) for f in filtex)):
-                continue
-            ctier = tgout.add_tier(tier)
-            for intv in self.get_annotation_data_for_tier(tier):
-                ctier.add_interval(intv[0]/1000.0, intv[1]/1000.0, intv[2])
-        return tgout
+        self.controlled_vocabularies[cv_id] = ([], {}, ext_ref)
 
-    def extract(self, start, end):
-        """Extracts the selected time frame as a new object.
+    def add_cv_entry(self, cv_id, cve_id, values, ext_ref=None):
+        """Add an entry to a controlled vocabulary.
 
-        :param int start: Start time.
-        :param int end: End time.
-        :returns: class:`pympi.Elan.Eaf` object containing the extracted frame.
+        :param str cv_id: Name of the controlled vocabulary to add an entry.
+        :param str cve_id: Name of the entry.
+        :param list values: List of values of the form:
+            ``(value, lang_ref, description)`` where description can be
+            ``None``.
+        :param str ext_ref: External reference.
+        :throws KeyError: If there is no controlled vocabulary with that id.
+        :throws ValueError: If a language in one of the entries doesn't exist.
         """
-        from copy import deepcopy
-        eaf_out = deepcopy(self)
-        for t in eaf_out.get_tier_names():
-            for ab, ae, value in eaf_out.get_annotation_data_for_tier(t):
-                if ab > end or ae < start:
-                    eaf_out.remove_annotation(t, (start-end)//2, False)
-        eaf_out.clean_time_slots()
-        return eaf_out
+        for value, lang_ref, description in values:
+            if lang_ref not in self.languages:
+                raise ValueError('Language not present: {}'.format(lang_ref))
+        self.controlled_vocabularies[cv_id][1][cve_id] = (values, ext_ref)
 
-    def get_linked_files(self):
-        """Give all linked files."""
-        return self.media_descriptors
+    def add_cv_description(self, cv_id, lang_ref, description=None):
+        """Add a description to a controlled vocabulary.
 
-    def get_secondary_linked_files(self):
-        """Give all linked files."""
-        return self.linked_file_descriptors
-
-    def add_secondary_linked_file(self, file_path, relpath=None, mimetype=None,
-                                  time_origin=None, assoc_with=None):
-        """Add a secondary linked file.
-
-        :param str file_path: Path of the file.
-        :param str relpath: Relative path of the file.
-        :param str mimetype: Mimetype of the file, if ``None`` it tries to
-            guess it according to the file extension which currently only works
-            for wav, mpg, mpeg and xml.
-        :param int time_origin: Time origin for the media file.
-        :param str assoc_with: Associated with field.
-        :raises KeyError: If mimetype had to be guessed and a non standard
-                          extension or an unknown mimetype.
+        :param str cv_id: Name of the controlled vocabulary to add the
+            description.
+        :param str lang_ref: Language reference.
+        :param str description: Description, this can be none.
+        :throws KeyError: If there is no controlled vocabulary with that id.
+        :throws ValueError: If the language provided doesn't exist.
         """
-        if mimetype is None:
-            mimetype = MIMES[file_path.split('.')[-1]]
-        self.linked_file_descriptors.append({
-            'LINK_URL': file_path, 'RELATIVE_LINK_URL': relpath,
-            'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
-            'ASSOCIATED_WITH': assoc_with})
+        if lang_ref not in self.languages:
+            raise ValueError('Language not present: {}'.format(lang_ref))
+        self.controlled_vocabularies[cv_id][0].append((lang_ref, description))
+
+    def add_language(self, lang_id, lang_def=None, lang_label=None):
+        """Add a language.
+
+        :param str lang_id: ID of the language.
+        :param str lang_def: Definition of the language(preferably ISO-639-3).
+        :param str lang_label: Label of the language.
+        """
+        self.languages[lang_id] = (lang_def, lang_label)
+
+    def add_license(self, name, url):
+        """Add a license
+
+        :param str name: Name of the license.
+        :param str url: URL of the license.
+        """
+        self.licenses.append((name, url))
+
+    def add_linguistic_type(self, lingtype, constraints=None,
+                            timealignable=True, graphicreferences=False,
+                            extref=None, param_dict=None):
+        """Add a linguistic type.
+
+        :param str lingtype: Name of the linguistic type.
+        :param list constraints: Constraint names.
+        :param bool timealignable: Flag for time alignable.
+        :param bool graphicreferences: Flag for graphic references.
+        :param str extref: External reference.
+        :param dict param_dict: TAG attributes, when this is not ``None`` it
+                                 will ignore all other options. Please only use
+                                 dictionaries coming from the
+                                 :func:`get_parameters_for_linguistic_type`
+        :raises KeyError: If a constraint is not defined
+        """
+        if param_dict:
+            self.linguistic_types[lingtype] = param_dict
+        else:
+            if constraints:
+                for c in constraints:
+                    self.constraints[c]
+            self.linguistic_types[lingtype] = {
+                'LINGUISTIC_TYPE_ID': lingtype,
+                'TIME_ALIGNABLE': str(timealignable).lower(),
+                'GRAPHIC_REFERENCES': str(graphicreferences).lower(),
+                'CONSTRAINTS': constraints}
+            if extref is not None:
+                self.linguistic_types[lingtype]['EXT_REF'] = extref
 
     def add_linked_file(self, file_path, relpath=None, mimetype=None,
                         time_origin=None, ex_from=None):
@@ -218,33 +254,72 @@ class Eaf:
             'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
             'EXTRACTED_FROM': ex_from})
 
-    def copy_tier(self, eaf_obj, tier_name):
-        """Copies a tier to another :class:`pympi.Elan.Eaf` object.
+    def add_locale(self, language_code, country_code=None, variant=None):
+        """Add a locale.
 
-        :param pympi.Elan.Eaf eaf_obj: Target Eaf object.
-        :param str tier_name: Name of the tier.
-        :raises KeyError: If the tier doesn't exist.
+        :param str language_code: The language code of the locale.
+        :param str country_code: The country code of the locale.
+        :param str variant: The variant of the locale.
         """
-        if tier_name in eaf_obj.get_tier_names():
-            eaf_obj.remove_tier(tier_name)
-        eaf_obj.add_tier(tier_name,
-                         tier_dict=self.get_parameters_for_tier(tier_name))
-        for ann in self.get_annotation_data_for_tier(tier_name):
-            eaf_obj.insert_annotation(tier_name, ann[0], ann[1], ann[2])
+        self.locales[language_code] = (country_code, variant)
 
-    def rename_tier(self, id_from, id_to):
-        """Rename a tier. Note that this renames also the child tiers that have
-        the tier as a parent.
+    def add_property(self, key, value):
+        """Add a property
 
-        :param str id_from: Original name of the tier.
-        :param str id_to: Target name of the tier.
-        :throws KeyError: If the tier doesnt' exist.
+        :param str key: Key of the property.
+        :param str value: Value of the property.
         """
-        childs = self.child_tiers_for(id_from)
-        self.tiers[id_to] = self.tiers.pop(id_from)
-        self.tiers[id_to][2]['TIER_ID'] = id_to
-        for child in childs:
-            self.tiers[child][2]['PARENT_REF'] = id_to
+        self.properties.append((key, value))
+
+    def add_ref_annotation(self, id_tier, tier2, time, value='',
+                           prev=None, svg=None):
+        """Add a reference annotation.
+
+        :param str id_tier: Name of the tier.
+        :param str tier2: Tier of the referenced annotation.
+        :param int time: Time of the referenced annotation.
+        :param str value: Value of the annotation.
+        :param str prev: Id of the previous annotation.
+        :param str svg_ref: Svg reference.
+        :raises KeyError: If the tier is non existent.
+        :raises ValueError: If the tier already contains normal annotations or
+            if there is no annotation in the tier on the time to reference to.
+        """
+        if self.tiers[id_tier][0]:
+            raise ValueError('This tier already contains normal annotations.')
+        ann = None
+        for aid, (begin, end, _, _) in self.tiers[tier2][0].iteritems():
+            begin = self.timeslots[begin]
+            end = self.timeslots[end]
+            if begin <= time and end >= time:
+                ann = aid
+                break
+        if not ann:
+            raise ValueError('There is no annotation to reference to.')
+        aid = self.generate_annotation_id()
+        self.annotations[aid] = id_tier
+        self.tiers[id_tier][1][aid] = (ann, value, prev, svg)
+
+    def add_secondary_linked_file(self, file_path, relpath=None, mimetype=None,
+                                  time_origin=None, assoc_with=None):
+        """Add a secondary linked file.
+
+        :param str file_path: Path of the file.
+        :param str relpath: Relative path of the file.
+        :param str mimetype: Mimetype of the file, if ``None`` it tries to
+            guess it according to the file extension which currently only works
+            for wav, mpg, mpeg and xml.
+        :param int time_origin: Time origin for the media file.
+        :param str assoc_with: Associated with field.
+        :raises KeyError: If mimetype had to be guessed and a non standard
+                          extension or an unknown mimetype.
+        """
+        if mimetype is None:
+            mimetype = MIMES[file_path.split('.')[-1]]
+        self.linked_file_descriptors.append({
+            'LINK_URL': file_path, 'RELATIVE_LINK_URL': relpath,
+            'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
+            'ASSOCIATED_WITH': assoc_with})
 
     def add_tier(self, tier_id, ling='default-lt', parent=None, locale=None,
                  part=None, ann=None, language=None, tier_dict=None):
@@ -288,44 +363,6 @@ class Eaf:
         else:
             self.tiers[tier_id] = ({}, {}, tier_dict, len(self.tiers))
 
-    def remove_tiers(self, tiers):
-        """Remove multiple tiers, note that this is a lot faster then removing
-        them individually because of the delayed cleaning of timeslots.
-
-        :param list tiers: Names of the tier to remove.
-        :raises KeyError: If a tier is non existent.
-        """
-        for a in tiers:
-            self.remove_tier(a, clean=False)
-        self.clean_time_slots()
-
-    def remove_tier(self, id_tier, clean=True):
-        """Remove a tier.
-
-        :param str id_tier: Name of the tier.
-        :param bool clean: Flag to also clean the timeslots.
-        :raises KeyError: If tier is non existent.
-        """
-        del(self.tiers[id_tier])
-        if clean:
-            self.clean_time_slots()
-
-    def get_tier_names(self):
-        """List all the tier names.
-
-        :returns: List of all tier names
-        """
-        return self.tiers.keys()
-
-    def get_parameters_for_tier(self, id_tier):
-        """Give the parameter dictionary, this is usaable in :func:`add_tier`.
-
-        :param str id_tier: Name of the tier.
-        :returns: Dictionary of parameters.
-        :raises KeyError: If the tier is non existent.
-        """
-        return self.tiers[id_tier][2]
-
     def child_tiers_for(self, id_tier):
         """Give all child tiers for a tier.
 
@@ -337,183 +374,110 @@ class Eaf:
         return [m for m in self.tiers if 'PARENT_REF' in self.tiers[m][2] and
                 self.tiers[m][2]['PARENT_REF'] == id_tier]
 
-    def get_annotation_data_for_tier(self, id_tier):
-        """Gives a list of annotations of the form: ``(begin, end, value)``
-        When th tier contains reference annotations this will be returned,
-        check :func:`get_ref_annotation_data_for_tier` for the format.
+    def clean_time_slots(self):
+        """Clean up all unused timeslots.
 
-        :param str id_tier: Name of the tier.
-        :raises KeyError: If the tier is non existent.
+        .. warning:: This can and will take time for larger tiers.
+
+        When you want to do a lot of operations on a lot of tiers please unset
+        the flags for cleaning in the functions so that the cleaning is only
+        performed afterwards.
         """
-        if self.tiers[id_tier][1]:
-            return self.get_ref_annotation_data_for_tier(id_tier, time)
-        a = self.tiers[id_tier][0]
-        return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2])
-                for b in a]
+        ts_in_tier = ((a[0], a[1]) for tier in self.tiers.itervalues() for a in
+                      tier[0].itervalues())
+        ts_in_tier = {a for b in ts_in_tier for a in b}
+        for a in ts_in_tier.symmetric_difference(self.timeslots):
+            del(self.timeslots[a])
 
-    def get_annotation_data_at_time(self, id_tier, time):
-        """Give the annotations at the given time. When the tier contains
-        reference annotations this will be returned, check
-        :func:`get_ref_annotation_data_at_time` for the format.
+    def copy_tier(self, eaf_obj, tier_name):
+        """Copies a tier to another :class:`pympi.Elan.Eaf` object.
 
-        :param str id_tier: Name of the tier.
-        :param int time: Time of the annotation.
-        :returns: List of annotations at that time.
-        :raises KeyError: If the tier is non existent.
+        :param pympi.Elan.Eaf eaf_obj: Target Eaf object.
+        :param str tier_name: Name of the tier.
+        :raises KeyError: If the tier doesn't exist.
         """
-        if self.tiers[id_tier][1]:
-            return self.get_ref_annotation_at_time(id_tier, time)
-        anns = self.tiers[id_tier][0]
-        return sorted(
-            [(self.timeslots[m[0]], self.timeslots[m[1]], m[2])
-                for m in anns.itervalues() if
-                self.timeslots[m[0]] <= time and
-                self.timeslots[m[1]] >= time])
+        if tier_name in eaf_obj.get_tier_names():
+            eaf_obj.remove_tier(tier_name)
+        eaf_obj.add_tier(tier_name,
+                         tier_dict=self.get_parameters_for_tier(tier_name))
+        for ann in self.get_annotation_data_for_tier(tier_name):
+            eaf_obj.insert_annotation(tier_name, ann[0], ann[1], ann[2])
 
-    def get_annotation_data_between_times(self, id_tier, start, end):
-        """Gives the annotations within the times.
+    def create_gaps_and_overlaps_tier(self, tier1, tier2, tier_name=None,
+                                      maxlen=-1, fast=False):
+        """Create a tier with the gaps and overlaps of the annotations.
+        For types see :func:`get_gaps_and_overlaps`
 
-        :param str id_tier: Name of the tier.
-        :param int start: Start time of the annotation.
-        :param int end: End time of the annotation.
-        :returns: List of annotations within that time.
-        :raises KeyError: If the tier is non existent.
+        :param str tier1: Name of the first tier.
+        :param str tier2: Name of the second tier.
+        :param str tier_name: Name of the new tier, if ``None`` the name will
+                              be generated.
+        :param int maxlen: Maximum length of gaps (skip longer ones), if ``-1``
+                           no maximum will be used.
+        :param bool fast: Flag for using the fast method.
+        :returns: List of gaps and overlaps of the form:
+                  ``[(type, start, end)]``.
+        :raises KeyError: If a tier is non existent.
+        :raises IndexError: If no annotations are available in the tiers.
         """
-        anns = ((self.timeslots[a[0]], self.timeslots[a[1]], a[2])
-                for a in self.tiers[id_tier][0].itervalues())
-        return sorted(a for a in anns if a[1] >= start and a[0] <= end)
+        if tier_name is None:
+            tier_name = '{}_{}_ftos'.format(tier1, tier2)
+        self.add_tier(tier_name)
+        ftos = []
+        ftogen = self.get_gaps_and_overlaps2(tier1, tier2, maxlen) if fast else\
+            self.get_gaps_and_overlaps(tier1, tier2, maxlen)
+        for fto in ftogen:
+            ftos.append(fto)
+            if fto[1]-fto[0] >= 1:
+                self.add_annotation(tier_name, fto[0], fto[1], fto[2])
+        self.clean_time_slots()
+        return ftos
 
-    def remove_all_annotations_from_tier(self, id_tier, clean=True):
-        """remove all annotations from a tier
+    def extract(self, start, end):
+        """Extracts the selected time frame as a new object.
 
-        :param str id_tier: Name of the tier.
-        :raises KeyError: If the tier is non existent.
+        :param int start: Start time.
+        :param int end: End time.
+        :returns: class:`pympi.Elan.Eaf` object containing the extracted frame.
         """
-        for aid in self.tiers[id_tier][0].keys()+self.tiers[id_tier][1].keys():
-            del(self.annotations[aid])
-        self.tiers[id_tier][0].clear()
-        self.tiers[id_tier][1].clear()
-        if clean:
-            self.clean_time_slots()
+        from copy import deepcopy
+        eaf_out = deepcopy(self)
+        for t in eaf_out.get_tier_names():
+            for ab, ae, value in eaf_out.get_annotation_data_for_tier(t):
+                if ab > end or ae < start:
+                    eaf_out.remove_annotation(t, (start-end)//2, False)
+        eaf_out.clean_time_slots()
+        return eaf_out
 
-    def insert_annotation(self, id_tier, start, end, value='', svg_ref=None):
-        """Insert an annotation.
-
-        :param str id_tier: Name of the tier.
-        :param int start: Start time of the annotation.
-        :param int end: End time of the annotation.
-        :param str value: Value of the annotation.
-        :param str svg_ref: Svg reference.
-        :raises KeyError: If the tier is non existent.
-        :raises ValueError: If one of the values is negative or start is bigger
-                            then end or if the tiers already contains ref
-                            annotations.
-        """
-        if self.tiers[id_tier][1]:
-            raise ValueError('Tier already contains ref annotations...')
-        if start == end:
-            raise ValueError('Annotation length is zero...')
-        if start > end:
-            raise ValueError('Annotation length is negative...')
-        if start < 0:
-            raise ValueError('Start is negative...')
-        start_ts = self.generate_ts_id(start)
-        end_ts = self.generate_ts_id(end)
-        aid = self.generate_annotation_id()
-        self.annotations[aid] = id_tier
-        self.tiers[id_tier][0][aid] = (start_ts, end_ts, value, svg_ref)
-
-    def remove_annotation(self, id_tier, time, clean=True):
-        """Remove an annotation in a tier, if you need speed the best thing is
-        to clean the timeslots after the last removal.
-
-        :param str id_tier: Name of the tier.
-        :param int time: Timepoint within the annotation.
-        :param bool clean: Flag to clean the timeslots afterwards.
-        :raises KeyError: If the tier is non existent.
-        :returns: Number of removed annotations.
-        """
-        removed = 0
-
-        for b in [a for a in self.tiers[id_tier][0].iteritems() if
-                  self.timeslots[a[1][0]] <= time and
-                  self.timeslots[a[1][1]] >= time]:
-            del(self.tiers[id_tier][0][b[0]])
-            del(self.annotations[b[0]])
-            removed += 1
-        if clean:
-            self.clean_time_slots()
-        return removed
-
-    def insert_ref_annotation(self, id_tier, tier2, time, value='',
-                              prev=None, svg=None):
-        """Insert a reference annotation.
-
-        :param str id_tier: Name of the tier.
-        :param str tier2: Tier of the referenced annotation.
-        :param int time: Time of the referenced annotation.
-        :param str value: Value of the annotation.
-        :param str prev: Id of the previous annotation.
-        :param str svg_ref: Svg reference.
-        :raises KeyError: If the tier is non existent.
-        :raises ValueError: If the tier already contains normal annotations or
-            if there is no annotation in the tier on the time to reference to.
-        """
-        if self.tiers[id_tier][0]:
-            raise ValueError('This tier already contains normal annotations.')
-        ann = None
-        for aid, (begin, end, _, _) in self.tiers[tier2][0].iteritems():
-            begin = self.timeslots[begin]
-            end = self.timeslots[end]
-            if begin <= time and end >= time:
-                ann = aid
-                break
-        if not ann:
-            raise ValueError('There is no annotation to reference to.')
-        aid = self.generate_annotation_id()
-        self.annotations[aid] = id_tier
-        self.tiers[id_tier][1][aid] = (ann, value, prev, svg)
-
-    def get_ref_annotation_data_for_tier(self, id_tier):
-        """"Give a list of all reference annotations of the form:
-        ``[(start, end, value, refvalue)]``
-
-        :param str id_tier: Name of the tier.
-        :raises KeyError: If the tier is non existent.
-        :returns: Reference annotations within that tier.
-        """
-        bucket = []
-        for aid, (ref, value, prev, _) in self.tiers[id_tier][1].iteritems():
-            refann = self.tiers[self.annotations[ref]][0][ref]
-            bucket.append((self.timeslots[refann[0]],
-                           self.timeslots[refann[1]], value, refann[2]))
-        return bucket
-
-    def get_ref_annotation_at_time(self, tier, time):
-        """Give the ref annotations at the given time of the form
-        ``[(start, end, value, refvalue)]``
+    def filter_annotations(self, tier, tier_name=None, filtin=None,
+                           filtex=None, regex=False, safe=False):
+        """Filter annotations in a tier using an exclusive and/or inclusive
+        filter.
 
         :param str tier: Name of the tier.
-        :param int time: Time of the annotation of the parent.
-        :returns: List of annotations at that time.
+        :param str tier_name: Name of the output tier, when ``None`` the name
+            will be generated.
+        :param list filtin: List of strings to be included, if None all
+            annotations all is included.
+        :param list filtex: List of strings to be excluded, if None no strings
+            are excluded.
+        :param bool regex: If this flag is set, the filters are seen as regex
+            matches.
+        :param bool safe: Ignore zero length annotations(when working with
+            possible malformed data).
         :raises KeyError: If the tier is non existent.
         """
-        bucket = []
-        for aid, (ref, value, _, _) in self.tiers[tier][1].iteritems():
-            begin, end, rvalue, _ = self.tiers[self.annotations[ref]][0][ref]
-            begin = self.timeslots[begin]
-            end = self.timeslots[end]
-            if begin <= time and end >= time:
-                bucket.append((begin, end, value, rvalue))
-        return bucket
-
-    def remove_controlled_vocabulary(self, cv):
-        """Remove a controlled vocabulary.
-
-        :param str cv: Controlled vocabulary id.
-        :raises KeyError: If the controlled vocabulary is non existent.
-        """
-        del(self.controlled_vocabularies[cv])
+        if tier_name is None:
+            tier_name = '{}_filter'.format(tier)
+        self.add_tier(tier_name)
+        func = (lambda x, y: re.match(x, y)) if regex else lambda x, y: x == y
+        for begin, end, value in self.get_annotation_data_for_tier(tier):
+            if (filtin and not any(func(f, value) for f in filtin)) or\
+                    (filtex and any(func(f, value) for f in filtex)):
+                continue
+            if not safe or end > begin:
+                self.add_annotation(tier_name, begin, end, value)
+        self.clean_time_slots()
 
     def generate_annotation_id(self):
         """Generate the next annotation id, this function is mainly used
@@ -548,153 +512,61 @@ class Eaf:
         self.timeslots[ts] = time
         return ts
 
-    def clean_time_slots(self):
-        """Clean up all unused timeslots.
+    def get_annotation_data_at_time(self, id_tier, time):
+        """Give the annotations at the given time. When the tier contains
+        reference annotations this will be returned, check
+        :func:`get_ref_annotation_data_at_time` for the format.
 
-        .. warning:: This can and will take time for larger tiers. When you
-
-        want to do a lot of operations on a lot of tiers please unset the flags
-        for cleaning in the functions so that the cleaning is only performed
-        afterwards.
-        """
-        ts_in_tier = ((a[0], a[1]) for tier in self.tiers.itervalues() for a in
-                      tier[0].itervalues())
-        ts_in_tier = {a for b in ts_in_tier for a in b}
-        for a in ts_in_tier.symmetric_difference(self.timeslots):
-            del(self.timeslots[a])
-
-    def merge_tiers(self, tiers, tiernew=None, gapt=0, sep='_', safe=False):
-        """Merge tiers into a new tier and when the gap is lower then the
-        threshhold glue the annotations together.
-
-        :param list tiers: List of tier names.
-        :param str tiernew: Name for the new tier, if ``None`` the name will be
-                            generated.
-        :param int gapt: Threshhold for the gaps, if the this is set to 10 it
-                         means that all gaps below 10 are ignored.
-        :param str sep: Separator for the merged annotations.
-        :param bool safe: Ignore zero length annotations(when working with
-            possible malformed data).
-        :raises KeyError: If a tier is non existent.
-        """
-        if tiernew is None:
-            tiernew = '{}_merged'.format('_'.join(tiers))
-        self.add_tier(tiernew)
-        aa = [(sys.maxint, sys.maxint, None)] + sorted((
-            a for t in tiers for a in self.get_annotation_data_for_tier(t)),
-            reverse=True)
-        l = None
-        while aa:
-            begin, end, value = aa.pop()
-            if l is None:
-                l = [begin, end, [value]]
-            elif begin - l[1] >= gapt:
-                if not safe or l[1] > l[0]:
-                    self.insert_annotation(tiernew, l[0], l[1], sep.join(l[2]))
-                l = [begin, end, [value]]
-            else:
-                if end > l[1]:
-                    l[1] = end
-                l[2].append(value)
-
-    def shift_annotations(self, time):
-        """Shift all annotations in time. Annotations that are in the beginning
-        and a left shift is applied can be squashed or discarded.
-
-        :param int time: Time shift width, negative numbers make a left shift.
-        :returns: Tuple of a list of squashed annotations and a list of removed
-                  annotations in the format: ``(tiername, start, end, value)``.
-        """
-        total_re = []
-        total_sq = []
-        for name, tier in self.tiers.iteritems():
-            squashed = []
-            for aid, (begin, end, value, _) in tier[0].iteritems():
-                if self.timeslots[end]+time <= 0:
-                    squashed.append((name, aid))
-                elif self.timeslots[begin]+time < 0:
-                    total_sq.append((name, self.timeslots[begin],
-                                     self.timeslots[end], value))
-                    self.timeslots[begin] = 0
-                else:
-                    self.timeslots[begin] += time
-                    self.timeslots[end] += time
-            for name, aid in squashed:
-                start, end, value, _ = self.tiers[name][0][aid]
-                del(self.tiers[name][0][aid])
-                del(self.annotations[aid])
-                total_re.append(
-                    (name, self.timeslots[start], self.timeslots[end], value))
-        return total_sq, total_re
-
-    def filter_annotations(self, tier, tier_name=None, filtin=None,
-                           filtex=None, regex=False, safe=False):
-        """Filter annotations in a tier using an exclusive and/or inclusive
-        filter.
-
-        :param str tier: Name of the tier.
-        :param str tier_name: Name of the output tier, when ``None`` the name
-            will be generated.
-        :param list filtin: List of strings to be included, if None all
-            annotations all is included.
-        :param list filtex: List of strings to be excluded, if None no strings
-            are excluded.
-        :param bool regex: If this flag is set, the filters are seen as regex
-            matches.
-        :param bool safe: Ignore zero length annotations(when working with
-            possible malformed data).
+        :param str id_tier: Name of the tier.
+        :param int time: Time of the annotation.
+        :returns: List of annotations at that time.
         :raises KeyError: If the tier is non existent.
         """
-        if tier_name is None:
-            tier_name = '{}_filter'.format(tier)
-        self.add_tier(tier_name)
-        func = (lambda x, y: re.match(x, y)) if regex else lambda x, y: x == y
-        for begin, end, value in self.get_annotation_data_for_tier(tier):
-            if (filtin and not any(func(f, value) for f in filtin)) or\
-                    (filtex and any(func(f, value) for f in filtex)):
-                continue
-            if not safe or end > begin:
-                self.insert_annotation(tier_name, begin, end, value)
-        self.clean_time_slots()
+        if self.tiers[id_tier][1]:
+            return self.get_ref_annotation_at_time(id_tier, time)
+        anns = self.tiers[id_tier][0]
+        return sorted(
+            [(self.timeslots[m[0]], self.timeslots[m[1]], m[2])
+                for m in anns.itervalues() if
+                self.timeslots[m[0]] <= time and
+                self.timeslots[m[1]] >= time])
+
+    def get_annotation_data_between_times(self, id_tier, start, end):
+        """Gives the annotations within the times.
+
+        :param str id_tier: Name of the tier.
+        :param int start: Start time of the annotation.
+        :param int end: End time of the annotation.
+        :returns: List of annotations within that time.
+        :raises KeyError: If the tier is non existent.
+        """
+        anns = ((self.timeslots[a[0]], self.timeslots[a[1]], a[2])
+                for a in self.tiers[id_tier][0].itervalues())
+        return sorted(a for a in anns if a[1] >= start and a[0] <= end)
+
+    def get_annotation_data_for_tier(self, id_tier):
+        """Gives a list of annotations of the form: ``(begin, end, value)``
+        When th tier contains reference annotations this will be returned,
+        check :func:`get_ref_annotation_data_for_tier` for the format.
+
+        :param str id_tier: Name of the tier.
+        :raises KeyError: If the tier is non existent.
+        """
+        if self.tiers[id_tier][1]:
+            return self.get_ref_annotation_data_for_tier(id_tier, time)
+        a = self.tiers[id_tier][0]
+        return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2])
+                for b in a]
 
     def get_full_time_interval(self):
-        """Give the full time interval of the file.
+        """Give the full time interval of the file. Note that the real interval
+        can be longer because the sound file attached can be longer.
 
         :returns: Tuple of the form: ``(min_time, max_time)``.
         """
         return (0, 0) if not self.timeslots else\
             (min(self.timeslots.itervalues()),
              max(self.timeslots.itervalues()))
-
-    def create_gaps_and_overlaps_tier(self, tier1, tier2, tier_name=None,
-                                      maxlen=-1, fast=False):
-        """Create a tier with the gaps and overlaps of the annotations.
-        For types see :func:`get_gaps_and_overlaps`
-
-        :param str tier1: Name of the first tier.
-        :param str tier2: Name of the second tier.
-        :param str tier_name: Name of the new tier, if ``None`` the name will
-                              be generated.
-        :param int maxlen: Maximum length of gaps (skip longer ones), if ``-1``
-                           no maximum will be used.
-        :param bool fast: Flag for using the fast method.
-        :returns: List of gaps and overlaps of the form:
-                  ``[(type, start, end)]``.
-        :raises KeyError: If a tier is non existent.
-        :raises IndexError: If no annotations are available in the tiers.
-        """
-        if tier_name is None:
-            tier_name = '{}_{}_ftos'.format(tier1, tier2)
-        self.add_tier(tier_name)
-        ftos = []
-        ftogen = self.get_gaps_and_overlaps2(tier1, tier2, maxlen) if fast else\
-            self.get_gaps_and_overlaps(tier1, tier2, maxlen)
-        for fto in ftogen:
-            ftos.append(fto)
-            if fto[1]-fto[0] >= 1:
-                self.insert_annotation(tier_name, fto[0], fto[1], fto[2])
-        self.clean_time_slots()
-        return ftos
 
     def get_gaps_and_overlaps(self, tier1, tier2, maxlen=-1):
         """Give gaps and overlaps. The return types are shown in the table
@@ -796,7 +668,8 @@ class Eaf:
                     yield (line1[i][1], line1[i][2]-1, '_'.join(t))
 
     def get_gaps_and_overlaps2(self, tier1, tier2, maxlen=-1):
-        """Faster variant of :func:`get_gaps_and_overlaps`.
+        """Faster variant of :func:`get_gaps_and_overlaps`. Faster in this case
+        means almost 100 times faster...
 
         :param str tier1: Name of the first tier.
         :param str tier2: Name of the second tier.
@@ -823,18 +696,111 @@ class Eaf:
                     yield (last[1], begin, 'G{}{}'.format(last[2], current))
                 last = (begin, end, current)
 
-    def create_controlled_vocabulary(self, cv_id, descriptions, entries,
-                                     ext_ref=None):
-        """Create a controlled vocabulary.
-        .. warning:: This is a very raw implementation and you should check the
-        Eaf file format specification for the entries.
+    def get_controlled_vocabulary_names(self):
+        """Gives all the controlled vocabulary names"""
+        return self.controlled_vocabularies.keys()
+
+    def get_cv_entries(self, cv_id):
+        """Gives all the controlled vocabulary entries names.
 
         :param str cv_id: Name of the controlled vocabulary.
-        :param list descriptions: List of descriptions.
-        :param dict entries: Entries dictionary.
-        :param str ext_ref: External reference.
+        :throws KeyError: If there is no controlled vocabulary with that id.
         """
-        self.controlledvocabularies[cv_id] = (descriptions, entries, ext_ref)
+        return self.controlled_vocabularies[cv_id][1]
+
+    def get_cv_descriptions(self, cv_id):
+        """Gives all the controlled vocabulary descriptions.
+
+        :param str cv_id: Name of the controlled vocabulary.
+        :throws KeyError: If there is no controlled vocabulary with that id.
+        """
+        return self.controlled_vocabularies[cv_id][0]
+
+    def get_languages(self):
+        """Gives all the languages in the format:
+        ``{lang_id -> (lang_def, lang_label)}``
+        """
+        return self.languages
+
+    def get_licenses(self):
+        """Gives all the licenses in the format: ``[(name, url)]``"""
+        return self.licenses
+
+    def get_linguistic_type_names(self):
+        """Give a list of available linguistic types.
+
+        :returns: List of linguistic type names.
+        """
+        return self.linguistic_types.keys()
+
+    def get_linked_files(self):
+        """Give all linked files."""
+        return self.media_descriptors
+
+    def get_locales(self):
+        """Gives all the locales in the format: ``{language_code ->
+        (country_code, variant)}``
+        """
+        return self.locales
+
+    def get_parameters_for_linguistic_type(self, lingtype):
+        """Give the parameter dictionary, this is usable in
+        :func:`add_linguistic_type`.
+
+        :param str lingtype: Name of the linguistic type.
+        :raises KeyError: If the linguistic type doesn't exist.
+        """
+        return self.linguistic_types[lingtype]
+
+    def get_parameters_for_tier(self, id_tier):
+        """Give the parameter dictionary, this is usaable in :func:`add_tier`.
+
+        :param str id_tier: Name of the tier.
+        :returns: Dictionary of parameters.
+        :raises KeyError: If the tier is non existent.
+        """
+        return self.tiers[id_tier][2]
+
+    def get_properties(self):
+        """Gives all the properties in the format: ``[(key, value)]``"""
+        return self.properties
+
+    def get_ref_annotation_at_time(self, tier, time):
+        """Give the ref annotations at the given time of the form
+        ``[(start, end, value, refvalue)]``
+
+        :param str tier: Name of the tier.
+        :param int time: Time of the annotation of the parent.
+        :returns: List of annotations at that time.
+        :raises KeyError: If the tier is non existent.
+        """
+        bucket = []
+        for aid, (ref, value, _, _) in self.tiers[tier][1].iteritems():
+            begin, end, rvalue, _ = self.tiers[self.annotations[ref]][0][ref]
+            begin = self.timeslots[begin]
+            end = self.timeslots[end]
+            if begin <= time and end >= time:
+                bucket.append((begin, end, value, rvalue))
+        return bucket
+
+    def get_ref_annotation_data_for_tier(self, id_tier):
+        """"Give a list of all reference annotations of the form:
+        ``[(start, end, value, refvalue)]``
+
+        :param str id_tier: Name of the tier.
+        :raises KeyError: If the tier is non existent.
+        :returns: Reference annotations within that tier.
+        """
+        bucket = []
+        for aid, (ref, value, prev, _) in self.tiers[id_tier][1].iteritems():
+            refann = self.tiers[self.annotations[ref]][0][ref]
+            bucket.append((self.timeslots[refann[0]],
+                           self.timeslots[refann[1]], value, refann[2]))
+        return bucket
+
+    def get_secondary_linked_files(self):
+        """Give all linked files."""
+        return self.linked_file_descriptors
 
     def get_tier_ids_for_linguistic_type(self, ling_type, parent=None):
         """Give a list of all tiers matching a linguistic type.
@@ -849,6 +815,145 @@ class Eaf:
                 self.tiers[t][2]['LINGUISTIC_TYPE_REF'] == ling_type and
                 (parent is None or self.tiers[t][2]['PARENT_REF'] == parent)]
 
+    def get_tier_names(self):
+        """List all the tier names.
+
+        :returns: List of all tier names
+        """
+        return self.tiers.keys()
+
+    def insert_annotation(self, id_tier, start, end, value='', svg_ref=None):
+        """.. deprecated:: 1.2
+
+        Use :func:`add_annotation` instead.
+        """
+        return self.add_annotation(id_tier, start, end, value, svg_ref)
+
+    def insert_ref_annotation(self, id_tier, tier2, time, value='',
+                              prev=None, svg=None):
+        """.. deprecated:: 1.2
+
+        Use :func:`add_ref_annotation` instead.
+        """
+        return self.add_ref_annotation(id_tier, tier2, time, value, prev, svg)
+
+    def merge_tiers(self, tiers, tiernew=None, gapt=0, sep='_', safe=False):
+        """Merge tiers into a new tier and when the gap is lower then the
+        threshhold glue the annotations together.
+
+        :param list tiers: List of tier names.
+        :param str tiernew: Name for the new tier, if ``None`` the name will be
+                            generated.
+        :param int gapt: Threshhold for the gaps, if the this is set to 10 it
+                         means that all gaps below 10 are ignored.
+        :param str sep: Separator for the merged annotations.
+        :param bool safe: Ignore zero length annotations(when working with
+            possible malformed data).
+        :raises KeyError: If a tier is non existent.
+        """
+        if tiernew is None:
+            tiernew = '{}_merged'.format('_'.join(tiers))
+        self.add_tier(tiernew)
+        aa = [(sys.maxint, sys.maxint, None)] + sorted((
+            a for t in tiers for a in self.get_annotation_data_for_tier(t)),
+            reverse=True)
+        l = None
+        while aa:
+            begin, end, value = aa.pop()
+            if l is None:
+                l = [begin, end, [value]]
+            elif begin - l[1] >= gapt:
+                if not safe or l[1] > l[0]:
+                    self.add_annotation(tiernew, l[0], l[1], sep.join(l[2]))
+                l = [begin, end, [value]]
+            else:
+                if end > l[1]:
+                    l[1] = end
+                l[2].append(value)
+
+    def remove_all_annotations_from_tier(self, id_tier, clean=True):
+        """remove all annotations from a tier
+
+        :param str id_tier: Name of the tier.
+        :raises KeyError: If the tier is non existent.
+        """
+        for aid in self.tiers[id_tier][0].keys()+self.tiers[id_tier][1].keys():
+            del(self.annotations[aid])
+        self.tiers[id_tier][0].clear()
+        self.tiers[id_tier][1].clear()
+        if clean:
+            self.clean_time_slots()
+
+    def remove_annotation(self, id_tier, time, clean=True):
+        """Remove an annotation in a tier, if you need speed the best thing is
+        to clean the timeslots after the last removal.
+
+        :param str id_tier: Name of the tier.
+        :param int time: Timepoint within the annotation.
+        :param bool clean: Flag to clean the timeslots afterwards.
+        :raises KeyError: If the tier is non existent.
+        :returns: Number of removed annotations.
+        """
+        removed = 0
+        for b in [a for a in self.tiers[id_tier][0].iteritems() if
+                  self.timeslots[a[1][0]] <= time and
+                  self.timeslots[a[1][1]] >= time]:
+            del(self.tiers[id_tier][0][b[0]])
+            del(self.annotations[b[0]])
+            removed += 1
+        if clean:
+            self.clean_time_slots()
+        return removed
+
+    def remove_controlled_vocabulary(self, cv_id):
+        """Remove a controlled vocabulary.
+
+        :param str cv_id: Name of the controlled vocabulary.
+        :throws KeyError: If there is no controlled vocabulary with that name.
+        """
+        del(self.controlled_vocabularies[cv_id])
+
+    def remove_cv_entry(self, cv_id, cve_id):
+        """Remove a controlled vocabulary entry.
+
+        :param str cv_id: Name of the controlled vocabulary.
+        :paarm str cve_id: Name of the entry.
+        :throws KeyError: If there is no entry or controlled vocabulary with
+            that name.
+        """
+        del(self.controlled_vocabularies[cv_id][1][cve_id])
+
+    def remove_cv_description(self, cv_id, lang_ref):
+        """Remove a controlled vocabulary description.
+
+        :param str cv_id: Name of the controlled vocabulary.
+        :paarm str cve_id: Name of the entry.
+        :throws KeyError: If there is no controlled vocabulary with that name.
+        """
+        for i, (l, d) in reversed(enumerate(
+                self.controlled_vocabularies[cv_id][1])):
+            if l == lang_ref:
+                del(self.controlled_vocabularies[cv_id][1][i])
+
+    def remove_language(self, lang_id):
+        """Remove the language mathing the id.
+
+        :param str lang_id: Language id of the language.
+        :throws KeyError: If there is no language matching the language id.
+        """
+        del(self.languages[lang_id])
+
+    def remove_license(self, name=None, url=None):
+        """Remove all licenses matching both key and value.
+
+        :param str name: Name of the license.
+        :param str url: URL of the license.
+        """
+        for k, v in self.licenses[:]:
+            if (name is None or name == k) and\
+                    (url is None or url == v):
+                del(self.licenses[self.licenses.index((k, v))])
+
     def remove_linguistic_type(self, ling_type):
         """Remove a linguistic type.
 
@@ -856,52 +961,6 @@ class Eaf:
         :raises KeyError: When the linguistic type doesn't exist.
         """
         del(self.linguistic_types[ling_type])
-
-    def add_linguistic_type(self, lingtype, constraints=None,
-                            timealignable=True, graphicreferences=False,
-                            extref=None, param_dict=None):
-        """Add a linguistic type.
-
-        :param str lingtype: Name of the linguistic type.
-        :param list constraints: Constraint names.
-        :param bool timealignable: Flag for time alignable.
-        :param bool graphicreferences: Flag for graphic references.
-        :param str extref: External reference.
-        :param dict param_dict: TAG attributes, when this is not ``None`` it
-                                 will ignore all other options. Please only use
-                                 dictionaries coming from the
-                                 :func:`get_parameters_for_linguistic_type`
-        :raises KeyError: If a constraint is not defined
-        """
-        if param_dict:
-            self.linguistic_types[lingtype] = param_dict
-        else:
-            if constraints:
-                for c in constraints:
-                    self.constraints[c]
-            self.linguistic_types[lingtype] = {
-                'LINGUISTIC_TYPE_ID': lingtype,
-                'TIME_ALIGNABLE': str(timealignable).lower(),
-                'GRAPHIC_REFERENCES': str(graphicreferences).lower(),
-                'CONSTRAINTS': constraints}
-            if extref is not None:
-                self.linguistic_types[lingtype]['EXT_REF'] = extref
-
-    def get_linguistic_type_names(self):
-        """Give a list of available linguistic types.
-
-        :returns: List of linguistic type names.
-        """
-        return self.linguistic_types.keys()
-
-    def get_parameters_for_linguistic_type(self, lingtype):
-        """Give the parameter dictionary, this is usable in
-        :func:`add_linguistic_type`.
-
-        :param str lingtype: Name of the linguistic type.
-        :raises KeyError: If the linguistic type doesn't exist.
-        """
-        return self.linguistic_types[lingtype]
 
     def remove_linked_files(self, file_path=None, relpath=None, mimetype=None,
                             time_origin=None, ex_from=None):
@@ -927,6 +986,25 @@ class Eaf:
             if ex_from is not None and attrib['EXTRACTED_FROM'] != ex_from:
                 continue
             del(self.media_descriptors[self.media_descriptors.index(attrib)])
+
+    def remove_locale(self, language_code):
+        """Remove the locale matching the language code.
+
+        :param str language_code: Language code of the locale.
+        :throws KeyError: If there is no locale matching the language code.
+        """
+        del(self.locales[language_code])
+
+    def remove_property(self, key=None, value=None):
+        """Remove all properties matching both key and value.
+
+        :param str key: Key of the property.
+        :param str value: Value of the property.
+        """
+        for k, v in self.properties[:]:
+            if (key is None or key == k) and\
+                    (value is None or value == v):
+                del(self.properties[self.properties.index((k, v))])
 
     def remove_secondary_linked_files(self, file_path=None, relpath=None,
                                       mimetype=None, time_origin=None,
@@ -956,97 +1034,105 @@ class Eaf:
             del(self.linked_file_descriptors[
                 self.linked_file_descriptors.index(attrib)])
 
-    def add_locale(self, language_code, country_code=None, variant=None):
-        """Add a locale.
+    def remove_tier(self, id_tier, clean=True):
+        """Remove a tier.
 
-        :param str language_code: The language code of the locale.
-        :param str country_code: The country code of the locale.
-        :param str variant: The variant of the locale.
+        :param str id_tier: Name of the tier.
+        :param bool clean: Flag to also clean the timeslots.
+        :raises KeyError: If tier is non existent.
         """
-        self.locales[language_code] = (country_code, variant)
+        del(self.tiers[id_tier])
+        if clean:
+            self.clean_time_slots()
 
-    def remove_locale(self, language_code):
-        """Remove the locale matching the language code.
+    def remove_tiers(self, tiers):
+        """Remove multiple tiers, note that this is a lot faster then removing
+        them individually because of the delayed cleaning of timeslots.
 
-        :param str language_code: Language code of the locale.
-        :throws KeyError: If there is no locale matching the language code.
+        :param list tiers: Names of the tier to remove.
+        :raises KeyError: If a tier is non existent.
         """
-        del(self.locales[language_code])
+        for a in tiers:
+            self.remove_tier(a, clean=False)
+        self.clean_time_slots()
 
-    def get_locales(self):
-        """Gives all the locales in the format: ``{language_code ->
-        (country_code, variant)}``
+    def rename_tier(self, id_from, id_to):
+        """Rename a tier. Note that this renames also the child tiers that have
+        the tier as a parent.
+
+        :param str id_from: Original name of the tier.
+        :param str id_to: Target name of the tier.
+        :throws KeyError: If the tier doesnt' exist.
         """
-        return self.locales
+        childs = self.child_tiers_for(id_from)
+        self.tiers[id_to] = self.tiers.pop(id_from)
+        self.tiers[id_to][2]['TIER_ID'] = id_to
+        for child in childs:
+            self.tiers[child][2]['PARENT_REF'] = id_to
 
-    def add_language(self, lang_id, lang_def=None, lang_label=None):
-        """Add a language.
+    def shift_annotations(self, time):
+        """Shift all annotations in time. Annotations that are in the beginning
+        and a left shift is applied can be squashed or discarded.
 
-        :param str lang_id: ID of the language.
-        :param str lang_def: Definition of the language(preferably ISO-639-3).
-        :param str lang_label: Label of the language.
+        :param int time: Time shift width, negative numbers make a left shift.
+        :returns: Tuple of a list of squashed annotations and a list of removed
+                  annotations in the format: ``(tiername, start, end, value)``.
         """
-        self.languages[lang_id] = (lang_def, lang_label)
+        total_re = []
+        total_sq = []
+        for name, tier in self.tiers.iteritems():
+            squashed = []
+            for aid, (begin, end, value, _) in tier[0].iteritems():
+                if self.timeslots[end]+time <= 0:
+                    squashed.append((name, aid))
+                elif self.timeslots[begin]+time < 0:
+                    total_sq.append((name, self.timeslots[begin],
+                                     self.timeslots[end], value))
+                    self.timeslots[begin] = 0
+                else:
+                    self.timeslots[begin] += time
+                    self.timeslots[end] += time
+            for name, aid in squashed:
+                start, end, value, _ = self.tiers[name][0][aid]
+                del(self.tiers[name][0][aid])
+                del(self.annotations[aid])
+                total_re.append(
+                    (name, self.timeslots[start], self.timeslots[end], value))
+        return total_sq, total_re
 
-    def remove_language(self, lang_id):
-        """Remove the language mathing the id.
+    def to_file(self, file_path, pretty=True):
+        """Write the object to a file, if the file already exists a backup will
+        be created with the ``.bak`` suffix.
 
-        :param str lang_id: Language id of the language.
-        :throws KeyError: If there is no language matching the language id.
+        :param str file_path: Filepath to write to.
+        :param bool pretty: Flag for pretty XML printing (Only unset this if
+            you are afraid of wasting bytes because it won't print unneccesary
+            whitespace).
         """
-        del(self.languages[lang_id])
+        to_eaf(file_path, self, pretty)
 
-    def get_languages(self):
-        """Gives all the languages in the format:
-        ``{lang_id -> (lang_def, lang_label)}``
+    def to_textgrid(self, filtin=[], filtex=[], regex=False):
+        """Convert the object to a :class:`pympi.Praat.TextGrid` object.
+
+        :param list filtin: Include only tiers in this list, if empty
+            all tiers are included.
+        :param list filtex: Exclude all tiers in this list.
+        :param bool regex: If this flag is set the filters are seen as regexes.
+        :returns: :class:`pympi.Praat.TextGrid` representation.
+        :raises ImportError: If the pympi.Praat module can't be loaded.
         """
-        return self.languages
-
-    def add_property(self, key, value):
-        """Add a property
-
-        :param str key: Key of the property.
-        :param str value: Value of the property.
-        """
-        self.properties.append((key, value))
-
-    def remove_property(self, key=None, value=None):
-        """Remove all properties matching both key and value.
-
-        :param str key: Key of the property.
-        :param str value: Value of the property.
-        """
-        for k, v in self.properties[:]:
-            if (key is None or key == k) and\
-                    (value is None or value == v):
-                del(self.properties[self.properties.index((k, v))])
-
-    def get_properties(self):
-        """Gives all the properties in the format: ``[(key, value)]``"""
-        return self.properties
-
-    def add_license(self, name, url):
-        """Add a license
-
-        :param str name: Name of the license.
-        :param str url: URL of the license.
-        """
-        self.licenses.append((name, url))
-
-    def remove_license(self, name=None, url=None):
-        """Remove all licenses matching both key and value.
-
-        :param str name: Name of the license.
-        :param str url: URL of the license.
-        """
-        for k, v in self.licenses[:]:
-            if (name is None or name == k) and\
-                    (url is None or url == v):
-                del(self.licenses[self.licenses.index((k, v))])
-
-    def get_licenses(self):
-        """Gives all the licenses in the format: ``[(name, url)]``"""
-        return self.licenses
+        from pympi.Praat import TextGrid
+        _, end = self.get_full_time_interval()
+        tgout = TextGrid(xmax=end)
+        func = (lambda x, y: re.match(x, y)) if regex else lambda x, y: x == y
+        for tier in self.tiers:
+            if (filtin and not any(func(f, tier) for f in filtin)) or\
+                    (filtex and any(func(f, tier) for f in filtex)):
+                continue
+            ctier = tgout.add_tier(tier)
+            for intv in self.get_annotation_data_for_tier(tier):
+                ctier.add_interval(intv[0]/1000.0, intv[1]/1000.0, intv[2])
+        return tgout
 
 
 def parse_eaf(file_path, eaf_obj):
@@ -1158,9 +1244,9 @@ def parse_eaf(file_path, eaf_obj):
                     cve_values = []
                     for elem2 in elem1:
                         if elem2.tag == 'CVE_VALUE':
-                            cve_values.append((elem2.attrib['LANG_REF'],
-                                               elem2.get('DESCRIPTION', None),
-                                               elem2.text))
+                            cve_values.append((elem2.text,
+                                               elem2.attrib['LANG_REF'],
+                                               elem2.get('DESCRIPTION', None)))
                     entries[cve_id] = (cve_values, cem_ext_ref)
             eaf_obj.controlled_vocabularies[cv_id] =\
                 (descriptions, entries, ext_ref)
@@ -1275,17 +1361,18 @@ def to_eaf(file_path, eaf_obj, pretty=True):
             eaf_obj.controlled_vocabularies.iteritems():
         cv = etree.SubElement(ANNOTATION_DOCUMENT, 'CONTROLLED_VOCABULARY',
                               rm_none({'CV_ID': cvid, 'EXT_REF': ext_ref}))
-        for lang_ref, textvalue in descriptions:
+        for lang_ref, description in descriptions:
             des = etree.SubElement(cv, 'DESCRIPTION', {'LANG_REF': lang_ref})
-            des.text = textvalue
+            if description:
+                des.text = description
         for cveid, (values, ext_ref) in cv_entries.iteritems():
             cem = etree.SubElement(cv, 'CV_ENTRY_ML', rm_none({
                                    'CVE_ID': cveid, 'EXT_REF': ext_ref}))
-            for lang_ref, description, textvalue in values:
+            for value, lang_ref, description in values:
                 val = etree.SubElement(cem, 'CVE_VALUE', rm_none({
                                        'LANG_REF': lang_ref,
                                        'DESCRIPTION': description}))
-                val.text = textvalue
+                val.text = value
 
     # Lexicon refs
     for l in eaf_obj.lexicon_refs:

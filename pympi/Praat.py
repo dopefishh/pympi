@@ -6,7 +6,7 @@ import itertools
 import re
 import sys
 
-VERSION = '1.19'
+VERSION = '1.2'
 
 rexmin = re.compile(r'xmin = ([0-9.]*)')
 rexmax = re.compile(r'xmax = ([0-9.]*)')

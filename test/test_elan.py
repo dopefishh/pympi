@@ -213,9 +213,9 @@ class Elan(unittest.TestCase):
 
     def test_get_annotation_data_for_tier(self):
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a1')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a1')
+        self.eaf.add_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.add_annotation('tier1', 1000, 2000, 'a1')
+        self.eaf.add_annotation('tier1', 2000, 3000, 'a1')
         self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             sorted([(0, 1000, 'a1'), (2000, 3000, 'a1'), (1000, 2000, 'a1')]))
@@ -224,9 +224,9 @@ class Elan(unittest.TestCase):
 
     def test_get_annotation_data_at_time(self):
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.add_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.add_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('tier1', 2000, 3000, 'a3')
         self.assertEqual(
             sorted(self.eaf.get_annotation_data_at_time('tier1', 500)),
             [(0, 1000, 'a1')])
@@ -240,10 +240,10 @@ class Elan(unittest.TestCase):
 
     def test_get_annotation_data_between_times(self):
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
-        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.eaf.add_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.add_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.add_annotation('tier1', 3000, 4000, 'a4')
         self.assertEqual(sorted(self.eaf.get_annotation_data_between_times(
             'tier1', 1500, 2500)), [(1000, 2000, 'a2'), (2000, 3000, 'a3')])
         self.assertEqual(sorted(self.eaf.get_annotation_data_between_times(
@@ -256,41 +256,41 @@ class Elan(unittest.TestCase):
 
     def test_remove_all_annotations_from_tier(self):
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
-        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.eaf.add_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.add_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.add_annotation('tier1', 3000, 4000, 'a4')
         self.eaf.remove_all_annotations_from_tier('tier1')
         self.assertEquals(self.eaf.get_annotation_data_for_tier('tier1'), [])
 
-    def test_insert_annotation(self):
+    def test_add_annotation(self):
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 0, 1)
+        self.eaf.add_annotation('tier1', 0, 1)
         self.assertEquals(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             [(0, 1, '')])
-        self.eaf.insert_annotation('tier1', 1, 2, 'abc')
+        self.eaf.add_annotation('tier1', 1, 2, 'abc')
         self.assertEquals(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             sorted([(0, 1, ''), (1, 2, 'abc')]))
-        self.assertRaises(KeyError, self.eaf.insert_annotation, 't1', 0, 0)
+        self.assertRaises(KeyError, self.eaf.add_annotation, 't1', 0, 0)
         self.assertRaises(ValueError,
-                          self.eaf.insert_annotation, 'tier1', 1, 1)
+                          self.eaf.add_annotation, 'tier1', 1, 1)
         self.assertRaises(ValueError,
-                          self.eaf.insert_annotation, 'tier1', 2, 1)
+                          self.eaf.add_annotation, 'tier1', 2, 1)
         self.assertRaises(ValueError,
-                          self.eaf.insert_annotation, 'tier1', -1, 1)
+                          self.eaf.add_annotation, 'tier1', -1, 1)
         self.eaf.add_tier('tier2')
-        self.eaf.insert_ref_annotation('tier2', 'tier1', 0, 'r1')
+        self.eaf.add_ref_annotation('tier2', 'tier1', 0, 'r1')
         self.assertRaises(ValueError,
-                          self.eaf.insert_annotation, 'tier2', 0, 1)
+                          self.eaf.add_annotation, 'tier2', 0, 1)
 
     def test_remove_annotation(self):
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
-        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.eaf.add_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.add_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.add_annotation('tier1', 3000, 4000, 'a4')
         self.assertEquals(self.eaf.remove_annotation('tier1', 500), 1)
         self.assertEquals(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
@@ -309,10 +309,10 @@ class Elan(unittest.TestCase):
     def test_clean_time_slots(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_tier('tier2')
-        self.eaf.insert_annotation('tier1', 0, 1, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
-        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.eaf.add_annotation('tier1', 0, 1, 'a1')
+        self.eaf.add_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.add_annotation('tier1', 3000, 4000, 'a4')
         ts = [x for x in self.eaf.timeslots]
         self.eaf.remove_annotation('tier1', 1500, False)
         self.assertEqual(len(ts), len(self.eaf.timeslots))
@@ -324,26 +324,26 @@ class Elan(unittest.TestCase):
         self.eaf.add_tier('tier2')
         self.eaf.add_tier('tier3')
         # Overlap
-        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('tier2', 500, 1500, 'b1')
+        self.eaf.add_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.add_annotation('tier2', 500, 1500, 'b1')
 
         # Gap
-        self.eaf.insert_annotation('tier1', 2000, 2500, 'a2')
-        self.eaf.insert_annotation('tier2', 3000, 4000, 'b2')
+        self.eaf.add_annotation('tier1', 2000, 2500, 'a2')
+        self.eaf.add_annotation('tier2', 3000, 4000, 'b2')
 
         # Within
-        self.eaf.insert_annotation('tier1', 5000, 6000, 'a3')
-        self.eaf.insert_annotation('tier2', 5100, 5900, 'b3')
+        self.eaf.add_annotation('tier1', 5000, 6000, 'a3')
+        self.eaf.add_annotation('tier2', 5100, 5900, 'b3')
 
         # Three
-        self.eaf.insert_annotation('tier1', 6050, 6250, 'c')
-        self.eaf.insert_annotation('tier1', 6250, 6500, 'c')
-        self.eaf.insert_annotation('tier1', 6500, 6750, 'c')
-        self.eaf.insert_annotation('tier3', 6100, 6800, 'd')
+        self.eaf.add_annotation('tier1', 6050, 6250, 'c')
+        self.eaf.add_annotation('tier1', 6250, 6500, 'c')
+        self.eaf.add_annotation('tier1', 6500, 6750, 'c')
+        self.eaf.add_annotation('tier3', 6100, 6800, 'd')
 
         # Gap of 5 ms
-        self.eaf.insert_annotation('tier1', 7000, 7995, 'a4')
-        self.eaf.insert_annotation('tier2', 8000, 9000, 'b4')
+        self.eaf.add_annotation('tier1', 7000, 7995, 'a4')
+        self.eaf.add_annotation('tier2', 8000, 9000, 'b4')
 
         self.eaf.merge_tiers(['tier1', 'tier2'], 'm_0')
         self.eaf.merge_tiers(['tier1'], 'm_a', 5)
@@ -377,10 +377,10 @@ class Elan(unittest.TestCase):
         self.eaf.add_tier('tier1')
         self.eaf.add_tier('tier2')
         # Overlap
-        self.eaf.insert_annotation('tier1', 0, 100, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier2', 500, 1500, 'b1')
-        self.eaf.insert_annotation('tier2', 0, 150, 'b1')
+        self.eaf.add_annotation('tier1', 0, 100, 'a1')
+        self.eaf.add_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('tier2', 500, 1500, 'b1')
+        self.eaf.add_annotation('tier2', 0, 150, 'b1')
         d1 = self.eaf.get_annotation_data_for_tier('tier1')
         d2 = self.eaf.get_annotation_data_for_tier('tier2')
         self.eaf.shift_annotations(0)
@@ -398,14 +398,14 @@ class Elan(unittest.TestCase):
 
     def test_filter_annotations(self):
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 0, 1, '1')
-        self.eaf.insert_annotation('tier1', 1, 2, '2')
-        self.eaf.insert_annotation('tier1', 2, 3, '3')
-        self.eaf.insert_annotation('tier1', 3, 4, '4')
-        self.eaf.insert_annotation('tier1', 4, 5, 'a')
-        self.eaf.insert_annotation('tier1', 5, 6, 'b')
-        self.eaf.insert_annotation('tier1', 6, 7, 'c')
-        self.eaf.insert_annotation('tier1', 7, 8, 'd')
+        self.eaf.add_annotation('tier1', 0, 1, '1')
+        self.eaf.add_annotation('tier1', 1, 2, '2')
+        self.eaf.add_annotation('tier1', 2, 3, '3')
+        self.eaf.add_annotation('tier1', 3, 4, '4')
+        self.eaf.add_annotation('tier1', 4, 5, 'a')
+        self.eaf.add_annotation('tier1', 5, 6, 'b')
+        self.eaf.add_annotation('tier1', 6, 7, 'c')
+        self.eaf.add_annotation('tier1', 7, 8, 'd')
 
         # No in or exclude
         self.eaf.filter_annotations('tier1')
@@ -450,28 +450,28 @@ class Elan(unittest.TestCase):
     def test_get_full_time_interval(self):
         self.assertEqual(self.eaf.get_full_time_interval(), (0, 0))
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 100, 500, 'a')
-        self.eaf.insert_annotation('tier1', 500, 1000, 'b')
+        self.eaf.add_annotation('tier1', 100, 500, 'a')
+        self.eaf.add_annotation('tier1', 500, 1000, 'b')
         self.assertEqual(self.eaf.get_full_time_interval(), (100, 1000))
 
     def test_create_gaps_and_overlaps_tier(self):
         self.eaf.add_tier('t1')
         self.eaf.add_tier('t2')
         # Pause
-        self.eaf.insert_annotation('t1', 0, 1000)
-        self.eaf.insert_annotation('t1', 1200, 2000)
+        self.eaf.add_annotation('t1', 0, 1000)
+        self.eaf.add_annotation('t1', 1200, 2000)
         # Gap
-        self.eaf.insert_annotation('t2', 2200, 3000)
+        self.eaf.add_annotation('t2', 2200, 3000)
         # Overlap
-        self.eaf.insert_annotation('t1', 2800, 4000)
+        self.eaf.add_annotation('t1', 2800, 4000)
         # Exact fto
-        self.eaf.insert_annotation('t2', 4000, 5000)
+        self.eaf.add_annotation('t2', 4000, 5000)
         # Within overlap
-        self.eaf.insert_annotation('t1', 4200, 4800)
+        self.eaf.add_annotation('t1', 4200, 4800)
         # Long pause
-        self.eaf.insert_annotation('t2', 14800, 15000)
+        self.eaf.add_annotation('t2', 14800, 15000)
         # Long gap
-        self.eaf.insert_annotation('t1', 20000, 20500)
+        self.eaf.add_annotation('t1', 20000, 20500)
         self.eaf.create_gaps_and_overlaps_tier('t1', 't2')
         self.eaf.create_gaps_and_overlaps_tier('t1', 't2', 'tt', 3000)
         self.assertEqual(
@@ -501,20 +501,20 @@ class Elan(unittest.TestCase):
         self.eaf.add_tier('t1')
         self.eaf.add_tier('t2')
         # Pause
-        self.eaf.insert_annotation('t1', 0, 1000)
-        self.eaf.insert_annotation('t1', 1200, 2000)
+        self.eaf.add_annotation('t1', 0, 1000)
+        self.eaf.add_annotation('t1', 1200, 2000)
         # Gap
-        self.eaf.insert_annotation('t2', 2200, 3000)
+        self.eaf.add_annotation('t2', 2200, 3000)
         # Overlap
-        self.eaf.insert_annotation('t1', 2800, 4000)
+        self.eaf.add_annotation('t1', 2800, 4000)
         # Exact fto
-        self.eaf.insert_annotation('t2', 4000, 5000)
+        self.eaf.add_annotation('t2', 4000, 5000)
         # Within overlap
-        self.eaf.insert_annotation('t1', 4200, 4800)
+        self.eaf.add_annotation('t1', 4200, 4800)
         # Long pause
-        self.eaf.insert_annotation('t2', 14800, 15000)
+        self.eaf.add_annotation('t2', 14800, 15000)
         # Long gap
-        self.eaf.insert_annotation('t1', 20000, 20500)
+        self.eaf.add_annotation('t1', 20000, 20500)
         g1 = self.eaf.get_gaps_and_overlaps2('t1', 't2')
         g2 = self.eaf.get_gaps_and_overlaps2('t1', 't2', 3000)
         self.assertEqual(sorted(g1), [
@@ -591,35 +591,35 @@ class Elan(unittest.TestCase):
         tg = self.eaf.to_textgrid()
         self.assertEqual(tg.get_tier_name_num(), [])
         self.eaf.add_tier('t1')
-        self.eaf.insert_annotation('t1', 0, 100, 'a11')
-        self.eaf.insert_annotation('t1', 100, 200, 'a21')
-        self.eaf.insert_annotation('t1', 200, 300, 'a31')
-        self.eaf.insert_annotation('t1', 300, 400, 'a41')
+        self.eaf.add_annotation('t1', 0, 100, 'a11')
+        self.eaf.add_annotation('t1', 100, 200, 'a21')
+        self.eaf.add_annotation('t1', 200, 300, 'a31')
+        self.eaf.add_annotation('t1', 300, 400, 'a41')
         self.eaf.add_tier('t2')
-        self.eaf.insert_annotation('t2', 0, 100, 'a12')
-        self.eaf.insert_annotation('t2', 100, 200, 'a22')
-        self.eaf.insert_annotation('t2', 200, 300, 'a32')
-        self.eaf.insert_annotation('t2', 300, 400, 'a42')
+        self.eaf.add_annotation('t2', 0, 100, 'a12')
+        self.eaf.add_annotation('t2', 100, 200, 'a22')
+        self.eaf.add_annotation('t2', 200, 300, 'a32')
+        self.eaf.add_annotation('t2', 300, 400, 'a42')
         self.eaf.add_tier('t3')
-        self.eaf.insert_annotation('t3', 0, 100, 'a13')
-        self.eaf.insert_annotation('t3', 100, 200, 'a23')
-        self.eaf.insert_annotation('t3', 200, 300, 'a33')
-        self.eaf.insert_annotation('t3', 300, 400, 'a43')
+        self.eaf.add_annotation('t3', 0, 100, 'a13')
+        self.eaf.add_annotation('t3', 100, 200, 'a23')
+        self.eaf.add_annotation('t3', 200, 300, 'a33')
+        self.eaf.add_annotation('t3', 300, 400, 'a43')
         self.eaf.add_tier('t4')
-        self.eaf.insert_annotation('t4', 0, 100, 'a14')
-        self.eaf.insert_annotation('t4', 100, 200, 'a24')
-        self.eaf.insert_annotation('t4', 200, 300, 'a34')
-        self.eaf.insert_annotation('t4', 300, 400, 'a44')
+        self.eaf.add_annotation('t4', 0, 100, 'a14')
+        self.eaf.add_annotation('t4', 100, 200, 'a24')
+        self.eaf.add_annotation('t4', 200, 300, 'a34')
+        self.eaf.add_annotation('t4', 300, 400, 'a44')
         self.eaf.add_tier('t5')
-        self.eaf.insert_annotation('t5', 0, 100, 'a15')
-        self.eaf.insert_annotation('t5', 100, 200, 'a25')
-        self.eaf.insert_annotation('t5', 200, 300, 'a35')
-        self.eaf.insert_annotation('t5', 300, 400, 'a45')
+        self.eaf.add_annotation('t5', 0, 100, 'a15')
+        self.eaf.add_annotation('t5', 100, 200, 'a25')
+        self.eaf.add_annotation('t5', 200, 300, 'a35')
+        self.eaf.add_annotation('t5', 300, 400, 'a45')
         self.eaf.add_tier('t6')
-        self.eaf.insert_annotation('t6', 0, 100, 'a16')
-        self.eaf.insert_annotation('t6', 100, 200, 'a26')
-        self.eaf.insert_annotation('t6', 200, 300, 'a36')
-        self.eaf.insert_annotation('t6', 300, 400, 'a46')
+        self.eaf.add_annotation('t6', 0, 100, 'a16')
+        self.eaf.add_annotation('t6', 100, 200, 'a26')
+        self.eaf.add_annotation('t6', 200, 300, 'a36')
+        self.eaf.add_annotation('t6', 300, 400, 'a46')
         tg = self.eaf.to_textgrid()
         self.assertEqual(sorted(a[1] for a in tg.get_tier_name_num()),
                          ['t1', 't2', 't3', 't4', 't5', 't6'])
@@ -646,10 +646,10 @@ class Elan(unittest.TestCase):
 
     def test_extract(self):
         self.eaf.add_tier('tier1')
-        self.eaf.insert_annotation('tier1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('tier1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('tier1', 2000, 3000, 'a3')
-        self.eaf.insert_annotation('tier1', 3000, 4000, 'a4')
+        self.eaf.add_annotation('tier1', 0, 1000, 'a1')
+        self.eaf.add_annotation('tier1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('tier1', 2000, 3000, 'a3')
+        self.eaf.add_annotation('tier1', 3000, 4000, 'a4')
         self.eaf.add_tier('tier2')
         e1 = self.eaf.extract(1500, 2500)
         self.assertEqual(e1.annotation_document, self.eaf.annotation_document)
@@ -680,46 +680,46 @@ class Elan(unittest.TestCase):
         self.eaf.add_tier('p1')
         self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
         self.eaf.add_tier('a1', 'c', 'p1')
-        self.eaf.insert_annotation('p1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('p1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('p1', 3000, 4000, 'a3')
-        self.eaf.insert_ref_annotation('a1', 'p1', 500, 'ref1')
-        self.eaf.insert_ref_annotation('a1', 'p1', 3000, 'ref2')
+        self.eaf.add_annotation('p1', 0, 1000, 'a1')
+        self.eaf.add_annotation('p1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('p1', 3000, 4000, 'a3')
+        self.eaf.add_ref_annotation('a1', 'p1', 500, 'ref1')
+        self.eaf.add_ref_annotation('a1', 'p1', 3000, 'ref2')
         self.assertEquals(self.eaf.get_ref_annotation_at_time('a1', 500),
                           [(0, 1000, 'ref1', 'a1')])
         self.assertEquals(self.eaf.get_ref_annotation_at_time('p1', 2500), [])
         self.assertRaises(KeyError,
                           self.eaf.get_ref_annotation_at_time, 'eau', 0)
 
-    def test_insert_ref_annotation(self):
+    def test_add_ref_annotation(self):
         self.eaf.add_tier('p1')
         self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
         self.eaf.add_tier('a1', 'c', 'p1')
-        self.eaf.insert_annotation('p1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('p1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('p1', 3000, 4000, 'a3')
-        self.eaf.insert_ref_annotation('a1', 'p1', 500, 'ref1')
-        self.eaf.insert_ref_annotation('a1', 'p1', 3000)
+        self.eaf.add_annotation('p1', 0, 1000, 'a1')
+        self.eaf.add_annotation('p1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('p1', 3000, 4000, 'a3')
+        self.eaf.add_ref_annotation('a1', 'p1', 500, 'ref1')
+        self.eaf.add_ref_annotation('a1', 'p1', 3000)
         self.assertEqual(
             sorted([(3000, 4000, '', 'a3'), (0, 1000, 'ref1', 'a1')]),
             sorted(self.eaf.get_ref_annotation_data_for_tier('a1')))
 
         self.assertRaises(ValueError,
-                          self.eaf.insert_ref_annotation, 'p1', 'a1', 0, 'r1')
-        self.assertRaises(ValueError, self.eaf.insert_ref_annotation, 'a1',
+                          self.eaf.add_ref_annotation, 'p1', 'a1', 0, 'r1')
+        self.assertRaises(ValueError, self.eaf.add_ref_annotation, 'a1',
                           'p1', 2500, 'r')
         self.assertRaises(KeyError,
-                          self.eaf.insert_ref_annotation, 'aa', 'bb', 0, 'r1')
+                          self.eaf.add_ref_annotation, 'aa', 'bb', 0, 'r1')
 
     def test_get_ref_annotation_data_for_tier(self):
         self.eaf.add_tier('p1')
         self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
         self.eaf.add_tier('a1', 'c', 'p1')
-        self.eaf.insert_annotation('p1', 0, 1000, 'a1')
-        self.eaf.insert_annotation('p1', 1000, 2000, 'a2')
-        self.eaf.insert_annotation('p1', 3000, 4000, 'a3')
-        self.eaf.insert_ref_annotation('a1', 'p1', 500, 'ref1')
-        self.eaf.insert_ref_annotation('a1', 'p1', 3000)
+        self.eaf.add_annotation('p1', 0, 1000, 'a1')
+        self.eaf.add_annotation('p1', 1000, 2000, 'a2')
+        self.eaf.add_annotation('p1', 3000, 4000, 'a3')
+        self.eaf.add_ref_annotation('a1', 'p1', 500, 'ref1')
+        self.eaf.add_ref_annotation('a1', 'p1', 3000)
         self.assertEqual(
             sorted([(3000, 4000, '', 'a3'), (0, 1000, 'ref1', 'a1')]),
             sorted(self.eaf.get_ref_annotation_data_for_tier('a1')))
@@ -861,11 +861,11 @@ class Elan(unittest.TestCase):
 
     def test_copy_tier(self):
         self.eaf.add_tier('test1')
-        self.eaf.insert_annotation('test1', 0, 100, 'a')
-        self.eaf.insert_annotation('test1', 100, 200, 'a')
+        self.eaf.add_annotation('test1', 0, 100, 'a')
+        self.eaf.add_annotation('test1', 100, 200, 'a')
         self.eaf.add_tier('test2')
-        self.eaf.insert_annotation('test2', 0, 100, 'a')
-        self.eaf.insert_annotation('test2', 100, 200, 'a')
+        self.eaf.add_annotation('test2', 0, 100, 'a')
+        self.eaf.add_annotation('test2', 100, 200, 'a')
         target = Eaf()
         self.eaf.copy_tier(target, 'test2')
         self.assertEqual(target.get_parameters_for_tier('test2'),
@@ -873,11 +873,109 @@ class Elan(unittest.TestCase):
         self.assertEqual(target.get_annotation_data_for_tier('test2'),
                          self.eaf.get_annotation_data_for_tier('test2'))
 
-    def test_create_controlled_vocabulary(self):
-        pass
+    def test_add_controlled_vocabulary(self):
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_controlled_vocabulary('cv2')
+        self.eaf.add_controlled_vocabulary('cv3', 'er1')
+        self.assertEqual(sorted(self.eaf.get_controlled_vocabulary_names()),
+                         ['cv1', 'cv2', 'cv3'])
+
+    def test_add_cv_entry(self):
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_language('eng')
+        self.eaf.add_language('nld')
+        self.eaf.add_cv_entry(
+            'cv1', 'cve1', [('H', 'eng', 'hold'), ('H', 'nld', None)])
+        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+            'cve1': ([('H', 'eng', 'hold'), ('H', 'nld', None)], None)})
+        self.eaf.add_cv_entry(
+            'cv1', 'cve2', [('S', 'eng', 'stroke'), ('S', 'nld', None)])
+        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+            'cve1': ([('H', 'eng', 'hold'), ('H', 'nld', None)], None),
+            'cve2': ([('S', 'eng', 'stroke'), ('S', 'nld', None)], None)})
+        self.assertRaises(KeyError, self.eaf.add_cv_entry, 'cv2', 'cve1', [])
+        self.assertRaises(ValueError, self.eaf.add_cv_entry, 'cv1', 'cve1',
+                          [('H', 'spa', None)])
+
+    def test_add_cv_description(self):
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_language('eng')
+        self.eaf.add_language('nld')
+        self.eaf.add_cv_description('cv1', 'eng', 'Gesture Phases')
+        self.eaf.add_cv_description('cv1', 'nld', None)
+        self.assertEquals(self.eaf.get_cv_descriptions('cv1'), [
+            ('eng', 'Gesture Phases'), ('nld', None)])
+        self.assertRaises(KeyError, self.eaf.add_cv_description, 'cv2', 'eng')
+        self.assertRaises(ValueError,
+                          self.eaf.add_cv_description, 'cv1', 'spa', None)
+
+    def test_get_controlled_vocabulary_names(self):
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_controlled_vocabulary('cv2')
+        self.eaf.add_controlled_vocabulary('cv3', 'er1')
+        self.assertEqual(sorted(self.eaf.get_controlled_vocabulary_names()),
+                         ['cv1', 'cv2', 'cv3'])
+
+    def test_get_cv_entry(self):
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_language('eng')
+        self.eaf.add_language('nld')
+        self.eaf.add_cv_entry(
+            'cv1', 'cve1', [('H', 'eng', 'hold'), ('H', 'nld', None)])
+        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+            'cve1': ([('H', 'eng', 'hold'), ('H', 'nld', None)], None)})
+        self.eaf.add_cv_entry(
+            'cv1', 'cve2', [('S', 'eng', 'stroke'), ('S', 'nld', None)])
+        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+            'cve1': ([('H', 'eng', 'hold'), ('H', 'nld', None)], None),
+            'cve2': ([('S', 'eng', 'stroke'), ('S', 'nld', None)], None)})
+        self.assertRaises(KeyError, self.eaf.get_cv_entries, 'cv2')
+
+    def test_get_cv_descriptions(self):
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_language('eng')
+        self.eaf.add_language('nld')
+        self.eaf.add_cv_description('cv1', 'eng', 'Gesture Phases')
+        self.eaf.add_cv_description('cv1', 'nld', None)
+        self.assertEquals(self.eaf.get_cv_descriptions('cv1'), [
+            ('eng', 'Gesture Phases'), ('nld', None)])
+        self.assertRaises(KeyError, self.eaf.get_cv_descriptions, 'cv2')
 
     def test_remove_controlled_vocabulary(self):
-        pass
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_controlled_vocabulary('cv2')
+        self.eaf.add_controlled_vocabulary('cv3', 'er1')
+        self.eaf.remove_controlled_vocabulary('cv3')
+        self.assertEqual(sorted(self.eaf.get_controlled_vocabulary_names()),
+                         ['cv1', 'cv2'])
+        self.eaf.remove_controlled_vocabulary('cv1')
+        self.assertEqual(sorted(self.eaf.get_controlled_vocabulary_names()),
+                         ['cv2'])
+        self.assertRaises(KeyError, self.eaf.remove_controlled_vocabulary, 'c')
+
+    def test_remove_cv_entry(self):
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_language('eng')
+        self.eaf.add_language('nld')
+        self.eaf.add_cv_entry(
+            'cv1', 'cve1', [('H', 'eng', 'hold'), ('H', 'nld', None)])
+        self.eaf.add_cv_entry(
+            'cv1', 'cve2', [('S', 'eng', 'stroke'), ('S', 'nld', None)])
+        self.eaf.remove_cv_entry('cv1', 'cve1')
+        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+            'cve2': ([('S', 'eng', 'stroke'), ('S', 'nld', None)], None)})
+        self.assertRaises(KeyError, self.eaf.remove_cv_entry, 'cv2', 'c')
+        self.assertRaises(KeyError, self.eaf.remove_cv_entry, 'cv1', 'c')
+
+    def test_remove_cv_description(self):
+        self.eaf.add_controlled_vocabulary('cv1')
+        self.eaf.add_language('eng')
+        self.eaf.add_language('nld')
+        self.eaf.add_cv_description('cv1', 'eng', 'Gesture Phases')
+        self.eaf.add_cv_description('cv1', 'nld', None)
+        self.assertEquals(self.eaf.get_cv_descriptions('cv1'), [
+            ('eng', 'Gesture Phases'), ('nld', None)])
+        self.assertRaises(KeyError, self.eaf.get_cv_descriptions, 'cv2')
 
     def test_to_file_to_eaf(self):
         x, filepath = tempfile.mkstemp()
