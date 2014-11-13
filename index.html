@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to pympi’s documentation! &mdash; pympi 1.1 documentation</title>
+    <title>Welcome to pympi’s documentation! &mdash; pympi 1.2 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1',
+        VERSION:     '1.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 1.1 documentation" href="#" />
+    <link rel="top" title="pympi 1.2 documentation" href="#" />
     <link rel="next" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="Praat.html" title="Praat"
              accesskey="N">next</a> |</li>
-        <li><a href="#">pympi 1.1 documentation</a> &raquo;</li> 
+        <li><a href="#">pympi 1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -62,8 +62,6 @@
 <h1>Todo<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li>Elan<ul>
-<li>Controlled vocabularies, easy functions</li>
-<li>External and lexicon reference functions</li>
 <li>Import from CLAN&#8217;s .cha files.</li>
 </ul>
 </li>
@@ -96,10 +94,41 @@
 <td>1.2</td>
 <td><ul class="first last simple">
 <li>Bugfixes.</li>
+<li>Changed the names of the insert functions, the old
+names are still usable. But the preferable method
+is to use the new functions:
+<tt class="xref py py-func docutils literal"><span class="pre">add_annotation()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">add_ref_annotation()</span></tt>.</li>
+<li>Added controlled vocabulary functions:<ul>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_controlled_vocabulary()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_cv_entry()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_cv_description()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_controlled_vocabulary_names()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_cv_entries()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_cv_descriptions()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_controlled_vocabulary()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_cv_entry()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_cv_description()</span></tt></li>
+</ul>
+</li>
+<li>Added external reference functions:<ul>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_external_ref()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_external_ref_names()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_external_ref()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_external_ref()</span></tt></li>
+</ul>
+</li>
+<li>Added lexicon reference functions:<ul>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_lexicon_ref()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_lexicon_ref_names()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_lexicon_ref()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_lexicon_ref()</span></tt></li>
+</ul>
+</li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>&nbsp;</td>
+<tr class="row-odd"><td>14-11-12</td>
 <td>1.19</td>
 <td><ul class="first last simple">
 <li>Locale functions added: <tt class="xref py py-func docutils literal"><span class="pre">add_locale()</span></tt>,
@@ -274,6 +303,7 @@ still be used by using tofileOLD().</td>
 <div class="section" id="author">
 <h1>Author<a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h1>
 <p>Mart Lubbers(<tt class="docutils literal"><span class="pre">mart</span> <span class="pre">at</span> <span class="pre">martlubbers.net</span></tt>)</p>
+<p>Supervision: Francisco Toreirra(<tt class="docutils literal"><span class="pre">francisco.torreira</span> <span class="pre">at</span> <span class="pre">mpi.nl</span></tt>)</p>
 </div>
 
 
@@ -327,7 +357,7 @@ still be used by using tofileOLD().</td>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              >next</a> |</li>
-        <li><a href="#">pympi 1.1 documentation</a> &raquo;</li> 
+        <li><a href="#">pympi 1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
