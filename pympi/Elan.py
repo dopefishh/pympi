@@ -64,10 +64,10 @@ class Eaf:
         entries of the form: ``{id -> (values, ext_ref)}``,
 
         values of the form:  ``[(lang_ref, description, text)]``.
-    :var list external_refs: External references, where every reference is of
-        the form ``[id, type, value]``.
+    :var list external_refs: External references of the form:
+        ``{id -> (type, value)}``.
     :var list lexicon_refs: Lexicon references, where every reference is of
-        the form: ``[{attribs}]``.
+        the form: ``{id -> {attribs}}``.
 
     :var dict annotations: Dictionary of annotations of the form:
         ``{id -> tier}``, this is only used internally.
@@ -97,14 +97,14 @@ class Eaf:
         self.annotations = {}
         self.constraints = {}
         self.controlled_vocabularies = {}
+        self.external_refs = {}
         self.header = {}
         self.languages = {}
+        self.lexicon_refs = {}
         self.linguistic_types = {}
         self.locales = {}
         self.tiers = {}
         self.timeslots = {}
-        self.external_refs = []
-        self.lexicon_refs = []
         self.licenses = []
         self.linked_file_descriptors = []
         self.media_descriptors = []
@@ -186,6 +186,20 @@ class Eaf:
             raise ValueError('Language not present: {}'.format(lang_ref))
         self.controlled_vocabularies[cv_id][0].append((lang_ref, description))
 
+    def add_external_ref(self, eid, etype, value):
+        """Add an external reference.
+
+        :param str eid: Name of the external reference.
+        :param str etype: Type of the external reference, has to be in
+            ``['iso12620', 'ecv', 'cve_id', 'lexen_id', 'resource_url']``.
+        :param str value: Value of the external reference.
+        :throws KeyError: if etype is not in the list of possible types.
+        """
+        if etype not in\
+                ['iso12620', 'ecv', 'cve_id', 'lexen_id', 'resource_url']:
+            raise KeyError('etype not in possible types')
+        self.external_refs[eid] = (etype, value)
+
     def add_language(self, lang_id, lang_def=None, lang_label=None):
         """Add a language.
 
@@ -194,6 +208,30 @@ class Eaf:
         :param str lang_label: Label of the language.
         """
         self.languages[lang_id] = (lang_def, lang_label)
+
+    def add_lexicon_ref(self, lrid, name, lrtype, url, lexicon_id,
+                        lexicon_name, datcat_id=None, datcat_name=None):
+        """Add lexicon reference.
+
+        :param str lrid: Lexicon reference internal ID.
+        :param str name: Lexicon reference display name.
+        :param str lrtype: Lexicon reference service type.
+        :param str url: Lexicon reference service location
+        :param str lexicon_id: Lexicon reference service id.
+        :param str lexicon_name: Lexicon reference service name.
+        :param str datacat_id: Lexicon reference identifier of data category.
+        :param str datacat_name: Lexicon reference name of data category.
+        """
+        self.lexicon_refs[lrid] = {
+            'LEX_REF_ID': lrid,
+            'NAME': name,
+            'TYPE': lrtype,
+            'URL': url,
+            'LEXICON_ID': lexicon_id,
+            'LEXICON_NAME': lexicon_name,
+            'DATCAT_ID': datcat_id,
+            'DATCAT_NAME': datcat_name
+            }
 
     def add_license(self, name, url):
         """Add a license
@@ -716,6 +754,30 @@ class Eaf:
         """
         return self.controlled_vocabularies[cv_id][0]
 
+    def get_external_ref(self, eid):
+        """Give the external reference matching the id.
+
+        :param str eid: Name of the external reference.
+        :throws KeyError: If there is no external reference with that id.
+        """
+        return self.external_refs[eid]
+
+    def get_external_ref_names(self):
+        """Gives all the external reference names."""
+        return self.external_refs.keys()
+
+    def get_lexicon_ref(self, reid):
+        """Gives the lexicon reference.
+
+        :param str reid: Lexicon reference id.
+        :throws KeyError: If there is no lexicon reference matching the id.
+        """
+        return self.lexicon_refs[reid]
+
+    def get_lexicon_ref_names(self):
+        """Gives all the lexicon reference names."""
+        return self.lexicon_refs.keys()
+
     def get_languages(self):
         """Gives all the languages in the format:
         ``{lang_id -> (lang_def, lang_label)}``
@@ -935,6 +997,14 @@ class Eaf:
             if l == lang_ref:
                 del(self.controlled_vocabularies[cv_id][1][i])
 
+    def remove_external_ref(self, eid):
+        """Remove an external reference.
+
+        :param str eid: Name of the external reference.
+        :throws KeyError: If there is no external reference with that id.
+        """
+        del(self.external_refs[eid])
+
     def remove_language(self, lang_id):
         """Remove the language mathing the id.
 
@@ -942,6 +1012,14 @@ class Eaf:
         :throws KeyError: If there is no language matching the language id.
         """
         del(self.languages[lang_id])
+
+    def remove_lexicon_ref(self, reid):
+        """Remove a lexicon reference matching the id.
+
+        :param str reid: Lexicon reference id.
+        :throws KeyError: If there is no lexicon reference matching the id.
+        """
+        del(self.lexicon_refs[reid])
 
     def remove_license(self, name=None, url=None):
         """Remove all licenses matching both key and value.
@@ -1252,12 +1330,11 @@ def parse_eaf(file_path, eaf_obj):
                 (descriptions, entries, ext_ref)
         # Lexicon ref
         elif elem.tag == 'LEXICON_REF':
-            eaf_obj.lexicon_refs.append(elem.attrib)
+            eaf_obj.lexicon_refs[elem.attrib['LEX_REF_ID']] = elem.attrib
         # External ref
         elif elem.tag == 'EXTERNAL_REF':
-            eaf_obj.external_refs.append((elem.attrib['EXT_REF_ID'],
-                                          elem.attrib['TYPE'],
-                                          elem.attrib['VALUE']))
+            eaf_obj.external_refs[elem.attrib['EXT_REF_ID']] = (
+                elem.attrib['TYPE'], elem.attrib['VALUE'])
 
 
 def indent(el, level=0):
@@ -1375,13 +1452,13 @@ def to_eaf(file_path, eaf_obj, pretty=True):
                 val.text = value
 
     # Lexicon refs
-    for l in eaf_obj.lexicon_refs:
-        etree.SubElement(ANNOTATION_DOCUMENT, 'LEXICON_REF', l)
+    for l in eaf_obj.lexicon_refs.itervalues():
+        etree.SubElement(ANNOTATION_DOCUMENT, 'LEXICON_REF', rm_none(l))
 
     # Exteral refs
-    for r in eaf_obj.external_refs:
+    for eid, (etype, value) in eaf_obj.external_refs.iteritems():
         etree.SubElement(ANNOTATION_DOCUMENT, 'EXTERNAL_REF', rm_none(
-            {'EXT_REF_ID': r[0], 'TYPE': r[1], 'VALUE': r[2]}))
+            {'EXT_REF_ID': eid, 'TYPE': etype, 'VALUE': value}))
 
     if pretty:
         indent(ANNOTATION_DOCUMENT)

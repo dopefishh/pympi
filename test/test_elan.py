@@ -977,6 +977,83 @@ class Elan(unittest.TestCase):
             ('eng', 'Gesture Phases'), ('nld', None)])
         self.assertRaises(KeyError, self.eaf.get_cv_descriptions, 'cv2')
 
+    def test_add_external_ref(self):
+        self.eaf.add_external_ref('er1', 'ecv', 'location')
+        self.eaf.add_external_ref('er2', 'lexen_id', 'location2')
+        self.assertEqual(sorted(self.eaf.get_external_ref_names()),
+                         ['er1', 'er2'])
+        self.assertRaises(KeyError, self.eaf.add_external_ref, 'er1', 'a', '')
+
+    def test_get_external_ref_names(self):
+        self.assertEqual(sorted(self.eaf.get_external_ref_names()),
+                         [])
+        self.eaf.add_external_ref('er1', 'ecv', 'location')
+        self.eaf.add_external_ref('er2', 'lexen_id', 'location2')
+        self.assertEqual(sorted(self.eaf.get_external_ref_names()),
+                         ['er1', 'er2'])
+
+    def test_get_external_ref(self):
+        self.eaf.add_external_ref('er1', 'ecv', 'location')
+        self.eaf.add_external_ref('er2', 'lexen_id', 'location2')
+        self.assertEqual(self.eaf.get_external_ref('er1'), ('ecv', 'location'))
+        self.assertRaises(KeyError, self.eaf.get_external_ref, 'er3')
+
+    def test_remove_external_ref(self):
+        self.eaf.add_external_ref('er1', 'ecv', 'location')
+        self.eaf.add_external_ref('er2', 'lexen_id', 'location2')
+        self.eaf.remove_external_ref('er1')
+        self.assertEqual(self.eaf.get_external_ref_names(), ['er2'])
+
+    def test_add_lexicon_ref(self):
+        self.eaf.add_lexicon_ref('id1', 'long name', 't1', 'url1', 'lid1',
+                                 'lname1')
+        self.eaf.add_lexicon_ref('id2', 'long name', 't2', 'url1', 'lid1',
+                                 'lname1', 'dc1', 'dc1')
+        self.assertEqual(sorted(self.eaf.get_lexicon_ref_names()),
+                         ['id1', 'id2'])
+        self.assertEqual(self.eaf.get_lexicon_ref('id1'), {
+            'DATCAT_ID': None, 'NAME': 'long name', 'DATCAT_NAME': None, 'URL':
+            'url1', 'LEX_REF_ID': 'id1', 'LEXICON_NAME': 'lname1', 'TYPE':
+            't1', 'LEXICON_ID': 'lid1'})
+        self.assertEqual(self.eaf.get_lexicon_ref('id2'), {
+            'DATCAT_ID': 'dc1', 'NAME': 'long name', 'DATCAT_NAME': 'dc1',
+            'URL': 'url1', 'LEX_REF_ID': 'id2', 'LEXICON_NAME': 'lname1',
+            'TYPE': 't2', 'LEXICON_ID': 'lid1'})
+
+    def test_remove_lexicon_ref(self):
+        self.eaf.add_lexicon_ref('id1', 'long name', 't1', 'url1', 'lid1',
+                                 'lname1')
+        self.eaf.add_lexicon_ref('id2', 'long name', 't2', 'url1', 'lid1',
+                                 'lname1', 'dc1', 'dc1')
+        self.eaf.remove_lexicon_ref('id1')
+        self.assertEqual(sorted(self.eaf.get_lexicon_ref_names()),
+                         ['id2'])
+        self.assertRaises(KeyError, self.eaf.remove_lexicon_ref, 'i')
+
+    def test_get_lexicon_ref_names(self):
+        self.assertEqual(sorted(self.eaf.get_lexicon_ref_names()), [])
+        self.eaf.add_lexicon_ref('id1', 'long name', 't1', 'url1', 'lid1',
+                                 'lname1')
+        self.eaf.add_lexicon_ref('id2', 'long name', 't2', 'url1', 'lid1',
+                                 'lname1', 'dc1', 'dc1')
+        self.assertEqual(sorted(self.eaf.get_lexicon_ref_names()),
+                         ['id1', 'id2'])
+
+    def test_get_lexicon_ref(self):
+        self.eaf.add_lexicon_ref('id1', 'long name', 't1', 'url1', 'lid1',
+                                 'lname1')
+        self.eaf.add_lexicon_ref('id2', 'long name', 't2', 'url1', 'lid1',
+                                 'lname1', 'dc1', 'dc1')
+        self.assertEqual(self.eaf.get_lexicon_ref('id1'), {
+            'DATCAT_ID': None, 'NAME': 'long name', 'DATCAT_NAME': None, 'URL':
+            'url1', 'LEX_REF_ID': 'id1', 'LEXICON_NAME': 'lname1', 'TYPE':
+            't1', 'LEXICON_ID': 'lid1'})
+        self.assertEqual(self.eaf.get_lexicon_ref('id2'), {
+            'DATCAT_ID': 'dc1', 'NAME': 'long name', 'DATCAT_NAME': 'dc1',
+            'URL': 'url1', 'LEX_REF_ID': 'id2', 'LEXICON_NAME': 'lname1',
+            'TYPE': 't2', 'LEXICON_ID': 'lid1'})
+        self.assertRaises(KeyError, self.eaf.get_lexicon_ref, 'id3')
+
     def test_to_file_to_eaf(self):
         x, filepath = tempfile.mkstemp()
         self.eaf = Eaf('./test/sample_2.8.eaf')
