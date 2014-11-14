@@ -553,23 +553,23 @@ class Elan(unittest.TestCase):
 
     def test_add_linguistic_type(self):
         self.eaf.add_linguistic_type('l1')
-        self.eaf.add_linguistic_type('l2', ['Time_Subdivision'], False, True)
+        self.eaf.add_linguistic_type('l2', 'Time_Subdivision', False, True)
         self.assertEquals(
             self.eaf.linguistic_types['l1'], {
                 'CONSTRAINTS': None, 'TIME_ALIGNABLE': 'true',
                 'LINGUISTIC_TYPE_ID': 'l1', 'GRAPHIC_REFERENCES': 'false'})
         self.assertEquals(
             self.eaf.linguistic_types['l2'], {
-                'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
+                'CONSTRAINTS': 'Time_Subdivision', 'TIME_ALIGNABLE': 'false',
                 'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
         self.eaf.add_linguistic_type('l3', param_dict={
-            'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
+            'CONSTRAINTS': 'Time_Subdivision', 'TIME_ALIGNABLE': 'false',
             'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
         self.assertEqual(self.eaf.get_parameters_for_linguistic_type('l3'), {
-            'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
+            'CONSTRAINTS': 'Time_Subdivision', 'TIME_ALIGNABLE': 'false',
             'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
 
-        self.assertRaises(KeyError, self.eaf.add_linguistic_type, 'l2', ['a'])
+        self.assertRaises(KeyError, self.eaf.add_linguistic_type, 'l2', 'a')
 
     def test_get_linguistic_types_names(self):
         self.assertEqual(self.eaf.get_linguistic_type_names(), ['default-lt'])
@@ -581,9 +581,9 @@ class Elan(unittest.TestCase):
 
     def test_get_parameters_for_linguistic_type(self):
         self.eaf.add_tier('tier2')
-        self.eaf.add_linguistic_type('l2', ['Time_Subdivision'], False, True)
+        self.eaf.add_linguistic_type('l2', 'Time_Subdivision', False, True)
         self.assertEqual(self.eaf.get_parameters_for_linguistic_type('l2'), {
-            'CONSTRAINTS': ['Time_Subdivision'], 'TIME_ALIGNABLE': 'false',
+            'CONSTRAINTS': 'Time_Subdivision', 'TIME_ALIGNABLE': 'false',
             'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
 
     def test_to_textgrid(self):
@@ -678,7 +678,7 @@ class Elan(unittest.TestCase):
 
     def test_get_ref_annotation_at_time(self):
         self.eaf.add_tier('p1')
-        self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
+        self.eaf.add_linguistic_type('c', 'Symbolic_Association')
         self.eaf.add_tier('a1', 'c', 'p1')
         self.eaf.add_annotation('p1', 0, 1000, 'a1')
         self.eaf.add_annotation('p1', 1000, 2000, 'a2')
@@ -693,7 +693,7 @@ class Elan(unittest.TestCase):
 
     def test_add_ref_annotation(self):
         self.eaf.add_tier('p1')
-        self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
+        self.eaf.add_linguistic_type('c', 'Symbolic_Association')
         self.eaf.add_tier('a1', 'c', 'p1')
         self.eaf.add_annotation('p1', 0, 1000, 'a1')
         self.eaf.add_annotation('p1', 1000, 2000, 'a2')
@@ -713,7 +713,7 @@ class Elan(unittest.TestCase):
 
     def test_get_ref_annotation_data_for_tier(self):
         self.eaf.add_tier('p1')
-        self.eaf.add_linguistic_type('c', ['Symbolic_Association'])
+        self.eaf.add_linguistic_type('c', 'Symbolic_Association')
         self.eaf.add_tier('a1', 'c', 'p1')
         self.eaf.add_annotation('p1', 0, 1000, 'a1')
         self.eaf.add_annotation('p1', 1000, 2000, 'a2')

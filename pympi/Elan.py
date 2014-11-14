@@ -247,7 +247,7 @@ class Eaf:
         """Add a linguistic type.
 
         :param str lingtype: Name of the linguistic type.
-        :param list constraints: Constraint names.
+        :param str constraints: Constraint name.
         :param bool timealignable: Flag for time alignable.
         :param bool graphicreferences: Flag for graphic references.
         :param str extref: External reference.
@@ -261,8 +261,7 @@ class Eaf:
             self.linguistic_types[lingtype] = param_dict
         else:
             if constraints:
-                for c in constraints:
-                    self.constraints[c]
+                self.constraints[constraints]
             self.linguistic_types[lingtype] = {
                 'LINGUISTIC_TYPE_ID': lingtype,
                 'TIME_ALIGNABLE': str(timealignable).lower(),
@@ -1213,7 +1212,7 @@ class Eaf:
         return tgout
 
 
-def eaf_from_chat(file_path, codec='ascii'):
+def eaf_from_chat(file_path, codec='ascii', extension='wav'):
     """.. warning:: This is not yet complete, some parts of the chat file
                     format is not yet implemented.
 
@@ -1224,89 +1223,66 @@ def eaf_from_chat(file_path, codec='ascii'):
     :param str file_path: The file path of the .cha file.
     :param str codec: The codec, if the @UTF8 header is present it will choose
         utf-8, default is ascii.
+    :param str extension: The extension of the media file.
     :throws StopIteration: If the file doesn't contain a @End header.
     """
-    infile = False
     eafob = Eaf()
-    eafob.remove_tier('default')
     eafob.add_linguistic_type('parent')
-    eafob.add_linguistic_type('child', constraints=['Symbolic_Association'],
-                              timealignable=False)
-    partsdb = {}
-    mediaextensions = {'audio': '.wav', 'sound': '.wav', 'video': 'mpg'}
+    eafob.add_linguistic_type(
+        'child', constraints='Symbolic_Association', timealignable=False)
+    participantsdb = {}
     last_annotation = None
     with open(file_path, 'r') as chatin:
         while True:
-            line = chatin.readline().strip()
-            # Hidden Headers and @Begin statement
-            if not infile:
-                if line == '@Begin':
-                    infile = True
-                elif line == '@UTF8':
-                    codec = 'utf8'
-            # Actual content
-            else:
-                line = line.decode(codec)
-                # Initial Headers
-                if line.startswith('@Languages:'):
-                    languages = ''.join(line.split(':')[1:]).strip()
-                    for language in languages.split(','):
+            line = chatin.readline().strip().decode(codec)
+            if line == '@UTF8':  # Codec marker
+                codec = 'utf8'
+                continue
+            elif line == '@End':  # End of file marker
+                break
+            elif line.startswith('@') and line != '@Begin':  # Header marker
+                key, value = line.split(':\t')
+                eafob.add_property('{}:\t'.format(key), value)
+                if key == '@Languages':
+                    for language in value.split(','):
                         eafob.add_language(language)
-                elif line.startswith('@Participants:'):
-                    participants = ''.join(line.split(':')[1:]).strip()
-                    for participant in participants.split(','):
+                elif key == '@Participants':
+                    for participant in value.split(','):
                         splits = participant.strip().split(' ')
                         splits = map(lambda x: x.replace('_', ' '), splits)
                         if len(splits) == 2:
-                            partsdb[splits[0]] = (None, splits[1])
+                            participantsdb[splits[0]] = (None, splits[1])
                         elif len(splits) == 3:
-                            partsdb[splits[0]] = (splits[1], splits[2])
-                elif line.startswith('@Options:'):
-                    pass
-                elif line.startswith('@ID:'):
-                    ids = ''.join(line.strip().split(':')[1:]).split('|')
-                    eafob.add_tier(ids[2].strip(),
-                                   part=partsdb[ids[2].strip()][0],
-                                   language=ids[0].strip())
-                elif line.startswith('@Media:'):
-                    mopts = ''.join(line.split(':')[1:]).split(',')
-                    mopts[0] = mopts[0].strip() +\
-                        mediaextensions[mopts[1].strip()]
-                # Constant headers TODO
-                elif line.startswith('@Transcriber:'):
-                    transcriber = ''.join(line.split(':')[1:]).strip()
+                            participantsdb[splits[0]] = (splits[1], splits[2])
+                elif key == '@ID':
+                    ids = map(lambda x: x.replace('_', ''), value.split('|'))
+                    eafob.add_tier(ids[2], part=participantsdb[ids[2]][0],
+                                   language=ids[0])
+                elif key == '@Media':
+                    media = value.split(',')
+                    eafob.add_linked_file(
+                        'file://{}.{}'.format(media[0], extension))
+                elif key == '@Transcriber:':
                     for tier in eafob.get_tier_names():
-                        eafob.tiers[tier][2]['ANNOTATOR'] = transcriber
-                # Participant specific headers TODO
-                # Changeable headers TODO
-                # End of file, this is the only way to stop the loop(or EOF)
-                elif line.startswith('@End'):
-                    break
-                # Actual transcriptions
-                else:
-                    if line.startswith('*'):
-                        line = line.strip()
-                        while len(line.split('\x15')) != 3:
-                            line += chatin.readline().decode(codec).strip()
-                        for participant in partsdb.keys():
-                            if line.startswith('*{}:'.format(participant)):
-                                splits = ''.join(line.split(':')[1:]).strip()
-                                utt, time, _ = splits.split('\x15')
-                                time = map(int, time.split('_'))
-                                last_annotation = (
-                                    participant, time[0], time[1], utt)
-                                eafob.add_annotation(*last_annotation)
-                    elif line.startswith('%'):
-                        splits = line.split(':')
-                        name = '{}_{}'.format(last_annotation[0],
-                                              splits[0][1:])
-                        if name not in eafob.get_tier_names():
-                            eafob.add_tier(name, 'child', last_annotation[0])
-                        eafob.add_ref_annotation(
-                            name,
-                            last_annotation[0],
-                            sum(last_annotation[1:3])/2,
-                            ''.join(splits[1:]).strip())
+                        eafob.tiers[tier][2]['ANNOTATOR'] = value
+            elif line.startswith('*'):  # Main tier marker
+                while len(line.split('\x15')) != 3:
+                    line += chatin.readline().decode(codec).strip()
+                for participant in participantsdb.keys():
+                    if line.startswith('*{}:'.format(participant)):
+                        splits = ''.join(line.split(':')[1:]).strip()
+                        utt, time, _ = splits.split('\x15')
+                        time = map(int, time.split('_'))
+                        last_annotation = (participant, time[0], time[1], utt)
+                        eafob.add_annotation(*last_annotation)
+            elif line.startswith('%'):  # Dependant tier marker
+                splits = line.split(':')
+                name = '{}_{}'.format(last_annotation[0], splits[0][1:])
+                if name not in eafob.get_tier_names():
+                    eafob.add_tier(name, 'child', last_annotation[0])
+                eafob.add_ref_annotation(
+                    name, last_annotation[0], sum(last_annotation[1:3])/2,
+                    ''.join(splits[1:]).strip())
     return eafob
 
 
@@ -1317,7 +1293,7 @@ def parse_eaf(file_path, eaf_obj):
     :param pympi.Elan.Eaf eaf_obj: Existing EAF object to put the data in.
     :returns: EAF object.
     """
-    if file_path == "-":
+    if file_path == '-':
         file_path = sys.stdin
     # Annotation document
     tree_root = etree.parse(file_path).getroot()
@@ -1541,11 +1517,10 @@ def to_eaf(file_path, eaf_obj, pretty=True):
                 des.text = description
         for cveid, (values, ext_ref) in cv_entries.iteritems():
             cem = etree.SubElement(cv, 'CV_ENTRY_ML', rm_none({
-                                   'CVE_ID': cveid, 'EXT_REF': ext_ref}))
+                'CVE_ID': cveid, 'EXT_REF': ext_ref}))
             for value, lang_ref, description in values:
                 val = etree.SubElement(cem, 'CVE_VALUE', rm_none({
-                                       'LANG_REF': lang_ref,
-                                       'DESCRIPTION': description}))
+                    'LANG_REF': lang_ref, 'DESCRIPTION': description}))
                 val.text = value
 
     # Lexicon refs
@@ -1559,7 +1534,7 @@ def to_eaf(file_path, eaf_obj, pretty=True):
 
     if pretty:
         indent(ANNOTATION_DOCUMENT)
-    if file_path == "-":
+    if file_path == '-':
         file_path = sys.stdout
     elif os.access(file_path, os.F_OK):
         os.rename(file_path, '{}.bak'.format(file_path))
