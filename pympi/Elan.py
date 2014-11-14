@@ -1213,6 +1213,103 @@ class Eaf:
         return tgout
 
 
+def eaf_from_chat(file_path, codec='ascii'):
+    """.. warning:: This is not yet complete, some parts of the chat file
+                    format is not yet implemented.
+
+    Reads a .cha file and converts it to an elan object. Some options will
+    be lost in the process. The file description of chat files can be found
+    `here <http://childes.psy.cmu.edu/manuals/CHAT.pdf>`_.
+
+    :param str file_path: The file path of the .cha file.
+    :param str codec: The codec, if the @UTF8 header is present it will choose
+        utf-8, default is ascii.
+    :throws StopIteration: If the file doesn't contain a @End header.
+    """
+    infile = False
+    eafob = Eaf()
+    eafob.remove_tier('default')
+    eafob.add_linguistic_type('parent')
+    eafob.add_linguistic_type('child', constraints=['Symbolic_Association'],
+                              timealignable=False)
+    partsdb = {}
+    mediaextensions = {'audio': '.wav', 'sound': '.wav', 'video': 'mpg'}
+    last_annotation = None
+    with open(file_path, 'r') as chatin:
+        while True:
+            line = chatin.readline().strip()
+            # Hidden Headers and @Begin statement
+            if not infile:
+                if line == '@Begin':
+                    infile = True
+                elif line == '@UTF8':
+                    codec = 'utf8'
+            # Actual content
+            else:
+                line = line.decode(codec)
+                # Initial Headers
+                if line.startswith('@Languages:'):
+                    languages = ''.join(line.split(':')[1:]).strip()
+                    for language in languages.split(','):
+                        eafob.add_language(language)
+                elif line.startswith('@Participants:'):
+                    participants = ''.join(line.split(':')[1:]).strip()
+                    for participant in participants.split(','):
+                        splits = participant.strip().split(' ')
+                        splits = map(lambda x: x.replace('_', ' '), splits)
+                        if len(splits) == 2:
+                            partsdb[splits[0]] = (None, splits[1])
+                        elif len(splits) == 3:
+                            partsdb[splits[0]] = (splits[1], splits[2])
+                elif line.startswith('@Options:'):
+                    pass
+                elif line.startswith('@ID:'):
+                    ids = ''.join(line.strip().split(':')[1:]).split('|')
+                    eafob.add_tier(ids[2].strip(),
+                                   part=partsdb[ids[2].strip()][0],
+                                   language=ids[0].strip())
+                elif line.startswith('@Media:'):
+                    mopts = ''.join(line.split(':')[1:]).split(',')
+                    mopts[0] = mopts[0].strip() +\
+                        mediaextensions[mopts[1].strip()]
+                # Constant headers TODO
+                elif line.startswith('@Transcriber:'):
+                    transcriber = ''.join(line.split(':')[1:]).strip()
+                    for tier in eafob.get_tier_names():
+                        eafob.tiers[tier][2]['ANNOTATOR'] = transcriber
+                # Participant specific headers TODO
+                # Changeable headers TODO
+                # End of file, this is the only way to stop the loop(or EOF)
+                elif line.startswith('@End'):
+                    break
+                # Actual transcriptions
+                else:
+                    if line.startswith('*'):
+                        line = line.strip()
+                        while len(line.split('\x15')) != 3:
+                            line += chatin.readline().decode(codec).strip()
+                        for participant in partsdb.keys():
+                            if line.startswith('*{}:'.format(participant)):
+                                splits = ''.join(line.split(':')[1:]).strip()
+                                utt, time, _ = splits.split('\x15')
+                                time = map(int, time.split('_'))
+                                last_annotation = (
+                                    participant, time[0], time[1], utt)
+                                eafob.add_annotation(*last_annotation)
+                    elif line.startswith('%'):
+                        splits = line.split(':')
+                        name = '{}_{}'.format(last_annotation[0],
+                                              splits[0][1:])
+                        if name not in eafob.get_tier_names():
+                            eafob.add_tier(name, 'child', last_annotation[0])
+                        eafob.add_ref_annotation(
+                            name,
+                            last_annotation[0],
+                            sum(last_annotation[1:3])/2,
+                            ''.join(splits[1:]).strip())
+    return eafob
+
+
 def parse_eaf(file_path, eaf_obj):
     """Parse an EAF file
 

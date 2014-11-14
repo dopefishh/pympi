@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 licence = '"THE BEER-WARE LICENSE" (Revision 42)',
-version = '1.2'
+version = '1.29'
 
 setup(name='pympi-ling',
       version=version,
@@ -16,9 +16,15 @@ http://dopefishh.github.io/pympi/
 
 Pympi is a package that allows you to interact with Elan[1] files and
 TextGrid[2] files. You can create, edit and convert both formats into
-eachother. It also includes a gaps and overlaps algorithm to calculate the
-gaps, overlaps and pauses between annotations conform Heldner and Edlund's
-method[3].
+eachother. It includes besides all the basic functions also functions for:
+- Calculating gaps and overlaps between speakers conform Heldner and Edlund's
+  method[3] (Could be used for determining floor transfers).
+- Shift annotations in both directions (Could be used when due to an error all
+  annotations are misaligned).
+- Import from CLAN's chat files.
+- Merge and or filter tiers (Could be used to combine hands in gesture coding)
+- Move tiers between elan files.
+- Etc.
 
 The development version can be found on github[4].
 

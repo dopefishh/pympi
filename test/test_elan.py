@@ -1070,5 +1070,8 @@ class Elan(unittest.TestCase):
     def test_parse_eaf(self):
         pass
 
+    def test_eaf_from_chat(self):
+        pass
+
 if __name__ == '__main__':
     unittest.main()
