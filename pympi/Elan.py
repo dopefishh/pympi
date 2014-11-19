@@ -1213,18 +1213,22 @@ class Eaf:
 
 
 def eaf_from_chat(file_path, codec='ascii', extension='wav'):
-    """.. warning:: This is not yet complete, some parts of the chat file
-                    format is not yet implemented.
-
-    Reads a .cha file and converts it to an elan object. Some options will
-    be lost in the process. The file description of chat files can be found
-    `here <http://childes.psy.cmu.edu/manuals/CHAT.pdf>`_.
+    """Reads a .cha file and converts it to an elan object. The functions tries
+    to mimic the CHAT2ELAN program that comes with the CLAN package as close as
+    possible. This function however converts to the latest ELAN file format
+    since the library is designed for it. All CHAT headers will be added as
+    Properties in the object and the headers that have a similar field in an
+    Eaf file will be added there too. The file description of chat files can be
+    found `here <http://childes.psy.cmu.edu/manuals/CHAT.pdf>`_.
 
     :param str file_path: The file path of the .cha file.
     :param str codec: The codec, if the @UTF8 header is present it will choose
-        utf-8, default is ascii.
+        utf-8, default is ascii. Older CHAT files don't have their encoding
+        embedded in a header so you will probably need to choose some obscure
+        ISO charset then.
     :param str extension: The extension of the media file.
-    :throws StopIteration: If the file doesn't contain a @End header.
+    :throws StopIteration: If the file doesn't contain a @End header, thus
+        inferring the file is broken.
     """
     eafob = Eaf()
     eafob.add_linguistic_type('parent')

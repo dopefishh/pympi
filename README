@@ -1,10 +1,10 @@
 pympi version 1.29, 2014-11-12
 
 Requirements:
-	None
+  None
 
 Optional:
-	lxml for running the unit tests
+  lxml for running the unit tests
 
 Full api documentation can be found on:
   http://dopefishh.github.io/pympi/
@@ -27,8 +27,8 @@ Manual Installation
     # python setup.py install
   
     If you don't have root access you can do:
-      $ python setup.py install --prefix=/home/user/bin
-      $ echo 'export PYTHONPATH=~/bin/lib/python2.7/site-packages' >> ~/.bashrc
+      $ python setup.py install --prefix=${HOME}/user/bin
+      $ echo "export PYTHONPATH=${HOME}/bin/lib/python2.7/site-packages" >> ~/.bashrc
 
   Windows(elevated command prompt)
     cd C:\directory\where\you\extracted\the\zip

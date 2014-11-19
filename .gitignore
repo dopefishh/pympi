@@ -1,9 +1,4 @@
-*.[Tt]ext[Gg]rid
-*.eaf
-*.001
-*.pfsx
 *.pyc
-*.cha
 build/
 dist/
 doc/build/
