@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import codecs
-import itertools
 import re
 import sys
 
-VERSION = '1.2'
+VERSION = '1.29'
 
 rexmin = re.compile(r'xmin = ([0-9.]*)')
 rexmax = re.compile(r'xmax = ([0-9.]*)')
@@ -92,21 +91,22 @@ class TextGrid:
         :param file ifile: Stream to read from.
         :param str codec: Text encoding.
         """
-        lines = itertools.ifilter(lambda x: x.strip(), ifile)
+        lines = iter(filter(lambda x: x.strip(), ifile))
         # skipping: 'File Type...' and 'Object class...'
-        lines.next(), lines.next()
-        self.xmin = float(rexmin.search(lines.next()).group(1))
-        self.xmax = float(rexmax.search(lines.next()).group(1))
+        next(lines), next(lines)
+        self.xmin = float(rexmin.search(next(lines)).group(1))
+        self.xmax = float(rexmax.search(next(lines)).group(1))
         # skipping: 'tiers? <exists>'
-        lines.next()
-        self.tier_num = int(resize.search(lines.next()).group(1))
+        next(lines)
+        self.tier_num = int(resize.search(next(lines)).group(1))
         # skipping: 'item []:'
-        lines.next()
-        for current_tier in xrange(self.tier_num):
-            number = int(reitem.search(lines.next()).group(1))
-            tier_type = retype.search(lines.next()).group(1)
-            name = rename.search(lines.next()).group(1)
-            self.tiers.append(Tier(name, tier_type, number, lines, codec))
+        next(lines)
+        for current_tier in range(self.tier_num):
+            # number = int(reitem.search(next(lines)).group(1))
+            next(lines)
+            tier_type = retype.search(next(lines)).group(1)
+            name = rename.search(next(lines)).group(1)
+            self.tiers.append(Tier(name, tier_type, lines, codec))
 
     def update(self):
         """Update the xmin, xmax and number of tiers value"""
@@ -124,19 +124,14 @@ class TextGrid:
         :raises ValueError: If the number is out of bounds.
         """
         if number is None:
-            number = 1 if not self.tiers else\
-                max(i.number for i in self.tiers) + 1
+            number = 1 if not self.tiers else len(self.tiers)+1
         elif number < 1 or number > len(self.tiers):
             raise ValueError(
                 'Number has to be in [1..{}]'.format(len(self.tiers)))
         elif tier_type not in ['IntervalTier', 'TextTier']:
             raise ValueError(
                 'tier_type has to be either IntervalTier or TextTier')
-        else:
-            for tier in self.tiers:
-                if tier.number >= number:
-                    tier.number += 1
-        self.tiers.append(Tier(name, tier_type, number))
+        self.tiers.insert(number-1, Tier(name, tier_type))
         return self.tiers[-1]
 
     def remove_tier(self, name_num):
@@ -149,13 +144,9 @@ class TextGrid:
         """
         num = isinstance(name_num, int)
         for tier in self.tiers:
-            if (num and tier.number == name_num) or\
+            if (num and self.tiers.index(tier)+1 == name_num) or\
                     not num and tier.name == name_num:
-                num = tier.number
                 self.tiers.remove(tier)
-                for tier in self.tiers:
-                    if tier.number > num:
-                        tier.number -= 1
                 break
         else:
             raise TierNotFoundException(name_num)
@@ -171,7 +162,7 @@ class TextGrid:
         """
         num = isinstance(name_num, int)
         for tier in self.tiers:
-            if (num and tier.number == name_num) or\
+            if (num and self.tiers.index(tier)+1 == name_num) or\
                     not num and tier.name == name_num:
                 return tier
         raise TierNotFoundException(name_num)
@@ -201,7 +192,7 @@ class TextGrid:
         :returns: List consisting of the form
                   ``[(num1, tier1), (num2, tier2) ... (numn, tiern)]``
         """
-        return sorted((s.number, s.name) for s in self.tiers)
+        return list(enumerate((s.name for s in self.tiers), 1))
 
     def to_file(self, filepath, codec='utf-8'):
         """Write the object to a file.
@@ -236,8 +227,8 @@ tiers? <exists>
 size = {:d}
 item []:
 """.format(float(self.xmin), float(self.xmax), self.tier_num))
-        for tier in sorted(self.tiers, key=lambda x: x.number):
-            f.write(u'{:>4}item [{:d}]:\n'.format(' ', tier.number))
+        for tnum, tier in enumerate(self.tiers, 1):
+            f.write(u'{:>4}item [{:d}]:\n'.format(' ', tnum))
             f.write(u'{:>8}class = "{}"\n'.format(' ', tier.tier_type))
             f.write(u'{:>8}name = "{}"\n'.format(' ', tier.name))
             f.write(u'{:>8}xmin = {:f}\n'.format(' ', tier.xmin))
@@ -261,15 +252,17 @@ item []:
                     f.write(u'{:>8}intervals [{:d}]:\n'.format(' ', i+1))
                     f.write(u'{:>12}xmin = {:f}\n'.format(' ', c[0]))
                     f.write(u'{:>12}xmax = {:f}\n'.format(' ', c[1]))
-                    f.write(u'{:>12}text = "{}"\n'.format(
-                        ' ', c[2].replace('"', '""').decode(codec)))
+                    line = u'{:>12}text = "{}"\n'.format(
+                        ' ', c[2].replace('"', '""'))
+                    f.write(line)
             elif tier.tier_type == 'TextTier':
                 f.write(u'{:>8}points: size = {:d}\n'.format(' ', len(srtint)))
                 for i, c in enumerate(srtint):
                     f.write(u'{:>8}points [{:d}]:\n'.format(' ', i + 1))
                     f.write(u'{:>12}number = {:f}\n'.format(' ', c[0]))
-                    f.write(u'{:>12}mark = "{}"\n'.format(
-                        ' ', c[1].replace('"', '""').decode(codec)))
+                    line = u'{:>12}mark = "{}"\n'.format(
+                        ' ', c[1].replace('"', '""'))
+                    f.write(line)
 
     def to_eaf(self, pointlength=0.1):
         """Convert the object to an pympi.Elan.Eaf object
@@ -300,50 +293,44 @@ class Tier:
     :var str name: Name of the tier.
     :var list intervals: List of intervals where each interval is
                          (start, [end,] value).
-    :var int number: Number of the tier.
     :var str tier_type: Type of the tier('IntervalTier' or 'TextTier').
     :var int xmin: Minimum x value.
     :var int xmax: Maximum x value.
     """
 
-    def __init__(self, name, tier_type, number, lines=None, codec='ascii'):
+    def __init__(self, name, tier_type, lines=None, codec='ascii'):
         """Creates a tier, if lines is ``None`` a new tier is created and codec
         is ignored.
 
         :param str name: Name of the tier.
         :param str tier_type: Type of the tier('IntervalTier' or 'TextTier').
-        :param int number: Number of the tier.
         :param iter lines: Iterator of the input lines.
         :param str codec: Text encoding of the input.
         :raises TierTypeException: If the tier type is unknown.
         """
         self.name = name
         self.intervals = []
-        self.number = number
         self.tier_type = tier_type
         if lines is None:
             self.xmin, self.xmax = 0, 0
         else:
-            self.xmin = float(rexmin.search(lines.next()).group(1))
-            self.xmax = float(rexmax.search(lines.next()).group(1))
-            num_int = int(resize.search(lines.next()).group(1))
+            self.xmin = float(rexmin.search(next(lines)).group(1))
+            self.xmax = float(rexmax.search(next(lines)).group(1))
+            num_int = int(resize.search(next(lines)).group(1))
             if self.tier_type == 'IntervalTier':
-                for i in xrange(num_int):
-                    # intervals [1]:
-                    lines.next()
-                    xmin = float(rexmin.search(lines.next()).group(1))
-                    xmax = float(rexmax.search(lines.next()).group(1))
-                    xtxt = retext.search(lines.next()).group(1).\
-                        replace('""', '"').encode(codec)
+                for i in range(num_int):
+                    next(lines)  # intervals [1]:
+                    xmin = float(rexmin.search(next(lines)).group(1))
+                    xmax = float(rexmax.search(next(lines)).group(1))
+                    xtxt = retext.search(next(lines)).group(1)
+                    xtxt = xtxt.replace('""', '"')
                     self.intervals.append((xmin, xmax, xtxt))
             elif self.tier_type == 'TextTier':
                 for i in range(num_int):
-                    # points [1]:
-                    lines.next()
-                    number = float(renumb.search(lines.next()).group(1))
-                    mark = remark.search(lines.next()).group(1).\
-                        replace('""', '"')
-                    mark = mark.encode(codec)
+                    next(lines)  # points [1]:
+                    number = float(renumb.search(next(lines)).group(1))
+                    mark = remark.search(next(lines)).group(1)
+                    mark = mark.replace('""', '"')
                     self.intervals.append((number, mark))
             else:
                 raise TierTypeException()

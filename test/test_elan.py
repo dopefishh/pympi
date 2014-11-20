@@ -132,7 +132,7 @@ class Elan(unittest.TestCase):
             self.eaf.get_parameters_for_tier('tier2')['LINGUISTIC_TYPE_REF'],
             'default-lt')
         self.assertEqual(['default', 'tier1', 'tier2'],
-                         self.eaf.get_tier_names())
+                         sorted(self.eaf.get_tier_names()))
 
         self.eaf.add_tier('tier3', None, 'tier1', 'en', 'person', 'person2')
         self.assertEqual(self.eaf.get_parameters_for_tier('tier3'), {
@@ -164,7 +164,7 @@ class Elan(unittest.TestCase):
         self.assertEqual(sorted(self.eaf.get_tier_names()), ['tier2', 'tier3'])
         self.assertRaises(KeyError, self.eaf.remove_tiers, ['tier1'])
         self.eaf.remove_tiers(['tier2', 'tier3'])
-        self.assertEqual(self.eaf.get_tier_names(), [])
+        self.assertEqual(sorted(self.eaf.get_tier_names()), [])
 
     def test_remove_tier(self):
         self.eaf.add_tier('tier1')
@@ -261,16 +261,16 @@ class Elan(unittest.TestCase):
         self.eaf.add_annotation('tier1', 2000, 3000, 'a3')
         self.eaf.add_annotation('tier1', 3000, 4000, 'a4')
         self.eaf.remove_all_annotations_from_tier('tier1')
-        self.assertEquals(self.eaf.get_annotation_data_for_tier('tier1'), [])
+        self.assertEqual(self.eaf.get_annotation_data_for_tier('tier1'), [])
 
     def test_add_annotation(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_annotation('tier1', 0, 1)
-        self.assertEquals(
+        self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             [(0, 1, '')])
         self.eaf.add_annotation('tier1', 1, 2, 'abc')
-        self.assertEquals(
+        self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             sorted([(0, 1, ''), (1, 2, 'abc')]))
         self.assertRaises(KeyError, self.eaf.add_annotation, 't1', 0, 0)
@@ -291,17 +291,17 @@ class Elan(unittest.TestCase):
         self.eaf.add_annotation('tier1', 1000, 2000, 'a2')
         self.eaf.add_annotation('tier1', 2000, 3000, 'a3')
         self.eaf.add_annotation('tier1', 3000, 4000, 'a4')
-        self.assertEquals(self.eaf.remove_annotation('tier1', 500), 1)
-        self.assertEquals(
+        self.assertEqual(self.eaf.remove_annotation('tier1', 500), 1)
+        self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             sorted([(1000, 2000, 'a2'), (2000, 3000, 'a3'),
                     (3000, 4000, 'a4')]))
 
-        self.assertEquals(self.eaf.remove_annotation('tier1', 2000), 2)
-        self.assertEquals(
+        self.assertEqual(self.eaf.remove_annotation('tier1', 2000), 2)
+        self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             sorted([(3000, 4000, 'a4')]))
-        self.assertEquals(
+        self.assertEqual(
             sorted(self.eaf.get_annotation_data_for_tier('tier1')),
             sorted([(3000, 4000, 'a4')]))
         self.assertRaises(KeyError, self.eaf.remove_annotation, 'tier2', 0)
@@ -547,18 +547,18 @@ class Elan(unittest.TestCase):
         self.eaf.add_linguistic_type('l2')
         self.eaf.add_linguistic_type('l3')
         self.eaf.remove_linguistic_type('l2')
-        self.assertEquals(sorted(self.eaf.get_linguistic_type_names()),
-                          ['default-lt', 'l1', 'l3'])
+        self.assertEqual(sorted(self.eaf.get_linguistic_type_names()),
+                         ['default-lt', 'l1', 'l3'])
         self.assertRaises(KeyError, self.eaf.remove_linguistic_type, 'a')
 
     def test_add_linguistic_type(self):
         self.eaf.add_linguistic_type('l1')
         self.eaf.add_linguistic_type('l2', 'Time_Subdivision', False, True)
-        self.assertEquals(
+        self.assertEqual(
             self.eaf.linguistic_types['l1'], {
                 'CONSTRAINTS': None, 'TIME_ALIGNABLE': 'true',
                 'LINGUISTIC_TYPE_ID': 'l1', 'GRAPHIC_REFERENCES': 'false'})
-        self.assertEquals(
+        self.assertEqual(
             self.eaf.linguistic_types['l2'], {
                 'CONSTRAINTS': 'Time_Subdivision', 'TIME_ALIGNABLE': 'false',
                 'LINGUISTIC_TYPE_ID': 'l2', 'GRAPHIC_REFERENCES': 'true'})
@@ -572,7 +572,8 @@ class Elan(unittest.TestCase):
         self.assertRaises(KeyError, self.eaf.add_linguistic_type, 'l2', 'a')
 
     def test_get_linguistic_types_names(self):
-        self.assertEqual(self.eaf.get_linguistic_type_names(), ['default-lt'])
+        self.assertEqual(sorted(self.eaf.get_linguistic_type_names()),
+                         ['default-lt'])
         self.eaf.add_linguistic_type('l1')
         self.eaf.add_linguistic_type('l2')
         self.eaf.add_linguistic_type('l3')
@@ -685,9 +686,9 @@ class Elan(unittest.TestCase):
         self.eaf.add_annotation('p1', 3000, 4000, 'a3')
         self.eaf.add_ref_annotation('a1', 'p1', 500, 'ref1')
         self.eaf.add_ref_annotation('a1', 'p1', 3000, 'ref2')
-        self.assertEquals(self.eaf.get_ref_annotation_at_time('a1', 500),
-                          [(0, 1000, 'ref1', 'a1')])
-        self.assertEquals(self.eaf.get_ref_annotation_at_time('p1', 2500), [])
+        self.assertEqual(self.eaf.get_ref_annotation_at_time('a1', 500),
+                         [(0, 1000, 'ref1', 'a1')])
+        self.assertEqual(self.eaf.get_ref_annotation_at_time('p1', 2500), [])
         self.assertRaises(KeyError,
                           self.eaf.get_ref_annotation_at_time, 'eau', 0)
 
@@ -868,10 +869,11 @@ class Elan(unittest.TestCase):
         self.eaf.add_annotation('test2', 100, 200, 'a')
         target = Eaf()
         self.eaf.copy_tier(target, 'test2')
-        self.assertEqual(target.get_parameters_for_tier('test2'),
-                         self.eaf.get_parameters_for_tier('test2'))
-        self.assertEqual(target.get_annotation_data_for_tier('test2'),
-                         self.eaf.get_annotation_data_for_tier('test2'))
+        self.assertEqual(sorted(target.get_parameters_for_tier('test2')),
+                         sorted(self.eaf.get_parameters_for_tier('test2')))
+        self.assertEqual(
+            sorted(target.get_annotation_data_for_tier('test2')),
+            sorted(self.eaf.get_annotation_data_for_tier('test2')))
 
     def test_add_controlled_vocabulary(self):
         self.eaf.add_controlled_vocabulary('cv1')
@@ -886,11 +888,11 @@ class Elan(unittest.TestCase):
         self.eaf.add_language('nld')
         self.eaf.add_cv_entry(
             'cv1', 'cve1', [('H', 'eng', 'hold'), ('H', 'nld', None)])
-        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+        self.assertEqual(self.eaf.get_cv_entries('cv1'), {
             'cve1': ([('H', 'eng', 'hold'), ('H', 'nld', None)], None)})
         self.eaf.add_cv_entry(
             'cv1', 'cve2', [('S', 'eng', 'stroke'), ('S', 'nld', None)])
-        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+        self.assertEqual(self.eaf.get_cv_entries('cv1'), {
             'cve1': ([('H', 'eng', 'hold'), ('H', 'nld', None)], None),
             'cve2': ([('S', 'eng', 'stroke'), ('S', 'nld', None)], None)})
         self.assertRaises(KeyError, self.eaf.add_cv_entry, 'cv2', 'cve1', [])
@@ -903,7 +905,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_language('nld')
         self.eaf.add_cv_description('cv1', 'eng', 'Gesture Phases')
         self.eaf.add_cv_description('cv1', 'nld', None)
-        self.assertEquals(self.eaf.get_cv_descriptions('cv1'), [
+        self.assertEqual(self.eaf.get_cv_descriptions('cv1'), [
             ('eng', 'Gesture Phases'), ('nld', None)])
         self.assertRaises(KeyError, self.eaf.add_cv_description, 'cv2', 'eng')
         self.assertRaises(ValueError,
@@ -922,11 +924,11 @@ class Elan(unittest.TestCase):
         self.eaf.add_language('nld')
         self.eaf.add_cv_entry(
             'cv1', 'cve1', [('H', 'eng', 'hold'), ('H', 'nld', None)])
-        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+        self.assertEqual(self.eaf.get_cv_entries('cv1'), {
             'cve1': ([('H', 'eng', 'hold'), ('H', 'nld', None)], None)})
         self.eaf.add_cv_entry(
             'cv1', 'cve2', [('S', 'eng', 'stroke'), ('S', 'nld', None)])
-        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+        self.assertEqual(self.eaf.get_cv_entries('cv1'), {
             'cve1': ([('H', 'eng', 'hold'), ('H', 'nld', None)], None),
             'cve2': ([('S', 'eng', 'stroke'), ('S', 'nld', None)], None)})
         self.assertRaises(KeyError, self.eaf.get_cv_entries, 'cv2')
@@ -937,7 +939,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_language('nld')
         self.eaf.add_cv_description('cv1', 'eng', 'Gesture Phases')
         self.eaf.add_cv_description('cv1', 'nld', None)
-        self.assertEquals(self.eaf.get_cv_descriptions('cv1'), [
+        self.assertEqual(self.eaf.get_cv_descriptions('cv1'), [
             ('eng', 'Gesture Phases'), ('nld', None)])
         self.assertRaises(KeyError, self.eaf.get_cv_descriptions, 'cv2')
 
@@ -962,7 +964,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_cv_entry(
             'cv1', 'cve2', [('S', 'eng', 'stroke'), ('S', 'nld', None)])
         self.eaf.remove_cv_entry('cv1', 'cve1')
-        self.assertEquals(self.eaf.get_cv_entries('cv1'), {
+        self.assertEqual(self.eaf.get_cv_entries('cv1'), {
             'cve2': ([('S', 'eng', 'stroke'), ('S', 'nld', None)], None)})
         self.assertRaises(KeyError, self.eaf.remove_cv_entry, 'cv2', 'c')
         self.assertRaises(KeyError, self.eaf.remove_cv_entry, 'cv1', 'c')
@@ -973,7 +975,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_language('nld')
         self.eaf.add_cv_description('cv1', 'eng', 'Gesture Phases')
         self.eaf.add_cv_description('cv1', 'nld', None)
-        self.assertEquals(self.eaf.get_cv_descriptions('cv1'), [
+        self.assertEqual(self.eaf.get_cv_descriptions('cv1'), [
             ('eng', 'Gesture Phases'), ('nld', None)])
         self.assertRaises(KeyError, self.eaf.get_cv_descriptions, 'cv2')
 
@@ -1002,7 +1004,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_external_ref('er1', 'ecv', 'location')
         self.eaf.add_external_ref('er2', 'lexen_id', 'location2')
         self.eaf.remove_external_ref('er1')
-        self.assertEqual(self.eaf.get_external_ref_names(), ['er2'])
+        self.assertEqual(sorted(self.eaf.get_external_ref_names()), ['er2'])
 
     def test_add_lexicon_ref(self):
         self.eaf.add_lexicon_ref('id1', 'long name', 't1', 'url1', 'lid1',
@@ -1064,8 +1066,7 @@ class Elan(unittest.TestCase):
             scheme_root = etree.XML(scheme_in.read())
         schema = etree.XMLSchema(scheme_root)
         xmlparser = etree.XMLParser(schema=schema)
-        with open(filepath, 'r') as xml_in:
-            etree.fromstring(xml_in.read(), xmlparser)
+        etree.parse(filepath, xmlparser)
 
     def test_parse_eaf(self):
         pass

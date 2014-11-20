@@ -29,12 +29,10 @@ class PraatTest(unittest.TestCase):
 
         self.assertEqual(['tier1', 'tier2', 'tier3'],
                          [a.name for a in self.tg.tiers])
-        self.assertEqual([1, 2, 3], [a.number for a in self.tg.tiers])
 
         self.tg.add_tier('tier4', number=2)
         self.assertEqual(len(self.tg.tiers), 4)
-        self.assertEqual('tier4', self.tg.tiers[3].name)
-        self.assertEqual([1, 3, 4, 2], [a.number for a in self.tg.tiers])
+        self.assertEqual(4, len(self.tg.tiers))
 
     def test_remove_tier(self):
         self.assertRaises(TierNotFoundException, self.tg.remove_tier, -1)
@@ -48,18 +46,16 @@ class PraatTest(unittest.TestCase):
 
         self.tg.remove_tier(3)
         self.assertEqual(len(self.tg.tiers), 3)
-        self.assertEqual([1, 3, 2], [a.number for a in self.tg.tiers])
         self.assertEqual(['tier1', 'tier3', 'tier4'],
-                         [a.name for a in self.tg.tiers])
+                         sorted(a.name for a in self.tg.tiers))
 
         self.tg.remove_tier('tier1')
         self.assertEqual(len(self.tg.tiers), 2)
-        self.assertEqual(['tier3', 'tier4'], [a.name for a in self.tg.tiers])
-        self.assertEqual([2, 1], [a.number for a in self.tg.tiers])
+        self.assertEqual(['tier3', 'tier4'],
+                         sorted(a.name for a in self.tg.tiers))
 
         self.tg.remove_tier(2)
         self.assertEqual(len(self.tg.tiers), 1)
-        self.assertEqual([1], [a.number for a in self.tg.tiers])
         self.assertEqual(['tier4'], [a.name for a in self.tg.tiers])
 
         self.tg.remove_tier('tier4')
@@ -75,12 +71,9 @@ class PraatTest(unittest.TestCase):
         tier3 = self.tg.add_tier('tier3')
 
         self.assertEqual(tier1, self.tg.get_tier(tier1.name))
-        self.assertEqual(tier1, self.tg.get_tier(tier1.number))
         self.assertEqual(tier3, self.tg.get_tier(tier3.name))
-        self.assertEqual(tier3, self.tg.get_tier(tier3.number))
 
         self.assertEqual(self.tg.tiers[1], self.tg.get_tier(tier2.name))
-        self.assertEqual(self.tg.tiers[1], self.tg.get_tier(tier2.number))
 
     def test_change_tier_name(self):
         self.assertRaises(TierNotFoundException,
@@ -89,7 +82,6 @@ class PraatTest(unittest.TestCase):
                           self.tg.change_tier_name, 'a', 'b')
         self.assertRaises(TierNotFoundException,
                           self.tg.change_tier_name, 10, 'b')
-
         self.tg.add_tier('tier1')
         tier2 = self.tg.add_tier('tier2')
         self.tg.add_tier('tier3')
@@ -97,7 +89,7 @@ class PraatTest(unittest.TestCase):
         self.tg.change_tier_name('tier1', 'tier1a')
         self.assertEqual(['tier1a', 'tier2', 'tier3'],
                          [a.name for a in self.tg.tiers])
-        self.tg.change_tier_name(tier2.number, 'tier2a')
+        self.tg.change_tier_name(self.tg.tiers.index(tier2)+1, 'tier2a')
         self.assertEqual(['tier1a', 'tier2a', 'tier3'],
                          [a.name for a in self.tg.tiers])
         self.tg.change_tier_name('tier1a', 'tier1')
@@ -119,6 +111,41 @@ class PraatTest(unittest.TestCase):
                          self.tg.get_tier_name_num())
 
     def test_to_file(self):
+        for codec in ['utf-8', 'utf-16', 'latin_1', 'mac_roman']:
+            self.tg = TextGrid(xmax=20)
+            tier1 = self.tg.add_tier('tier')
+            tier1.add_interval(1, 2, 'i1')
+            tier1.add_interval(2, 3, 'i2')
+            tier1.add_interval(4, 5, 'i3')
+
+            tier4 = self.tg.add_tier('tier')
+            tier4.add_interval(1, 2, u'i1ü')
+            tier4.add_interval(2.0, 3, 'i2')
+            tier4.add_interval(4, 5.0, 'i3')
+
+            tier2 = self.tg.add_tier('tier2', tier_type='TextTier')
+            tier2.add_point(1, u'p1ü')
+            tier2.add_point(2, 'p1')
+            tier2.add_point(3, 'p1')
+
+            tgfile = io.StringIO()
+            self.tg.to_stream(tgfile, codec=codec)
+            self.tg.to_file('{}.TextGrid'.format(codec), codec=codec)
+            tgfile.seek(0)
+            tg1 = tgfile.read()
+            tgfile.seek(0)
+
+            self.tg = TextGrid(tgfile, codec=codec, stream=True)
+
+            tgfile = io.StringIO()
+            self.tg.to_stream(tgfile, codec=codec)
+            tgfile.seek(0)
+            tg2 = tgfile.read()
+            tgfile.seek(0)
+
+            self.assertEqual(tg2, tg1)
+        return
+
         for codec in ['ascii', 'utf-8', 'utf-16', 'latin_1', 'mac_roman']:
             self.tg = TextGrid(codec=codec, xmax=20)
             tier1 = self.tg.add_tier('tier')
@@ -168,14 +195,15 @@ class PraatTest(unittest.TestCase):
         tier2.add_point(3.5, 'point3')
         eaf = self.tg.to_eaf(0.03)
         self.assertRaises(ValueError, self.tg.to_eaf, -1)
-        self.assertEquals(sorted(eaf.get_tier_names()),
-                          sorted(['default', 'tier1', 'tier2']))
-        self.assertEquals(sorted(eaf.get_annotation_data_for_tier('tier1')),
-                          sorted([(0, 1000, 'int1'), (4000, 5000, 'int3'),
-                                  (2000, 3000, 'int2')]))
-        self.assertEquals(eaf.get_annotation_data_for_tier('tier2'),
-                          [(2500, 2530, 'point2'), (1500, 1530, 'point1'),
-                           (3500, 3530, 'point3')])
+        self.assertEqual(sorted(eaf.get_tier_names()),
+                         sorted(['default', 'tier1', 'tier2']))
+        self.assertEqual(sorted(eaf.get_annotation_data_for_tier('tier1')),
+                         sorted([(0, 1000, 'int1'), (4000, 5000, 'int3'),
+                                 (2000, 3000, 'int2')]))
+        self.assertEqual(sorted(eaf.get_annotation_data_for_tier('tier2')),
+                         sorted([(2500, 2530, 'point2'),
+                                 (1500, 1530, 'point1'),
+                                 (3500, 3530, 'point3')]))
 
 # Test all the Praat.Tier functions
     def setup_tier(self):
@@ -186,10 +214,10 @@ class PraatTest(unittest.TestCase):
         self.setup_tier()
         self.assertRaises(TierTypeException, self.tier1.add_point, 5, 'a')
         self.tier2.add_point(5, 't')
-        self.assertEquals([(5, 't')], self.tier2.intervals)
+        self.assertEqual([(5, 't')], self.tier2.intervals)
         self.assertRaises(Exception, self.tier2.add_point, 5, 'a')
         self.tier2.add_point(6, 'a')
-        self.assertEquals([(5, 't'), (6, 'a')], self.tier2.intervals)
+        self.assertEqual([(5, 't'), (6, 'a')], self.tier2.intervals)
         self.tier2.add_point(5, 'a', False)
 
     def test_add_interval(self):
@@ -199,10 +227,10 @@ class PraatTest(unittest.TestCase):
         self.assertRaises(Exception, self.tier2.add_interval, 6, 5, 'a')
 
         self.tier1.add_interval(5, 6, 't')
-        self.assertEquals([(5, 6, 't')], self.tier1.intervals)
+        self.assertEqual([(5, 6, 't')], self.tier1.intervals)
         self.assertRaises(Exception, self.tier1.add_interval, 5.5, 6.5, 't')
         self.tier1.add_interval(6, 7, 'a')
-        self.assertEquals([(5, 6, 't'), (6, 7, 'a')], self.tier1.intervals)
+        self.assertEqual([(5, 6, 't'), (6, 7, 'a')], self.tier1.intervals)
 
         self.tier1.add_interval(5.5, 6.5, 't', False)
 

@@ -34,7 +34,7 @@ How to cite::
         author={{Lubbers, Mart and Torreira, Francisco}},
         title={{pympi-ling:\
 a Python module for processing ELAN and Praat annotation files.}},
-        howpublished={{\url{{https://pypi.python.org/pypi/pympi-ling}}}},
+        howpublished={{\\url{{https://pypi.python.org/pypi/pympi-ling}}}},
         year={{2013-2014}},
         note={{Version {}}}
     }}
@@ -51,7 +51,8 @@ a Python module for processing ELAN and Praat annotation files.}},
                    'Environment :: Console',
                    'Natural Language :: English',
                    'Operating System :: OS Independent',
-                   'Programming Language :: Python :: 2.7',
+                   'Programming Language :: Python :: 2',
+                   'Programming Language :: Python :: 3',
                    'Topic :: Text Processing :: Linguistic'],
       packages=['pympi']
       )

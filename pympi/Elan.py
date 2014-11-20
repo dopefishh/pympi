@@ -7,7 +7,7 @@ import re
 import sys
 import time
 
-VERSION = '1.2'
+VERSION = '1.29'
 
 CONSTRAINTS = {
     'Time_Subdivision': 'Time subdivision of parent annotation\'s time interva'
@@ -325,7 +325,7 @@ class Eaf:
         if self.tiers[id_tier][0]:
             raise ValueError('This tier already contains normal annotations.')
         ann = None
-        for aid, (begin, end, _, _) in self.tiers[tier2][0].iteritems():
+        for aid, (begin, end, _, _) in self.tiers[tier2][0].items():
             begin = self.timeslots[begin]
             end = self.timeslots[end]
             if begin <= time and end >= time:
@@ -383,7 +383,7 @@ class Eaf:
         if not tier_id:
             raise ValueError('Tier id is empty...')
         if ling not in self.linguistic_types:
-            ling = self.linguistic_types.keys()[0]
+            ling = sorted(self.linguistic_types.keys())[0]
         if locale and locale not in self.locales:
             locale = None
         if language and language not in self.languages:
@@ -420,8 +420,8 @@ class Eaf:
         the flags for cleaning in the functions so that the cleaning is only
         performed afterwards.
         """
-        ts_in_tier = ((a[0], a[1]) for tier in self.tiers.itervalues() for a in
-                      tier[0].itervalues())
+        ts_in_tier = ((a[0], a[1]) for tier in self.tiers.values() for a in
+                      tier[0].values())
         ts_in_tier = {a for b in ts_in_tier for a in b}
         for a in ts_in_tier.symmetric_difference(self.timeslots):
             del(self.timeslots[a])
@@ -564,7 +564,7 @@ class Eaf:
         anns = self.tiers[id_tier][0]
         return sorted(
             [(self.timeslots[m[0]], self.timeslots[m[1]], m[2])
-                for m in anns.itervalues() if
+                for m in anns.values() if
                 self.timeslots[m[0]] <= time and
                 self.timeslots[m[1]] >= time])
 
@@ -578,7 +578,7 @@ class Eaf:
         :raises KeyError: If the tier is non existent.
         """
         anns = ((self.timeslots[a[0]], self.timeslots[a[1]], a[2])
-                for a in self.tiers[id_tier][0].itervalues())
+                for a in self.tiers[id_tier][0].values())
         return sorted(a for a in anns if a[1] >= start and a[0] <= end)
 
     def get_annotation_data_for_tier(self, id_tier):
@@ -602,8 +602,8 @@ class Eaf:
         :returns: Tuple of the form: ``(min_time, max_time)``.
         """
         return (0, 0) if not self.timeslots else\
-            (min(self.timeslots.itervalues()),
-             max(self.timeslots.itervalues()))
+            (min(self.timeslots.values()),
+             max(self.timeslots.values()))
 
     def get_gaps_and_overlaps(self, tier1, tier2, maxlen=-1):
         """Give gaps and overlaps. The return types are shown in the table
@@ -659,7 +659,7 @@ class Eaf:
         minmax = (min(spkr1anns[0][0], spkr2anns[0][0]),
                   max(spkr1anns[-1][1], spkr2anns[-1][1]))
         last = (1, minmax[0])
-        for ts in xrange(*minmax):
+        for ts in range(*minmax):
             in1, in2 = isin(ts, spkr1anns), isin(ts, spkr2anns)
             if in1 and in2:      # Both speaking
                 if last[0] == 'B':
@@ -680,7 +680,7 @@ class Eaf:
             line1.append((last[0], last[1], ts))
             last = (ty, ts)
         line1.append((last[0], last[1], minmax[1]))
-        for i in xrange(len(line1)):
+        for i in range(len(line1)):
             if line1[i][0] == 'N':
                 if i != 0 and i < len(line1) - 1 and\
                         line1[i-1][0] != line1[i+1][0]:
@@ -836,7 +836,7 @@ class Eaf:
         :raises KeyError: If the tier is non existent.
         """
         bucket = []
-        for aid, (ref, value, _, _) in self.tiers[tier][1].iteritems():
+        for aid, (ref, value, _, _) in self.tiers[tier][1].items():
             begin, end, rvalue, _ = self.tiers[self.annotations[ref]][0][ref]
             begin = self.timeslots[begin]
             end = self.timeslots[end]
@@ -853,7 +853,7 @@ class Eaf:
         :returns: Reference annotations within that tier.
         """
         bucket = []
-        for aid, (ref, value, prev, _) in self.tiers[id_tier][1].iteritems():
+        for aid, (ref, value, prev, _) in self.tiers[id_tier][1].items():
             refann = self.tiers[self.annotations[ref]][0][ref]
             bucket.append((self.timeslots[refann[0]],
                            self.timeslots[refann[1]], value, refann[2]))
@@ -915,7 +915,7 @@ class Eaf:
         if tiernew is None:
             tiernew = '{}_merged'.format('_'.join(tiers))
         self.add_tier(tiernew)
-        aa = [(sys.maxint, sys.maxint, None)] + sorted((
+        aa = [(sys.maxsize, sys.maxsize, None)] + sorted((
             a for t in tiers for a in self.get_annotation_data_for_tier(t)),
             reverse=True)
         l = None
@@ -938,8 +938,11 @@ class Eaf:
         :param str id_tier: Name of the tier.
         :raises KeyError: If the tier is non existent.
         """
-        for aid in self.tiers[id_tier][0].keys()+self.tiers[id_tier][1].keys():
+        for aid in self.tiers[id_tier][0]:
             del(self.annotations[aid])
+        for aid in self.tiers[id_tier][1]:
+            del(self.annotations[aid])
+
         self.tiers[id_tier][0].clear()
         self.tiers[id_tier][1].clear()
         if clean:
@@ -956,7 +959,7 @@ class Eaf:
         :returns: Number of removed annotations.
         """
         removed = 0
-        for b in [a for a in self.tiers[id_tier][0].iteritems() if
+        for b in [a for a in self.tiers[id_tier][0].items() if
                   self.timeslots[a[1][0]] <= time and
                   self.timeslots[a[1][1]] >= time]:
             del(self.tiers[id_tier][0][b[0]])
@@ -1157,9 +1160,9 @@ class Eaf:
         """
         total_re = []
         total_sq = []
-        for name, tier in self.tiers.iteritems():
+        for name, tier in self.tiers.items():
             squashed = []
-            for aid, (begin, end, value, _) in tier[0].iteritems():
+            for aid, (begin, end, value, _) in tier[0].items():
                 if self.timeslots[end]+time <= 0:
                     squashed.append((name, aid))
                 elif self.timeslots[begin]+time < 0:
@@ -1446,7 +1449,7 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     :param bool pretty: Flag to set pretty printing.
     """
     rm_none = lambda x:\
-        dict((k, unicode(v)) for k, v in x.iteritems() if v is not None)
+        dict((k, str(v)) for k, v in x.items() if v is not None)
     # Annotation Document
     ANNOTATION_DOCUMENT = etree.Element('ANNOTATION_DOCUMENT',
                                         eaf_obj.annotation_document)
@@ -1467,62 +1470,62 @@ def to_eaf(file_path, eaf_obj, pretty=True):
         etree.SubElement(HEADER, 'LINKED_FILE_DESCRIPTOR', rm_none(m))
     # Properties
     for k, v in eaf_obj.properties:
-        etree.SubElement(HEADER, 'PROPERTY', {'NAME': k}).text = unicode(v)
+        etree.SubElement(HEADER, 'PROPERTY', {'NAME': k}).text = str(v)
 
     # Time order
     TIME_ORDER = etree.SubElement(ANNOTATION_DOCUMENT, 'TIME_ORDER')
-    for t in sorted(eaf_obj.timeslots.iteritems(),
+    for t in sorted(eaf_obj.timeslots.items(),
                     key=lambda x: int(x[0][2:])):
         etree.SubElement(TIME_ORDER, 'TIME_SLOT', rm_none(
             {'TIME_SLOT_ID': t[0], 'TIME_VALUE': t[1]}))
 
     # Tiers
-    for t in eaf_obj.tiers.iteritems():
+    for t in eaf_obj.tiers.items():
         tier = etree.SubElement(ANNOTATION_DOCUMENT, 'TIER', rm_none(t[1][2]))
-        for a in t[1][0].iteritems():
+        for a in t[1][0].items():
             ann = etree.SubElement(tier, 'ANNOTATION')
             alan = etree.SubElement(ann, 'ALIGNABLE_ANNOTATION', rm_none(
                 {'ANNOTATION_ID': a[0], 'TIME_SLOT_REF1': a[1][0],
                  'TIME_SLOT_REF2': a[1][1], 'SVG_REF': a[1][3]}))
             etree.SubElement(alan, 'ANNOTATION_VALUE').text =\
-                unicode(a[1][2])
-        for a in t[1][1].iteritems():
+                str(a[1][2])
+        for a in t[1][1].items():
             ann = etree.SubElement(tier, 'ANNOTATION')
             rean = etree.SubElement(ann, 'REF_ANNOTATION', rm_none(
                 {'ANNOTATION_ID': a[0], 'ANNOTATION_REF': a[1][0],
                  'PREVIOUS_ANNOTATION': a[1][2], 'SVG_REF': a[1][3]}))
             etree.SubElement(rean, 'ANNOTATION_VALUE').text =\
-                unicode(a[1][1])
+                str(a[1][1])
 
     # Linguistic types
-    for l in eaf_obj.linguistic_types.itervalues():
+    for l in eaf_obj.linguistic_types.values():
         etree.SubElement(ANNOTATION_DOCUMENT, 'LINGUISTIC_TYPE', rm_none(l))
 
     # Locales
-    for lc, (cc, vr) in eaf_obj.locales.iteritems():
+    for lc, (cc, vr) in eaf_obj.locales.items():
         etree.SubElement(ANNOTATION_DOCUMENT, 'LOCALE', rm_none(
             {'LANGUAGE_CODE': lc, 'COUNTRY_CODE': cc, 'VARIANT': vr}))
 
     # Languages
-    for lid, (ldef, label) in eaf_obj.languages.iteritems():
+    for lid, (ldef, label) in eaf_obj.languages.items():
         etree.SubElement(ANNOTATION_DOCUMENT, 'LANGUAGE', rm_none(
             {'LANG_ID': lid, 'LANG_DEF': ldef, 'LANG_LABEL': label}))
 
     # Constraints
-    for l in eaf_obj.constraints.iteritems():
+    for l in eaf_obj.constraints.items():
         etree.SubElement(ANNOTATION_DOCUMENT, 'CONSTRAINT', rm_none(
             {'STEREOTYPE': l[0], 'DESCRIPTION': l[1]}))
 
     # Controlled vocabularies
     for cvid, (descriptions, cv_entries, ext_ref) in\
-            eaf_obj.controlled_vocabularies.iteritems():
+            eaf_obj.controlled_vocabularies.items():
         cv = etree.SubElement(ANNOTATION_DOCUMENT, 'CONTROLLED_VOCABULARY',
                               rm_none({'CV_ID': cvid, 'EXT_REF': ext_ref}))
         for lang_ref, description in descriptions:
             des = etree.SubElement(cv, 'DESCRIPTION', {'LANG_REF': lang_ref})
             if description:
                 des.text = description
-        for cveid, (values, ext_ref) in cv_entries.iteritems():
+        for cveid, (values, ext_ref) in cv_entries.items():
             cem = etree.SubElement(cv, 'CV_ENTRY_ML', rm_none({
                 'CVE_ID': cveid, 'EXT_REF': ext_ref}))
             for value, lang_ref, description in values:
@@ -1531,11 +1534,11 @@ def to_eaf(file_path, eaf_obj, pretty=True):
                 val.text = value
 
     # Lexicon refs
-    for l in eaf_obj.lexicon_refs.itervalues():
+    for l in eaf_obj.lexicon_refs.values():
         etree.SubElement(ANNOTATION_DOCUMENT, 'LEXICON_REF', rm_none(l))
 
     # Exteral refs
-    for eid, (etype, value) in eaf_obj.external_refs.iteritems():
+    for eid, (etype, value) in eaf_obj.external_refs.items():
         etree.SubElement(ANNOTATION_DOCUMENT, 'EXTERNAL_REF', rm_none(
             {'EXT_REF_ID': eid, 'TYPE': etype, 'VALUE': value}))
 
