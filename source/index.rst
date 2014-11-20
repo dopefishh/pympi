@@ -23,6 +23,12 @@ Todo
 
 - General
 
+Old versions
+============
+- `Version 1.2 <docs_1.2/index.html>`_.
+- `Version 1.19 <docs_1.19/index.html>`_.
+- `Version 1.1 <docs_1.1/index.html>`_.
+
 Changelog
 =========
 +------------+---------+------------------------------------------------------+

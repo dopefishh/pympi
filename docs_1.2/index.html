@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to pympi’s documentation! &mdash; pympi 1.29 documentation</title>
+    <title>Welcome to pympi’s documentation! &mdash; pympi 1.2 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.29',
+        VERSION:     '1.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 1.29 documentation" href="#" />
+    <link rel="top" title="pympi 1.2 documentation" href="#" />
     <link rel="next" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="Praat.html" title="Praat"
              accesskey="N">next</a> |</li>
-        <li><a href="#">pympi 1.29 documentation</a> &raquo;</li> 
+        <li><a href="#">pympi 1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -61,20 +61,18 @@
 <div class="section" id="todo">
 <h1>Todo<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li>Elan</li>
+<li>Elan<ul>
+<li>Import from CLAN&#8217;s .cha files.</li>
+</ul>
+</li>
 <li>Praat<ul>
 <li>Binary textgrids(long shot...)</li>
 </ul>
 </li>
-<li>General</li>
+<li>General<ul>
+<li>Python 3 support</li>
 </ul>
-</div>
-<div class="section" id="old-versions">
-<h1>Old versions<a class="headerlink" href="#old-versions" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference external" href="docs_1.2/index.html">Version 1.2</a>.</li>
-<li><a class="reference external" href="docs_1.19/index.html">Version 1.19</a>.</li>
-<li><a class="reference external" href="docs_1.1/index.html">Version 1.1</a>.</li>
+</li>
 </ul>
 </div>
 <div class="section" id="changelog">
@@ -92,22 +90,7 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>14-11-20</td>
-<td>1.29</td>
-<td><ul class="first last simple">
-<li>Import chat files to elan files.</li>
-<li>Added some example scripts that portay possible
-things you can do with the package and can be used
-as possible templates.</li>
-<li>Fixed a non fatal bug about constraints.</li>
-<li>Internal update for textgrids, tiers don&#8217;t know
-their number anymore, numbers are inherited from
-index in the array.</li>
-<li>Python 3 support.</li>
-</ul>
-</td>
-</tr>
-<tr class="row-odd"><td>14-11-13</td>
+<tr class="row-even"><td>14-11-13</td>
 <td>1.2</td>
 <td><ul class="first last simple">
 <li>Bugfixes.</li>
@@ -145,7 +128,7 @@ is to use the new functions:
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td>14-11-12</td>
+<tr class="row-odd"><td>14-11-12</td>
 <td>1.19</td>
 <td><ul class="first last simple">
 <li>Locale functions added: <tt class="xref py py-func docutils literal"><span class="pre">add_locale()</span></tt>,
@@ -173,7 +156,7 @@ possible.</li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>14-10-17</td>
+<tr class="row-even"><td>14-10-17</td>
 <td>1.1a</td>
 <td><ul class="first last simple">
 <li>Fixed bugs in ref annotations.</li>
@@ -181,7 +164,7 @@ possible.</li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td>14-10-17</td>
+<tr class="row-odd"><td>14-10-17</td>
 <td>1.1</td>
 <td><ul class="first last simple">
 <li>Faster filter_annotions functions</li>
@@ -225,7 +208,7 @@ will be discarded in a merge or filter.</li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>2014-10-08</td>
+<tr class="row-even"><td>2014-10-08</td>
 <td>1.0</td>
 <td><ul class="first last simple">
 <li>Glue annotations is removed(you can get the same
@@ -254,61 +237,61 @@ things that are to be implemented.</li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td>2014-09-26</td>
+<tr class="row-odd"><td>2014-09-26</td>
 <td>0.99a</td>
 <td>Unit tests for Praat finished and Praat module is on
 version 1.0, meaning no api changes in the future
 that break compatibility</td>
 </tr>
-<tr class="row-odd"><td>2014-09-11</td>
+<tr class="row-even"><td>2014-09-11</td>
 <td>0.99</td>
 <td>Unit tests for Praat and Elan and from version 1.0
 no api changes.</td>
 </tr>
-<tr class="row-even"><td>2014-08-06</td>
+<tr class="row-odd"><td>2014-08-06</td>
 <td>0.91d</td>
 <td>New documentation format(sphinx) and github pages.</td>
 </tr>
-<tr class="row-odd"><td>2014-07-17</td>
+<tr class="row-even"><td>2014-07-17</td>
 <td>0.91</td>
 <td>Controlled vocabularies (eaf file format 2.8) added
 and quickly tested.</td>
 </tr>
-<tr class="row-even"><td>2014-07-16</td>
+<tr class="row-odd"><td>2014-07-16</td>
 <td>0.9</td>
 <td>Added support for licences(eaf file format 2.8) and
 planned extended controlled vocabulary support.</td>
 </tr>
-<tr class="row-odd"><td>2014-07-09</td>
+<tr class="row-even"><td>2014-07-09</td>
 <td>0.7</td>
 <td>Changed the style to pep8 and thus some functions
 (read all) have changed name.</td>
 </tr>
-<tr class="row-even"><td>2014-03-24</td>
+<tr class="row-odd"><td>2014-03-24</td>
 <td>&nbsp;</td>
 <td>Fixed a lot of TextGrid bugs and have written a
 better parser using more regexp.</td>
 </tr>
-<tr class="row-odd"><td>2014-02-17</td>
+<tr class="row-even"><td>2014-02-17</td>
 <td>&nbsp;</td>
 <td>Started branching and fixed a few bugs.</td>
 </tr>
-<tr class="row-even"><td>2014-02-03</td>
+<tr class="row-odd"><td>2014-02-03</td>
 <td>&nbsp;</td>
 <td>Fixed the praat tofile function so that it writes
 silence intervals (that praat convention).</td>
 </tr>
-<tr class="row-odd"><td>2014-01-27</td>
+<tr class="row-even"><td>2014-01-27</td>
 <td>&nbsp;</td>
 <td>Added documentation via pdoc in html and cleaned up
 some documentation in EafIO.py.</td>
 </tr>
-<tr class="row-even"><td>2013-12-02</td>
+<tr class="row-odd"><td>2013-12-02</td>
 <td>&nbsp;</td>
 <td>IO is now in a different file, the old tofile is
 removed because the new one is much better.</td>
 </tr>
-<tr class="row-odd"><td>2013-11-15</td>
+<tr class="row-even"><td>2013-11-15</td>
 <td>&nbsp;</td>
 <td>Rewritten the tofile function, the old function is a
 bit faster but less reliable. The old function can
@@ -374,7 +357,7 @@ still be used by using tofileOLD().</td>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              >next</a> |</li>
-        <li><a href="#">pympi 1.29 documentation</a> &raquo;</li> 
+        <li><a href="#">pympi 1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
