@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Elan &mdash; pympi 1.2 documentation</title>
+    <title>Elan &mdash; pympi 1.29 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2',
+        VERSION:     '1.29',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 1.2 documentation" href="index.html" />
+    <link rel="top" title="pympi 1.29 documentation" href="index.html" />
     <link rel="prev" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="Praat.html" title="Praat"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">pympi 1.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.29 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -328,7 +328,7 @@ description.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>lingtype</strong> (<em>str</em>) &#8211; Name of the linguistic type.</li>
-<li><strong>constraints</strong> (<em>list</em>) &#8211; Constraint names.</li>
+<li><strong>constraints</strong> (<em>str</em>) &#8211; Constraint name.</li>
 <li><strong>timealignable</strong> (<em>bool</em>) &#8211; Flag for time alignable.</li>
 <li><strong>graphicreferences</strong> (<em>bool</em>) &#8211; Flag for graphic references.</li>
 <li><strong>extref</strong> (<em>str</em>) &#8211; External reference.</li>
@@ -1574,6 +1574,39 @@ all tiers are included.</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="pympi.Elan.eaf_from_chat">
+<tt class="descclassname">pympi.Elan.</tt><tt class="descname">eaf_from_chat</tt><span class="sig-paren">(</span><em>file_path</em>, <em>codec='ascii'</em>, <em>extension='wav'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.eaf_from_chat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a .cha file and converts it to an elan object. The functions tries
+to mimic the CHAT2ELAN program that comes with the CLAN package as close as
+possible. This function however converts to the latest ELAN file format
+since the library is designed for it. All CHAT headers will be added as
+Properties in the object and the headers that have a similar field in an
+Eaf file will be added there too. The file description of chat files can be
+found <a class="reference external" href="http://childes.psy.cmu.edu/manuals/CHAT.pdf">here</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; The file path of the .cha file.</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; The codec, if the &#64;UTF8 header is present it will choose
+utf-8, default is ascii. Older CHAT files don&#8217;t have their encoding
+embedded in a header so you will probably need to choose some obscure
+ISO charset then.</li>
+<li><strong>extension</strong> (<em>str</em>) &#8211; The extension of the media file.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Throws StopIteration:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the file doesn&#8217;t contain a &#64;End header, thus
+inferring the file is broken.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="pympi.Elan.indent">
 <tt class="descclassname">pympi.Elan.</tt><tt class="descname">indent</tt><span class="sig-paren">(</span><em>el</em>, <em>level=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.indent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to pretty print the xml, meaning adding tabs and newlines.</p>
@@ -1684,7 +1717,7 @@ all tiers are included.</li>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              >previous</a> |</li>
-        <li><a href="index.html">pympi 1.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.29 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

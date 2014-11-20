@@ -17,22 +17,27 @@ API Documentation:
 Todo
 ====
 - Elan
-
-  - Import from CLAN's .cha files.
-
 - Praat
 
   - Binary textgrids(long shot...)
 
 - General
 
-  - Python 3 support
-
 Changelog
 =========
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 14-11-20   | 1.29    | - Import chat files to elan files.                   |
+|            |         | - Added some example scripts that portay possible    |
+|            |         |   things you can do with the package and can be used |
+|            |         |   as possible templates.                             |
+|            |         | - Fixed a non fatal bug about constraints.           |
+|            |         | - Internal update for textgrids, tiers don't know    |
+|            |         |   their number anymore, numbers are inherited from   |
+|            |         |   index in the array.                                |
+|            |         | - Python 3 support.                                  |
++------------+---------+------------------------------------------------------+
 | 14-11-13   | 1.2     | - Bugfixes.                                          |
 |            |         | - Changed the names of the insert functions, the old |
 |            |         |   names are still usable. But the preferable method  |
