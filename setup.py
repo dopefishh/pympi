@@ -14,6 +14,9 @@ setup(name='pympi-ling',
 Documentation as well as a detailed changelog can be found on:
 http://dopefishh.github.io/pympi/
 
+Note on python 3 compatibility: I have only tested it on python 3.4, it will
+probably work on everything newer then or equal to 3.3.
+
 Pympi is a package that allows you to interact with Elan[1] files and
 TextGrid[2] files. You can create, edit and convert both formats into
 eachother. It includes besides all the basic functions also functions for:
@@ -51,8 +54,8 @@ a Python module for processing ELAN and Praat annotation files.}},
                    'Environment :: Console',
                    'Natural Language :: English',
                    'Operating System :: OS Independent',
-                   'Programming Language :: Python :: 2',
-                   'Programming Language :: Python :: 3',
+                   'Programming Language :: Python :: 2.7',
+                   'Programming Language :: Python :: 3.4',
                    'Topic :: Text Processing :: Linguistic'],
       packages=['pympi']
       )
