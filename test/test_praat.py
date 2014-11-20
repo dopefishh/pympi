@@ -3,7 +3,7 @@
 
 import unittest
 import io
-from pympi import TextGrid
+from pympi.Praat import TextGrid
 from pympi.Praat import TierNotFoundException, TierTypeException
 
 

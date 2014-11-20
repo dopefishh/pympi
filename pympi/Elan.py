@@ -1200,7 +1200,7 @@ class Eaf:
         """
         from pympi.Praat import TextGrid
         _, end = self.get_full_time_interval()
-        tgout = TextGrid(xmax=end)
+        tgout = TextGrid(xmax=end/1000.0)
         func = (lambda x, y: re.match(x, y)) if regex else lambda x, y: x == y
         for tier in self.tiers:
             if (filtin and not any(func(f, tier) for f in filtin)) or\
@@ -1208,7 +1208,10 @@ class Eaf:
                 continue
             ctier = tgout.add_tier(tier)
             for intv in self.get_annotation_data_for_tier(tier):
-                ctier.add_interval(intv[0]/1000.0, intv[1]/1000.0, intv[2])
+                try:
+                    ctier.add_interval(intv[0]/1000.0, intv[1]/1000.0, intv[2])
+                except:
+                    pass
         return tgout
 
 
