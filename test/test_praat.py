@@ -12,6 +12,22 @@ class PraatTest(unittest.TestCase):
         self.tg = TextGrid(xmax=20)
 
 # Test all the Praat.TextGrid functions
+    def test_sort_tiers(self):
+        self.tg.add_tier('t2')
+        self.tg.add_tier('t1')
+        self.tg.add_tier('t3')
+        self.tg.add_tier('t6')
+        self.tg.add_tier('t4')
+        self.tg.add_tier('t5')
+
+        tiernames = ['t1', 't2', 't3', 't4', 't5', 't6']
+        self.tg.sort_tiers()
+        self.assertEqual([a[1] for a in self.tg.get_tier_name_num()],
+                         tiernames)
+        self.tg.sort_tiers(lambda x: list(reversed(tiernames)).index(x.name))
+        self.assertEqual([a[1] for a in self.tg.get_tier_name_num()],
+                         list(reversed(tiernames)))
+
     def test_add_tier(self):
         self.assertRaises(ValueError, self.tg.add_tier, 'a', number=-1)
         self.assertRaises(ValueError, self.tg.add_tier, 'a', number=10)
@@ -127,46 +143,6 @@ class PraatTest(unittest.TestCase):
             tier2.add_point(1, u'p1ü')
             tier2.add_point(2, 'p1')
             tier2.add_point(3, 'p1')
-
-            tgfile = io.StringIO()
-            self.tg.to_stream(tgfile, codec=codec)
-            self.tg.to_file('{}.TextGrid'.format(codec), codec=codec)
-            tgfile.seek(0)
-            tg1 = tgfile.read()
-            tgfile.seek(0)
-
-            self.tg = TextGrid(tgfile, codec=codec, stream=True)
-
-            tgfile = io.StringIO()
-            self.tg.to_stream(tgfile, codec=codec)
-            tgfile.seek(0)
-            tg2 = tgfile.read()
-            tgfile.seek(0)
-
-            self.assertEqual(tg2, tg1)
-        return
-
-        for codec in ['ascii', 'utf-8', 'utf-16', 'latin_1', 'mac_roman']:
-            self.tg = TextGrid(codec=codec, xmax=20)
-            tier1 = self.tg.add_tier('tier')
-            tier1.add_interval(1, 2, 'i1'.encode(codec))
-            tier1.add_interval(2, 3, 'i2'.encode(codec))
-            tier1.add_interval(4, 5, 'i3'.encode(codec))
-
-            if codec != 'ascii':
-                tier4 = self.tg.add_tier('tier')
-                tier4.add_interval(1, 2, 'i1ü'.decode('utf-8').encode(codec))
-                tier4.add_interval(2.0, 3, 'i2'.encode(codec))
-                tier4.add_interval(4, 5.0, 'i3'.encode(codec))
-                tier2 = self.tg.add_tier('tier2', tier_type='TextTier')
-                tier2.add_point(1, 'p1ü'.decode('utf-8').encode(codec))
-                tier2.add_point(2, 'p1'.encode(codec))
-                tier2.add_point(3, 'p1'.encode(codec))
-
-            tier3 = self.tg.add_tier('tier3', tier_type='TextTier')
-            tier3.add_point(0.5, 'p1'.encode(codec))
-            tier3.add_point(5, 'p1'.encode(codec))
-            tier3.add_point(3.3, 'p1'.encode(codec))
 
             tgfile = io.StringIO()
             self.tg.to_stream(tgfile, codec=codec)

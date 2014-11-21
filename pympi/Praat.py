@@ -112,6 +112,28 @@ class TextGrid:
         """Update the xmin, xmax and number of tiers value"""
         self.tier_num = len(self.tiers)
 
+    def sort_tiers(self, key=None):
+        """Sort the tiers given the key. Example key functions:
+
+        Sort according to the tiername in a list:
+
+        ``lambda x: ['name1', 'name2' ... 'namen'].index(x.name)``.
+
+        Sort according to the number of annotations:
+
+        ``lambda x: len(x.get_intervals())``
+
+        Sort by name in reverse:
+
+        ``lambda x: list(reversed(['name1', 'name2' ...
+        'namen'])).index(x.name)``.
+
+        :param func key: A key function. Default sorts on name.
+        """
+        if not key:
+            key = lambda x: x.name
+        self.tiers.sort(key=key)
+
     def add_tier(self, name, tier_type='IntervalTier', number=None):
         """Add an IntervalTier or a TextTier on the specified location.
 
