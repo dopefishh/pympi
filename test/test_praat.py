@@ -149,7 +149,6 @@ class PraatTest(unittest.TestCase):
             tgfile.seek(0)
             tg1 = tgfile.read()
             tgfile.seek(0)
-
             self.tg = TextGrid(tgfile, codec=codec, stream=True)
 
             tgfile = io.StringIO()

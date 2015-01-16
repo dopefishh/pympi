@@ -7,15 +7,9 @@ import sys
 
 VERSION = '1.29'
 
-rexmin = re.compile(r'xmin = ([0-9.]*)')
-rexmax = re.compile(r'xmax = ([0-9.]*)')
-retext = re.compile(r'text = "(.*)"')
-remark = re.compile(r'mark = "(.*)"')
-resize = re.compile(r'size = ([0-9]*)')
-renumb = re.compile(r'number = ([0-9.]*)')
-reitem = re.compile(r'item \[([0-9]*)\]')
-retype = re.compile(r'class = "(.*)"')
-rename = re.compile(r'name = "(.*)"')
+regfloat = re.compile('([\d.]+)\s*$')
+regint = re.compile('([\d]+)\s*$')
+regstring = re.compile('"(.*)"\s*$')
 
 
 class TierNotFoundException(Exception):
@@ -53,7 +47,7 @@ class TextGrid:
     :var str codec: Codec of the input file.
     """
     def __init__(self, file_path=None, xmin=0, xmax=None, codec='ascii',
-                 stream=False):
+                 stream=False, binary=False):
         """Construct either a new TextGrid object or read one from a
         file/stream. When you create an empty TextGrid you must at least
         specify the xmax.
@@ -66,6 +60,7 @@ class TextGrid:
         :param str codec: Text encoding for the input.
         :param bool stream: Flag for loading from a stream(not used, only for
                             debugging purposes)
+        :param bool binary: Flag to read the files in binary.
         :raises Exception: If filepath is specified but no xmax
         """
         self.tiers = []
@@ -76,37 +71,42 @@ class TextGrid:
             self.tier_num = 0
             self.xmin = xmin
             self.xmax = xmax
-        elif stream:
-            self.from_stream(file_path, codec)
         else:
-            ifile = sys.stdin if file_path == '-' else\
-                codecs.open(file_path, 'r', codec)
-            self.from_stream(ifile, codec)
-            if file_path != '-':
-                ifile.close()
+            if stream:
+                self.from_stream(file_path, codec, binary)
+            else:
+                ifile = sys.stdin if file_path == '-' else\
+                    codecs.open(file_path, 'r', codec)
+                self.from_stream(ifile, codec, binary)
+                if file_path != '-':
+                    ifile.close()
 
-    def from_stream(self, ifile, codec='ascii'):
+    def from_stream(self, ifile, codec='ascii', binary=False):
         """Read textgrid from stream.
 
         :param file ifile: Stream to read from.
         :param str codec: Text encoding.
+        :param bool binary: Flag to read the files in binary.
         """
-        lines = iter(filter(lambda x: x.strip(), ifile))
-        # skipping: 'File Type...' and 'Object class...'
-        next(lines), next(lines)
-        self.xmin = float(rexmin.search(next(lines)).group(1))
-        self.xmax = float(rexmax.search(next(lines)).group(1))
-        # skipping: 'tiers? <exists>'
-        next(lines)
-        self.tier_num = int(resize.search(next(lines)).group(1))
-        # skipping: 'item []:'
-        next(lines)
-        for current_tier in range(self.tier_num):
-            # number = int(reitem.search(next(lines)).group(1))
-            next(lines)
-            tier_type = retype.search(next(lines)).group(1)
-            name = rename.search(next(lines)).group(1)
-            self.tiers.append(Tier(name, tier_type, lines, codec))
+        if not binary:
+            lines = iter(ifile)
+            # Skip the Headers and empty line
+            next(lines), next(lines), next(lines)
+            self.xmin = float(regfloat.search(next(lines)).group(1))
+            self.xmax = float(regfloat.search(next(lines)).group(1))
+            # Skip <exists>
+            line = next(lines)
+            short = line.strip() == '<exists>'
+            self.tier_num = int(regint.search(next(lines)).group(1))
+            if not short:
+                next(lines)
+            for i in range(self.tier_num):
+                if not short:
+                    next(lines)  # skip item[]: and item[\d]:
+                self.tiers.append(
+                    Tier(lines=lines, codec=codec, binary=binary))
+        else:
+            raise NotImplementedError('Binary TextGrid not implemented')
 
     def update(self):
         """Update the xmin, xmax and number of tiers value"""
@@ -240,7 +240,7 @@ class TextGrid:
             t.update()
         self.update()
         f.write(u"""\
-File Type = "ooTextFile
+File type = "ooTextFile"
 Object class = "TextGrid"
 
 xmin = {:f}
@@ -320,7 +320,8 @@ class Tier:
     :var int xmax: Maximum x value.
     """
 
-    def __init__(self, name, tier_type, lines=None, codec='ascii'):
+    def __init__(self, name=None, tier_type=None, lines=None, codec='ascii',
+                 binary=False):
         """Creates a tier, if lines is ``None`` a new tier is created and codec
         is ignored.
 
@@ -328,34 +329,38 @@ class Tier:
         :param str tier_type: Type of the tier('IntervalTier' or 'TextTier').
         :param iter lines: Iterator of the input lines.
         :param str codec: Text encoding of the input.
+        :param bool binary: Flag to read the files in binary.
         :raises TierTypeException: If the tier type is unknown.
         """
-        self.name = name
         self.intervals = []
-        self.tier_type = tier_type
         if lines is None:
+            self.name = name
+            self.tier_type = tier_type
             self.xmin, self.xmax = 0, 0
         else:
-            self.xmin = float(rexmin.search(next(lines)).group(1))
-            self.xmax = float(rexmax.search(next(lines)).group(1))
-            num_int = int(resize.search(next(lines)).group(1))
-            if self.tier_type == 'IntervalTier':
-                for i in range(num_int):
-                    next(lines)  # intervals [1]:
-                    xmin = float(rexmin.search(next(lines)).group(1))
-                    xmax = float(rexmax.search(next(lines)).group(1))
-                    xtxt = retext.search(next(lines)).group(1)
-                    xtxt = xtxt.replace('""', '"')
-                    self.intervals.append((xmin, xmax, xtxt))
-            elif self.tier_type == 'TextTier':
-                for i in range(num_int):
-                    next(lines)  # points [1]:
-                    number = float(renumb.search(next(lines)).group(1))
-                    mark = remark.search(next(lines)).group(1)
-                    mark = mark.replace('""', '"')
-                    self.intervals.append((number, mark))
+            if not binary:
+                self.tier_type = regstring.search(next(lines)).group(1)
+                self.name = regstring.search(next(lines)).group(1)
+                self.xmin = float(regfloat.search(next(lines)).group(1))
+                self.xmax = float(regfloat.search(next(lines)).group(1))
+                line = next(lines)
+                short = not (line.strip().startswith('intervals:') or
+                             line.strip().startswith('points:'))
+                for i in range(int(regint.search(line).group(1))):
+                    if not short:
+                        next(lines)  # skip intervals [\d]
+                    n1 = float(regfloat.search(next(lines)).group(1))
+                    if self.tier_type == 'IntervalTier':
+                        self.intervals.append(
+                            (n1, float(regfloat.search(next(lines)).group(1)),
+                             regstring.search(next(lines)).group(1)))
+                    elif self.tier_type == 'TextTier':
+                        self.intervals.append(
+                            (n1, regstring.search(next(lines)).group(1)))
+                    else:
+                        raise TierTypeException()
             else:
-                raise TierTypeException()
+                raise NotImplementedError('Binary TextGrid not implemented')
 
     def update(self):
         """Update the internal values"""
