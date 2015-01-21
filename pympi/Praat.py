@@ -6,17 +6,29 @@ import re
 import struct
 import sys
 
-VERSION = '1.29'
+VERSION = '1.30'
 
-regfloat = re.compile('([\d.]+)\s*$')
+"""Helper objects/functions to extract data:
+
+lamfloat - Extract binary float 8bytes
+lamint   - Extract binary integer 4bytes
+lamshort - Extract binary integer 2bytes
+regfloat - Extract text float
+regint   - Extract text integer
+regstr   - Extract text string"""
 lamfloat = lambda x: struct.unpack('>d', x.read(8))[0]
-regint = re.compile('([\d]+)\s*$')
 lamint = lambda x: struct.unpack('>i', x.read(4))[0]
 lamsht = lambda x: struct.unpack('>h', x.read(2))[0]
+regfloat = re.compile('([\d.]+)\s*$')
+regint = re.compile('([\d]+)\s*$')
 regstr = re.compile('"(.*)"\s*$')
 
 
 def lamstr(ifile):
+    """Helper function for extracting string from a binary TextGrid
+
+    :param file ifile: Stream with information
+    """
     textlen = lamsht(ifile)
     if textlen == 0:
         return u''
@@ -24,8 +36,10 @@ def lamstr(ifile):
         return ifile.read(textlen)
     elif textlen == -1:
         textlen = lamsht(ifile)
-        return ''.join(unichr(struct.unpack('>h', i)[0]) for i in
-                       re.findall('.{2}', ifile.read(textlen*2)))
+        data = ifile.read(textlen*2)
+        fun = getattr(__builtins__, 'unichr', chr)
+        return ''.join(fun(struct.unpack('>h', i)[0]) for i in
+                       [data[i:i+2] for i in range(0, len(data), 2)])
 
 
 class TierNotFoundException(Exception):
@@ -63,10 +77,10 @@ class TextGrid:
     :var str codec: Codec of the input file.
     """
     def __init__(self, file_path=None, xmin=0, xmax=None, codec='ascii',
-                 stream=False, binary=False):
+                 stream=False):
         """Construct either a new TextGrid object or read one from a
         file/stream. When you create an empty TextGrid you must at least
-        specify the xmax.
+        specify the xmax. Binary, short and normal TextGrids are supported.
 
 
         :param str file_path: Path to read from, - for stdin. If ``None`` an
@@ -90,7 +104,8 @@ class TextGrid:
             if stream:
                 self.from_stream(file_path, codec)
             else:
-                ifile = sys.stdin if file_path == '-' else open(file_path, 'r')
+                ifile = sys.stdin if file_path == '-' else\
+                    open(file_path, 'rb')
                 self.from_stream(ifile, codec)
                 if file_path != '-':
                     ifile.close()
@@ -101,7 +116,7 @@ class TextGrid:
         :param file ifile: Stream to read from.
         :param str codec: Text encoding.
         """
-        if ifile.read(12) == 'ooBinaryFile':
+        if ifile.read(12) == b'ooBinaryFile':
             ifile.read(ord(ifile.read(1)))  # skip oo type
             self.xmin = lamfloat(ifile)
             self.xmax = lamfloat(ifile)
@@ -367,7 +382,7 @@ class Tier:
             self.xmin, self.xmax = 0, 0
         else:
             if binary:
-                self.tier_type = ifile.read(ord(ifile.read(1)))
+                self.tier_type = ifile.read(ord(ifile.read(1))).decode('ascii')
                 self.name = lamstr(ifile)
                 self.xmin = lamfloat(ifile)
                 self.xmax = lamfloat(ifile)
