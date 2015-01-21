@@ -590,7 +590,7 @@ class Eaf:
         :raises KeyError: If the tier is non existent.
         """
         if self.tiers[id_tier][1]:
-            return self.get_ref_annotation_data_for_tier(id_tier, time)
+            return self.get_ref_annotation_data_for_tier(id_tier)
         a = self.tiers[id_tier][0]
         return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2])
                 for b in a]
