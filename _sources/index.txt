@@ -18,9 +18,6 @@ Todo
 ====
 - Elan
 - Praat
-
-  - Binary textgrids(long shot...)
-
 - General
 
 Old versions
