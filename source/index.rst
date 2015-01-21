@@ -25,6 +25,7 @@ Todo
 
 Old versions
 ============
+- `Version 1.29 <docs_1.29/index.html>`_.
 - `Version 1.2 <docs_1.2/index.html>`_.
 - `Version 1.19 <docs_1.19/index.html>`_.
 - `Version 1.1 <docs_1.1/index.html>`_.
@@ -34,6 +35,11 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 15-01-21   | 1.3     | - Sort tier function for praat tiers                 |
+|            |         | - Faster TextGrid constructor with itertools         |
+|            |         | - Binary TextGrid support                            |
+|            |         | - Short TextGrid support                             |
++------------+---------+------------------------------------------------------+
 | 14-11-20   | 1.29    | - Import chat files to elan files.                   |
 |            |         | - Added some example scripts that portay possible    |
 |            |         |   things you can do with the package and can be used |

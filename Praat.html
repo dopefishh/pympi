@@ -82,7 +82,7 @@
 <tt class="descname">__init__</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>xmin=0</em>, <em>xmax=None</em>, <em>codec='ascii'</em>, <em>stream=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct either a new TextGrid object or read one from a
 file/stream. When you create an empty TextGrid you must at least
-specify the xmax.</p>
+specify the xmax. Binary, short and normal TextGrids are supported.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -243,6 +243,27 @@ first is removed.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pympi.Praat.TextGrid.sort_tiers">
+<tt class="descname">sort_tiers</tt><span class="sig-paren">(</span><em>key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.sort_tiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort the tiers given the key. Example key functions:</p>
+<p>Sort according to the tiername in a list:</p>
+<p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">['name1',</span> <span class="pre">'name2'</span> <span class="pre">...</span> <span class="pre">'namen'].index(x.name)</span></tt>.</p>
+<p>Sort according to the number of annotations:</p>
+<p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">len(x.get_intervals())</span></tt></p>
+<p>Sort by name in reverse:</p>
+<p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">list(reversed(['name1',</span> <span class="pre">'name2'</span> <span class="pre">...</span>
+<span class="pre">'namen'])).index(x.name)</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<em>func</em>) &#8211; A key function. Default sorts on name.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympi.Praat.TextGrid.to_eaf">
 <tt class="descname">to_eaf</tt><span class="sig-paren">(</span><em>pointlength=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_eaf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the object to an pympi.Elan.Eaf object</p>
@@ -269,7 +290,7 @@ seconds</p>
 
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.to_file">
-<tt class="descname">to_file</tt><span class="sig-paren">(</span><em>filepath</em>, <em>codec='utf-8'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_file" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">to_file</tt><span class="sig-paren">(</span><em>filepath</em>, <em>codec='utf-8'</em>, <em>short=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the object to a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -287,7 +308,7 @@ seconds</p>
 
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.to_stream">
-<tt class="descname">to_stream</tt><span class="sig-paren">(</span><em>f</em>, <em>codec='utf-8'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_stream" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">to_stream</tt><span class="sig-paren">(</span><em>f</em>, <em>codec='utf-8'</em>, <em>short=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the object to a stream.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -296,6 +317,7 @@ seconds</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>f</strong> (<em>file</em>) &#8211; Open stream to write to.</li>
 <li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding.</li>
+<li><strong>short</strong> (<em>bool</em>) &#8211; Flag to use the short notation(saves space)</li>
 </ul>
 </td>
 </tr>
@@ -313,7 +335,7 @@ seconds</p>
 
 <dl class="class">
 <dt id="pympi.Praat.Tier">
-<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">Tier</tt><span class="sig-paren">(</span><em>name</em>, <em>tier_type</em>, <em>lines=None</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">Tier</tt><span class="sig-paren">(</span><em>name=None</em>, <em>tier_type=None</em>, <em>ifile=None</em>, <em>codec='ascii'</em>, <em>binary=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class representing a TextGrid tier, either an Interval or TextTier</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -323,7 +345,6 @@ seconds</p>
 <li><strong>name</strong> (<em>str</em>) &#8211; Name of the tier.</li>
 <li><strong>intervals</strong> (<em>list</em>) &#8211; List of intervals where each interval is
 (start, [end,] value).</li>
-<li><strong>number</strong> (<em>int</em>) &#8211; Number of the tier.</li>
 <li><strong>tier_type</strong> (<em>str</em>) &#8211; Type of the tier(&#8216;IntervalTier&#8217; or &#8216;TextTier&#8217;).</li>
 <li><strong>xmin</strong> (<em>int</em>) &#8211; Minimum x value.</li>
 <li><strong>xmax</strong> (<em>int</em>) &#8211; Maximum x value.</li>
@@ -334,7 +355,7 @@ seconds</p>
 </table>
 <dl class="method">
 <dt id="pympi.Praat.Tier.__init__">
-<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>name</em>, <em>tier_type</em>, <em>lines=None</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>name=None</em>, <em>tier_type=None</em>, <em>ifile=None</em>, <em>codec='ascii'</em>, <em>binary=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a tier, if lines is <tt class="docutils literal"><span class="pre">None</span></tt> a new tier is created and codec
 is ignored.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -346,6 +367,7 @@ is ignored.</p>
 <li><strong>tier_type</strong> (<em>str</em>) &#8211; Type of the tier(&#8216;IntervalTier&#8217; or &#8216;TextTier&#8217;).</li>
 <li><strong>lines</strong> (<em>iter</em>) &#8211; Iterator of the input lines.</li>
 <li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding of the input.</li>
+<li><strong>binary</strong> (<em>bool</em>) &#8211; Flag to read the files in binary.</li>
 </ul>
 </td>
 </tr>
@@ -515,6 +537,32 @@ function in which it is raised</p>
 <dd><p>list of weak references to the object (if defined)</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="data">
+<dt id="pympi.Praat.VERSION">
+<tt class="descclassname">pympi.Praat.</tt><tt class="descname">VERSION</tt><em class="property"> = '1.30'</em><a class="headerlink" href="#pympi.Praat.VERSION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper objects/functions to extract data:</p>
+<p>lamfloat - Extract binary float 8bytes
+lamint   - Extract binary integer 4bytes
+lamshort - Extract binary integer 2bytes
+regfloat - Extract text float
+regint   - Extract text integer
+regstr   - Extract text string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pympi.Praat.lamstr">
+<tt class="descclassname">pympi.Praat.</tt><tt class="descname">lamstr</tt><span class="sig-paren">(</span><em>ifile</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.lamstr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function for extracting string from a binary TextGrid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ifile</strong> (<em>file</em>) &#8211; Stream with information</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
