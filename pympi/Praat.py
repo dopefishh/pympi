@@ -3,13 +3,29 @@
 
 import codecs
 import re
+import struct
 import sys
 
 VERSION = '1.29'
 
 regfloat = re.compile('([\d.]+)\s*$')
+lamfloat = lambda x: struct.unpack('>d', x.read(8))[0]
 regint = re.compile('([\d]+)\s*$')
-regstring = re.compile('"(.*)"\s*$')
+lamint = lambda x: struct.unpack('>i', x.read(4))[0]
+lamsht = lambda x: struct.unpack('>h', x.read(2))[0]
+regstr = re.compile('"(.*)"\s*$')
+
+
+def lamstr(ifile):
+    textlen = lamsht(ifile)
+    if textlen == 0:
+        return u''
+    elif textlen > 0:
+        return ifile.read(textlen)
+    elif textlen == -1:
+        textlen = lamsht(ifile)
+        return ''.join(unichr(struct.unpack('>h', i)[0]) for i in
+                       re.findall('.{2}', ifile.read(textlen*2)))
 
 
 class TierNotFoundException(Exception):
@@ -60,7 +76,6 @@ class TextGrid:
         :param str codec: Text encoding for the input.
         :param bool stream: Flag for loading from a stream(not used, only for
                             debugging purposes)
-        :param bool binary: Flag to read the files in binary.
         :raises Exception: If filepath is specified but no xmax
         """
         self.tiers = []
@@ -73,40 +88,42 @@ class TextGrid:
             self.xmax = xmax
         else:
             if stream:
-                self.from_stream(file_path, codec, binary)
+                self.from_stream(file_path, codec)
             else:
-                ifile = sys.stdin if file_path == '-' else\
-                    codecs.open(file_path, 'r', codec)
-                self.from_stream(ifile, codec, binary)
+                ifile = sys.stdin if file_path == '-' else open(file_path, 'r')
+                self.from_stream(ifile, codec)
                 if file_path != '-':
                     ifile.close()
 
-    def from_stream(self, ifile, codec='ascii', binary=False):
+    def from_stream(self, ifile, codec='ascii'):
         """Read textgrid from stream.
 
         :param file ifile: Stream to read from.
         :param str codec: Text encoding.
-        :param bool binary: Flag to read the files in binary.
         """
-        if not binary:
-            lines = iter(ifile)
+        if ifile.read(12) == 'ooBinaryFile':
+            ifile.read(ord(ifile.read(1)))  # skip oo type
+            self.xmin = lamfloat(ifile)
+            self.xmax = lamfloat(ifile)
+            ifile.read(1)  # skip <exists>
+            self.tier_num = lamint(ifile)
+            for i in range(self.tier_num):
+                self.tiers.append(Tier(ifile=ifile, codec=codec, binary=True))
+        else:
             # Skip the Headers and empty line
-            next(lines), next(lines), next(lines)
-            self.xmin = float(regfloat.search(next(lines)).group(1))
-            self.xmax = float(regfloat.search(next(lines)).group(1))
+            next(ifile), next(ifile), next(ifile)
+            self.xmin = float(regfloat.search(next(ifile)).group(1))
+            self.xmax = float(regfloat.search(next(ifile)).group(1))
             # Skip <exists>
-            line = next(lines)
+            line = next(ifile)
             short = line.strip() == '<exists>'
-            self.tier_num = int(regint.search(next(lines)).group(1))
+            self.tier_num = int(regint.search(next(ifile)).group(1))
             if not short:
-                next(lines)
+                next(ifile)
             for i in range(self.tier_num):
                 if not short:
-                    next(lines)  # skip item[]: and item[\d]:
-                self.tiers.append(
-                    Tier(lines=lines, codec=codec, binary=binary))
-        else:
-            raise NotImplementedError('Binary TextGrid not implemented')
+                    next(ifile)  # skip item[]: and item[\d]:
+                self.tiers.append(Tier(ifile=ifile, codec=codec))
 
     def update(self):
         """Update the xmin, xmax and number of tiers value"""
@@ -216,7 +233,7 @@ class TextGrid:
         """
         return list(enumerate((s.name for s in self.tiers), 1))
 
-    def to_file(self, filepath, codec='utf-8'):
+    def to_file(self, filepath, codec='utf-8', short=False):
         """Write the object to a file.
 
         :param str filepath: Path of the file, '-' for stdout.
@@ -225,36 +242,39 @@ class TextGrid:
         try:
             stream = sys.stdout if filepath == '-' else\
                 codecs.open(filepath, 'w', codec)
-            self.to_stream(stream, codec)
+            self.to_stream(stream, codec, short)
         finally:
             if stream != sys.stdout:
                 stream.close()
 
-    def to_stream(self, f, codec='utf-8'):
+    def to_stream(self, f, codec='utf-8', short=False):
         """Write the object to a stream.
 
         :param file f: Open stream to write to.
         :param str codec: Text encoding.
+        :param bool short: Flag to use the short notation(saves space)
         """
         for t in self.tiers:
             t.update()
         self.update()
-        f.write(u"""\
-File type = "ooTextFile"
-Object class = "TextGrid"
-
-xmin = {:f}
-xmax = {:f}
-tiers? <exists>
-size = {:d}
-item []:
-""".format(float(self.xmin), float(self.xmax), self.tier_num))
+        f.write(u'File type = "ooTextFile"\nObject class = "TextGrid"\n\n')
+        f.write(u'{}{:f}\n'.format('' if short else 'xmin = ', self.xmin))
+        f.write(u'{}{:f}\n'.format('' if short else 'xmax = ', self.xmax))
+        f.write(u'{}\n'.format('<exists>' if short else 'tiers? <exists>'))
+        f.write(u'{}{:d}\n'.format('' if short else 'size = ', self.tier_num))
+        if not short:
+            f.write(u'item []:\n')
         for tnum, tier in enumerate(self.tiers, 1):
-            f.write(u'{:>4}item [{:d}]:\n'.format(' ', tnum))
-            f.write(u'{:>8}class = "{}"\n'.format(' ', tier.tier_type))
-            f.write(u'{:>8}name = "{}"\n'.format(' ', tier.name))
-            f.write(u'{:>8}xmin = {:f}\n'.format(' ', tier.xmin))
-            f.write(u'{:>8}xmax = {:f}\n'.format(' ', tier.xmax))
+            if not short:
+                f.write(u'{}item [{:d}]:\n'.format(' '*4, tnum))
+            f.write(u'{}"{}"\n'.format(
+                '' if short else ' '*8+'class = ', tier.tier_type))
+            f.write(u'{}"{}"\n'.format(
+                '' if short else ' '*8+'name = ', tier.name))
+            f.write(u'{}{:f}\n'.format(
+                '' if short else ' '*8+'xmin = ', tier.xmin))
+            f.write(u'{}{:f}\n'.format(
+                '' if short else ' '*8+'xmax = ', tier.xmax))
             srtint = sorted(list(tier.get_intervals()))
             if tier.tier_type == 'IntervalTier':
                 ints = []
@@ -268,22 +288,30 @@ item []:
                     ints.append(i)
                 if ints and ints[-1][1] < self.xmax:
                     ints.append((ints[-1][1], self.xmax, ''))
-                f.write(
-                    u'{:>8}intervals: size = {:d}\n'.format(' ', len(ints)))
+                f.write(u'{}{:d}\n'.format(
+                    '' if short else ' '*8+'intervals: size = ', len(ints)))
                 for i, c in enumerate(ints):
-                    f.write(u'{:>8}intervals [{:d}]:\n'.format(' ', i+1))
-                    f.write(u'{:>12}xmin = {:f}\n'.format(' ', c[0]))
-                    f.write(u'{:>12}xmax = {:f}\n'.format(' ', c[1]))
-                    line = u'{:>12}text = "{}"\n'.format(
-                        ' ', c[2].replace('"', '""'))
+                    if not short:
+                        f.write(u'{}intervals [{:d}]:\n'.format(' '*8, i+1))
+                    f.write(u'{}{:f}\n'.format(
+                        '' if short else ' '*12+'xmin = ', c[0]))
+                    f.write(u'{}{:f}\n'.format(
+                        '' if short else ' '*12+'xmax = ', c[1]))
+                    line = u'{}"{}"\n'.format(
+                        '' if short else ' '*12+'text = ',
+                        c[2].replace('"', '""'))
                     f.write(line)
             elif tier.tier_type == 'TextTier':
-                f.write(u'{:>8}points: size = {:d}\n'.format(' ', len(srtint)))
+                f.write(u'{}{:d}\n'.format(
+                    '' if short else ' '*8+'points: size = ', len(srtint)))
                 for i, c in enumerate(srtint):
-                    f.write(u'{:>8}points [{:d}]:\n'.format(' ', i + 1))
-                    f.write(u'{:>12}number = {:f}\n'.format(' ', c[0]))
-                    line = u'{:>12}mark = "{}"\n'.format(
-                        ' ', c[1].replace('"', '""'))
+                    if not short:
+                        f.write(u'{}points [{:d}]:\n'.format(' '*8, i + 1))
+                    f.write(u'{}{:f}\n'.format(
+                        '' if short else ' '*12+'number = ', c[0]))
+                    line = u'{}"{}"\n'.format(
+                        '' if short else ' '*12+'mark = ',
+                        c[1].replace('"', '""'))
                     f.write(line)
 
     def to_eaf(self, pointlength=0.1):
@@ -320,7 +348,7 @@ class Tier:
     :var int xmax: Maximum x value.
     """
 
-    def __init__(self, name=None, tier_type=None, lines=None, codec='ascii',
+    def __init__(self, name=None, tier_type=None, ifile=None, codec='ascii',
                  binary=False):
         """Creates a tier, if lines is ``None`` a new tier is created and codec
         is ignored.
@@ -333,34 +361,49 @@ class Tier:
         :raises TierTypeException: If the tier type is unknown.
         """
         self.intervals = []
-        if lines is None:
+        if ifile is None:
             self.name = name
             self.tier_type = tier_type
             self.xmin, self.xmax = 0, 0
         else:
-            if not binary:
-                self.tier_type = regstring.search(next(lines)).group(1)
-                self.name = regstring.search(next(lines)).group(1)
-                self.xmin = float(regfloat.search(next(lines)).group(1))
-                self.xmax = float(regfloat.search(next(lines)).group(1))
-                line = next(lines)
+            if binary:
+                self.tier_type = ifile.read(ord(ifile.read(1)))
+                self.name = lamstr(ifile)
+                self.xmin = lamfloat(ifile)
+                self.xmax = lamfloat(ifile)
+                nint = lamint(ifile)
+                for i in range(nint):
+                    x1 = lamfloat(ifile)
+                    if self.tier_type == 'IntervalTier':
+                        x2 = lamfloat(ifile)
+                    text = lamstr(ifile)
+                    if self.tier_type == 'IntervalTier':
+                        self.intervals.append((x1, x2, text))
+                    elif self.tier_type == 'TextTier':
+                        self.intervals.append((x1, text))
+                    else:
+                        raise TierTypeException()
+            else:
+                self.tier_type = regstr.search(next(ifile)).group(1)
+                self.name = regstr.search(next(ifile)).group(1)
+                self.xmin = float(regfloat.search(next(ifile)).group(1))
+                self.xmax = float(regfloat.search(next(ifile)).group(1))
+                line = next(ifile)
                 short = not (line.strip().startswith('intervals:') or
                              line.strip().startswith('points:'))
                 for i in range(int(regint.search(line).group(1))):
                     if not short:
-                        next(lines)  # skip intervals [\d]
-                    n1 = float(regfloat.search(next(lines)).group(1))
+                        next(ifile)  # skip intervals [\d]
+                    x1 = float(regfloat.search(next(ifile)).group(1))
                     if self.tier_type == 'IntervalTier':
-                        self.intervals.append(
-                            (n1, float(regfloat.search(next(lines)).group(1)),
-                             regstring.search(next(lines)).group(1)))
+                        x2 = float(regfloat.search(next(ifile)).group(1))
+                        t = regstr.search(next(ifile)).group(1)
+                        self.intervals.append((x1, x2, t))
                     elif self.tier_type == 'TextTier':
-                        self.intervals.append(
-                            (n1, regstring.search(next(lines)).group(1)))
+                        t = regstr.search(next(ifile)).group(1)
+                        self.intervals.append((x1, t))
                     else:
                         raise TierTypeException()
-            else:
-                raise NotImplementedError('Binary TextGrid not implemented')
 
     def update(self):
         """Update the internal values"""

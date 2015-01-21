@@ -10,6 +10,7 @@ from pympi.Praat import TierNotFoundException, TierTypeException
 class PraatTest(unittest.TestCase):
     def setUp(self):
         self.tg = TextGrid(xmax=20)
+        self.maxdiff = None
 
 # Test all the Praat.TextGrid functions
     def test_sort_tiers(self):
@@ -127,6 +128,8 @@ class PraatTest(unittest.TestCase):
                          self.tg.get_tier_name_num())
 
     def test_to_file(self):
+        # Binary mode
+        bintg = TextGrid('test/bin.TextGrid')
         for codec in ['utf-8', 'utf-16', 'latin_1', 'mac_roman']:
             self.tg = TextGrid(xmax=20)
             tier1 = self.tg.add_tier('tier')
@@ -144,6 +147,7 @@ class PraatTest(unittest.TestCase):
             tier2.add_point(2, 'p1')
             tier2.add_point(3, 'p1')
 
+# Normal mode
             tgfile = io.StringIO()
             self.tg.to_stream(tgfile, codec=codec)
             tgfile.seek(0)
@@ -153,6 +157,22 @@ class PraatTest(unittest.TestCase):
 
             tgfile = io.StringIO()
             self.tg.to_stream(tgfile, codec=codec)
+            tgfile.seek(0)
+            tg2 = tgfile.read()
+            tgfile.seek(0)
+
+            self.assertEqual(tg2, tg1)
+
+# Short mode
+            tgfile = io.StringIO()
+            self.tg.to_stream(tgfile, codec=codec, short=True)
+            tgfile.seek(0)
+            tg1 = tgfile.read()
+            tgfile.seek(0)
+            self.tg = TextGrid(tgfile, codec=codec, stream=True)
+
+            tgfile = io.StringIO()
+            self.tg.to_stream(tgfile, codec=codec, short=True)
             tgfile.seek(0)
             tg2 = tgfile.read()
             tgfile.seek(0)
