@@ -4,7 +4,6 @@
 import unittest
 import io
 from pympi.Praat import TextGrid
-from pympi.Praat import TierNotFoundException, TierTypeException
 
 
 class PraatTest(unittest.TestCase):
@@ -52,9 +51,9 @@ class PraatTest(unittest.TestCase):
         self.assertEqual(4, len(self.tg.tiers))
 
     def test_remove_tier(self):
-        self.assertRaises(TierNotFoundException, self.tg.remove_tier, -1)
-        self.assertRaises(TierNotFoundException, self.tg.remove_tier, 'a')
-        self.assertRaises(TierNotFoundException, self.tg.remove_tier, 10)
+        self.assertRaises(Exception, self.tg.remove_tier, -1)
+        self.assertRaises(Exception, self.tg.remove_tier, 'a')
+        self.assertRaises(Exception, self.tg.remove_tier, 10)
 
         self.tg.add_tier('tier1')
         self.tg.add_tier('tier2')
@@ -79,9 +78,9 @@ class PraatTest(unittest.TestCase):
         self.assertTrue(not self.tg.tiers)
 
     def test_get_tier(self):
-        self.assertRaises(TierNotFoundException, self.tg.get_tier, -1)
-        self.assertRaises(TierNotFoundException, self.tg.get_tier, 'a')
-        self.assertRaises(TierNotFoundException, self.tg.get_tier, 10)
+        self.assertRaises(Exception, self.tg.get_tier, -1)
+        self.assertRaises(Exception, self.tg.get_tier, 'a')
+        self.assertRaises(Exception, self.tg.get_tier, 10)
 
         tier1 = self.tg.add_tier('tier1')
         tier2 = self.tg.add_tier('tier2')
@@ -93,11 +92,11 @@ class PraatTest(unittest.TestCase):
         self.assertEqual(self.tg.tiers[1], self.tg.get_tier(tier2.name))
 
     def test_change_tier_name(self):
-        self.assertRaises(TierNotFoundException,
+        self.assertRaises(Exception,
                           self.tg.change_tier_name, -1, 'b')
-        self.assertRaises(TierNotFoundException,
+        self.assertRaises(Exception,
                           self.tg.change_tier_name, 'a', 'b')
-        self.assertRaises(TierNotFoundException,
+        self.assertRaises(Exception,
                           self.tg.change_tier_name, 10, 'b')
         self.tg.add_tier('tier1')
         tier2 = self.tg.add_tier('tier2')
@@ -128,8 +127,6 @@ class PraatTest(unittest.TestCase):
                          self.tg.get_tier_name_num())
 
     def test_to_file(self):
-        # Binary mode
-        bintg = TextGrid('test/bin.TextGrid')
         for codec in ['utf-8', 'utf-16', 'latin_1', 'mac_roman']:
             self.tg = TextGrid(xmax=20)
             tier1 = self.tg.add_tier('tier')
@@ -149,6 +146,8 @@ class PraatTest(unittest.TestCase):
 
 # Normal mode
             tgfile = io.StringIO()
+            if codec == 'utf-8':
+                self.tg.to_file('normal.TextGrid', codec=codec)
             self.tg.to_stream(tgfile, codec=codec)
             tgfile.seek(0)
             tg1 = tgfile.read()
@@ -165,14 +164,34 @@ class PraatTest(unittest.TestCase):
 
 # Short mode
             tgfile = io.StringIO()
-            self.tg.to_stream(tgfile, codec=codec, short=True)
+            if codec == 'utf-8':
+                self.tg.to_file('short.TextGrid', codec=codec, mode='s')
+            self.tg.to_stream(tgfile, codec=codec, mode='s')
             tgfile.seek(0)
             tg1 = tgfile.read()
             tgfile.seek(0)
             self.tg = TextGrid(tgfile, codec=codec, stream=True)
 
             tgfile = io.StringIO()
-            self.tg.to_stream(tgfile, codec=codec, short=True)
+            self.tg.to_stream(tgfile, codec=codec, mode='s')
+            tgfile.seek(0)
+            tg2 = tgfile.read()
+            tgfile.seek(0)
+
+            self.assertEqual(tg2, tg1)
+
+# Binary mode
+            tgfile = io.BytesIO()
+            if codec == 'utf-8':
+                self.tg.to_file('bin.TextGrid', codec=codec, mode='b')
+            self.tg.to_stream(tgfile, codec=codec, mode='b')
+            tgfile.seek(0)
+            tg1 = tgfile.read()
+            tgfile.seek(0)
+            self.tg = TextGrid(tgfile, codec=codec, stream=True)
+
+            tgfile = io.BytesIO()
+            self.tg.to_stream(tgfile, codec=codec, mode='b')
             tgfile.seek(0)
             tg2 = tgfile.read()
             tgfile.seek(0)
@@ -207,7 +226,7 @@ class PraatTest(unittest.TestCase):
 
     def test_add_point(self):
         self.setup_tier()
-        self.assertRaises(TierTypeException, self.tier1.add_point, 5, 'a')
+        self.assertRaises(Exception, self.tier1.add_point, 5, 'a')
         self.tier2.add_point(5, 't')
         self.assertEqual([(5, 't')], self.tier2.intervals)
         self.assertRaises(Exception, self.tier2.add_point, 5, 'a')
@@ -217,7 +236,7 @@ class PraatTest(unittest.TestCase):
 
     def test_add_interval(self):
         self.setup_tier()
-        self.assertRaises(TierTypeException,
+        self.assertRaises(Exception,
                           self.tier2.add_interval, 5, 6, 'a')
         self.assertRaises(Exception, self.tier2.add_interval, 6, 5, 'a')
 
@@ -231,7 +250,7 @@ class PraatTest(unittest.TestCase):
 
     def test_remove_interval(self):
         self.setup_tier()
-        self.assertRaises(TierTypeException, self.tier2.remove_interval, 5)
+        self.assertRaises(Exception, self.tier2.remove_interval, 5)
         self.tier1.add_interval(5, 6, 'a')
         self.tier1.add_interval(6, 7, 'b')
         self.tier1.add_interval(7, 8, 'c')
@@ -247,7 +266,7 @@ class PraatTest(unittest.TestCase):
 
     def test_remove_point(self):
         self.setup_tier()
-        self.assertRaises(TierTypeException, self.tier1.remove_point, 5)
+        self.assertRaises(Exception, self.tier1.remove_point, 5)
         self.tier2.add_point(5, 'a')
         self.tier2.add_point(6, 'b')
         self.tier2.add_point(7, 'c')
