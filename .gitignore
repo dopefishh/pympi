@@ -1,7 +1,16 @@
-*.pyc
-build/
-dist/
-doc/build/
+# Distribution files
+bin
+build
+dist
+
+# Virtual env files
+include
+lib
+lib64
+pyvenv.cfg
+
+# Test files or temporary data files
 *.TextGrid
 *.pfsx
 *.eaf
+*.pyc
