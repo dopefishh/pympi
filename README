@@ -33,3 +33,16 @@ Manual Installation
   Windows(elevated command prompt)
     cd C:\directory\where\you\extracted\the\zip
     python setup.py install
+
+How to start developing
+	Have python2+virtualenv or python3 installen on your system.
+	python2:
+		$ virtualenv -p /path/to/python2.7 .
+	python3:
+		$ pyvenv .
+
+	and then:
+		$ . bin/activate
+		$ pip install lxml
+		$ python test/test_elan.py
+		$ python test/test_praat.py	

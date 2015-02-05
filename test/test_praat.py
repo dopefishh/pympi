@@ -129,7 +129,6 @@ class PraatTest(unittest.TestCase):
 
     def test_to_file(self):
         # Binary mode
-        bintg = TextGrid('test/bin.TextGrid')
         for codec in ['utf-8', 'utf-16', 'latin_1', 'mac_roman']:
             self.tg = TextGrid(xmax=20)
             tier1 = self.tg.add_tier('tier')

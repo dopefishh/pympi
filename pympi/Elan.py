@@ -1487,15 +1487,13 @@ def to_eaf(file_path, eaf_obj, pretty=True):
             alan = etree.SubElement(ann, 'ALIGNABLE_ANNOTATION', rm_none(
                 {'ANNOTATION_ID': a[0], 'TIME_SLOT_REF1': a[1][0],
                  'TIME_SLOT_REF2': a[1][1], 'SVG_REF': a[1][3]}))
-            etree.SubElement(alan, 'ANNOTATION_VALUE').text =\
-                str(a[1][2])
+            etree.SubElement(alan, 'ANNOTATION_VALUE').text = a[1][2]
         for a in t[1][1].items():
             ann = etree.SubElement(tier, 'ANNOTATION')
             rean = etree.SubElement(ann, 'REF_ANNOTATION', rm_none(
                 {'ANNOTATION_ID': a[0], 'ANNOTATION_REF': a[1][0],
                  'PREVIOUS_ANNOTATION': a[1][2], 'SVG_REF': a[1][3]}))
-            etree.SubElement(rean, 'ANNOTATION_VALUE').text =\
-                str(a[1][1])
+            etree.SubElement(rean, 'ANNOTATION_VALUE').text = a[1][1]
 
     # Linguistic types
     for l in eaf_obj.linguistic_types.values():
