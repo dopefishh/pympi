@@ -32,6 +32,9 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 15-02-05   | 1.3a    | - Fixed a small unicode bug in Elan.py               |
+|            |         | - Added information for developing                   |
++------------+---------+------------------------------------------------------+
 | 15-01-21   | 1.3     | - Sort tier function for praat tiers                 |
 |            |         | - Faster TextGrid constructor with itertools         |
 |            |         | - Binary TextGrid support                            |
