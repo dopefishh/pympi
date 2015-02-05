@@ -146,8 +146,6 @@ class PraatTest(unittest.TestCase):
 
 # Normal mode
             tgfile = io.StringIO()
-            if codec == 'utf-8':
-                self.tg.to_file('normal.TextGrid', codec=codec)
             self.tg.to_stream(tgfile, codec=codec)
             tgfile.seek(0)
             tg1 = tgfile.read()
@@ -164,8 +162,6 @@ class PraatTest(unittest.TestCase):
 
 # Short mode
             tgfile = io.StringIO()
-            if codec == 'utf-8':
-                self.tg.to_file('short.TextGrid', codec=codec, mode='s')
             self.tg.to_stream(tgfile, codec=codec, mode='s')
             tgfile.seek(0)
             tg1 = tgfile.read()
@@ -182,8 +178,6 @@ class PraatTest(unittest.TestCase):
 
 # Binary mode
             tgfile = io.BytesIO()
-            if codec == 'utf-8':
-                self.tg.to_file('bin.TextGrid', codec=codec, mode='b')
             self.tg.to_stream(tgfile, codec=codec, mode='b')
             tgfile.seek(0)
             tg1 = tgfile.read()
