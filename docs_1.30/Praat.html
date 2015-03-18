@@ -82,9 +82,7 @@
 <tt class="descname">__init__</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>xmin=0</em>, <em>xmax=None</em>, <em>codec='ascii'</em>, <em>stream=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct either a new TextGrid object or read one from a
 file/stream. When you create an empty TextGrid you must at least
-specify the xmax. When you want to load a TextGrid from file you need
-to specify at least the file_path and optionally the codec. Binary,
-short and normal TextGrids are supported.</p>
+specify the xmax. Binary, short and normal TextGrids are supported.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -94,15 +92,14 @@ short and normal TextGrids are supported.</p>
 empty TextGrid will be created.</li>
 <li><strong>xmin</strong> (<em>int</em>) &#8211; Xmin value, only needed when not loading from file.</li>
 <li><strong>xmax</strong> (<em>int</em>) &#8211; Xmax value, needed when not loading from file.</li>
-<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding for the input. Note that this will be
-ignored for binary TextGrids.</li>
-<li><strong>stream</strong> (<em>bool</em>) &#8211; Flag for loading from a stream (Only use this if
-you know what you are doing...)</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding for the input.</li>
+<li><strong>stream</strong> (<em>bool</em>) &#8211; Flag for loading from a stream(not used, only for
+debugging purposes)</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Raises Exception:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If filepath is not specified but no xmax</p>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If filepath is specified but no xmax</p>
 </td>
 </tr>
 </tbody>
@@ -119,9 +116,10 @@ you know what you are doing...)</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>name</strong> (<em>str</em>) &#8211; Name of the tier, duplicate names is allowed.</li>
-<li><strong>tier_type</strong> (<em>str</em>) &#8211; Type of the tier.</li>
+<li><strong>tier_type</strong> (<em>str</em>) &#8211; Type of the tier. (&#8216;IntervalTier&#8217;, &#8216;TextTier&#8217;)</li>
 <li><strong>number</strong> (<em>int</em>) &#8211; Place to insert the tier, when <tt class="docutils literal"><span class="pre">None</span></tt> the number
-is generated and the tier will be placed on the bottom.</li>
+is generated and the tier will be placed on the
+bottom.</li>
 </ul>
 </td>
 </tr>
@@ -151,7 +149,7 @@ name only the first is renamed.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises IndexError:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TierNotFoundException:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier doesn&#8217;t exist.</p>
 </td>
 </tr>
@@ -169,8 +167,7 @@ name only the first is renamed.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>ifile</strong> (<em>file</em>) &#8211; Stream to read from.</li>
-<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding for the input. Note that this will be
-ignored for binary TextGrids.</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding.</li>
 </ul>
 </td>
 </tr>
@@ -191,7 +188,7 @@ first is returned.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The tier.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Raises IndexError:</th></tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises TierNotFoundException:</th></tr>
 <tr class="field-odd field"><td>&nbsp;</td><td class="field-body">If the tier doesn&#8217;t exist.</td>
 </tr>
 </tbody>
@@ -206,7 +203,8 @@ first is returned.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Yield:</th><td class="field-body">Enumerate of the form <tt class="docutils literal"><span class="pre">[(num1,</span> <span class="pre">tier1),</span>&nbsp; <span class="pre">...</span> <span class="pre">(numn,</span> <span class="pre">tiern)]</span></tt></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List consisting of the form
+<tt class="docutils literal"><span class="pre">[(num1,</span> <span class="pre">tier1),</span> <span class="pre">(num2,</span> <span class="pre">tier2)</span> <span class="pre">...</span> <span class="pre">(numn,</span> <span class="pre">tiern)]</span></tt></td>
 </tr>
 </tbody>
 </table>
@@ -220,7 +218,7 @@ first is returned.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body">All tiers</td>
+<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body">Available tiers</td>
 </tr>
 </tbody>
 </table>
@@ -237,8 +235,8 @@ first is removed.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name_num</strong> (<em>int or str</em>) &#8211; Name or number of the tier to remove.</td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises IndexError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If there is no tier with that number.</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TierNotFoundException:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier doesn&#8217;t exist.</td>
 </tr>
 </tbody>
 </table>
@@ -246,17 +244,20 @@ first is removed.</p>
 
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.sort_tiers">
-<tt class="descname">sort_tiers</tt><span class="sig-paren">(</span><em>key=&lt;function &lt;lambda&gt; at 0x277b758&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.sort_tiers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">sort_tiers</tt><span class="sig-paren">(</span><em>key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.sort_tiers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sort the tiers given the key. Example key functions:</p>
 <p>Sort according to the tiername in a list:</p>
 <p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">['name1',</span> <span class="pre">'name2'</span> <span class="pre">...</span> <span class="pre">'namen'].index(x.name)</span></tt>.</p>
 <p>Sort according to the number of annotations:</p>
 <p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">len(x.get_intervals())</span></tt></p>
+<p>Sort by name in reverse:</p>
+<p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">list(reversed(['name1',</span> <span class="pre">'name2'</span> <span class="pre">...</span>
+<span class="pre">'namen'])).index(x.name)</span></tt>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<em>func</em>) &#8211; A key function. Default sorts alphabetically.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<em>func</em>) &#8211; A key function. Default sorts on name.</td>
 </tr>
 </tbody>
 </table>
@@ -289,7 +290,7 @@ seconds</p>
 
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.to_file">
-<tt class="descname">to_file</tt><span class="sig-paren">(</span><em>filepath</em>, <em>codec='utf-8'</em>, <em>mode='normal'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_file" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">to_file</tt><span class="sig-paren">(</span><em>filepath</em>, <em>codec='utf-8'</em>, <em>short=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the object to a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -298,8 +299,6 @@ seconds</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>filepath</strong> (<em>str</em>) &#8211; Path of the file, &#8216;-&#8216; for stdout.</li>
 <li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding.</li>
-<li><strong>mode</strong> (<em>string</em>) &#8211; Flag to for write mode, possible modes:
-&#8216;n&#8217;/&#8217;normal&#8217;, &#8216;s&#8217;/&#8217;short&#8217; and &#8216;b&#8217;/&#8217;binary&#8217;</li>
 </ul>
 </td>
 </tr>
@@ -309,7 +308,7 @@ seconds</p>
 
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.to_stream">
-<tt class="descname">to_stream</tt><span class="sig-paren">(</span><em>f</em>, <em>codec='utf-8'</em>, <em>mode='normal'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_stream" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">to_stream</tt><span class="sig-paren">(</span><em>f</em>, <em>codec='utf-8'</em>, <em>short=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the object to a stream.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -318,8 +317,7 @@ seconds</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>f</strong> (<em>file</em>) &#8211; Open stream to write to.</li>
 <li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding.</li>
-<li><strong>mode</strong> (<em>string</em>) &#8211; Flag to for write mode, possible modes:
-&#8216;n&#8217;/&#8217;normal&#8217;, &#8216;s&#8217;/&#8217;short&#8217; and &#8216;b&#8217;/&#8217;binary&#8217;</li>
+<li><strong>short</strong> (<em>bool</em>) &#8211; Flag to use the short notation(saves space)</li>
 </ul>
 </td>
 </tr>
@@ -327,11 +325,17 @@ seconds</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.update">
+<tt class="descname">update</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the xmin, xmax and number of tiers value</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="pympi.Praat.Tier">
-<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">Tier</tt><span class="sig-paren">(</span><em>name=None</em>, <em>tier_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">Tier</tt><span class="sig-paren">(</span><em>name=None</em>, <em>tier_type=None</em>, <em>ifile=None</em>, <em>codec='ascii'</em>, <em>binary=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class representing a TextGrid tier, either an Interval or TextTier</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -351,8 +355,9 @@ seconds</p>
 </table>
 <dl class="method">
 <dt id="pympi.Praat.Tier.__init__">
-<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>name=None</em>, <em>tier_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a tier, if lines is <tt class="docutils literal"><span class="pre">None</span></tt> a new tier is created.</p>
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>name=None</em>, <em>tier_type=None</em>, <em>ifile=None</em>, <em>codec='ascii'</em>, <em>binary=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a tier, if lines is <tt class="docutils literal"><span class="pre">None</span></tt> a new tier is created and codec
+is ignored.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -360,6 +365,9 @@ seconds</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>name</strong> (<em>str</em>) &#8211; Name of the tier.</li>
 <li><strong>tier_type</strong> (<em>str</em>) &#8211; Type of the tier(&#8216;IntervalTier&#8217; or &#8216;TextTier&#8217;).</li>
+<li><strong>lines</strong> (<em>iter</em>) &#8211; Iterator of the input lines.</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding of the input.</li>
+<li><strong>binary</strong> (<em>bool</em>) &#8211; Flag to read the files in binary.</li>
 </ul>
 </td>
 </tr>
@@ -387,8 +395,10 @@ seconds</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises Exception:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If overlap, begin &gt; end or wrong tiertype.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>TierTypeException</strong> &#8211; If the tier is not a IntervalTier.</li>
+<li><strong>Exception</strong> &#8211; If there is already an interval in that time.</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -410,8 +420,10 @@ seconds</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises Exception:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If overlap or wrong tiertype.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>TierTypeException</strong> &#8211; If the tier is not a TextTier.</li>
+<li><strong>Exception</strong> &#8211; If there is already a point at that time.</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -422,12 +434,6 @@ seconds</p>
 <dt id="pympi.Praat.Tier.clear_intervals">
 <tt class="descname">clear_intervals</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.clear_intervals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes all the intervals in the tier</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pympi.Praat.Tier.get_all_intervals">
-<tt class="descname">get_all_intervals</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.get_all_intervals" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the true list of intervals including the empty intervals.</p>
 </dd></dl>
 
 <dl class="method">
@@ -486,6 +492,77 @@ seconds</p>
 <dd><p>Update the internal values</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="exception">
+<dt id="pympi.Praat.TierNotFoundException">
+<em class="property">exception </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">TierNotFoundException</tt><span class="sig-paren">(</span><em>tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TierNotFoundException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception that is raised when a tier is adressed that doesn&#8217;t exist</p>
+<dl class="method">
+<dt id="pympi.Praat.TierNotFoundException.__init__">
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TierNotFoundException.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a TierNotFoundException.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tier</strong> (<em>int or str</em>) &#8211; Name or number of the tier.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pympi.Praat.TierNotFoundException.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#pympi.Praat.TierNotFoundException.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pympi.Praat.TierTypeException">
+<em class="property">exception </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">TierTypeException</tt><a class="headerlink" href="#pympi.Praat.TierTypeException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception that is raised when a tiertype is unknown or wrong for the
+function in which it is raised</p>
+<dl class="method">
+<dt id="pympi.Praat.TierTypeException.__init__">
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TierTypeException.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a TierTypeException.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pympi.Praat.TierTypeException.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#pympi.Praat.TierTypeException.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="data">
+<dt id="pympi.Praat.VERSION">
+<tt class="descclassname">pympi.Praat.</tt><tt class="descname">VERSION</tt><em class="property"> = '1.30'</em><a class="headerlink" href="#pympi.Praat.VERSION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper objects/functions to extract data:</p>
+<p>lamfloat - Extract binary float 8bytes
+lamint   - Extract binary integer 4bytes
+lamshort - Extract binary integer 2bytes
+regfloat - Extract text float
+regint   - Extract text integer
+regstr   - Extract text string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pympi.Praat.lamstr">
+<tt class="descclassname">pympi.Praat.</tt><tt class="descname">lamstr</tt><span class="sig-paren">(</span><em>ifile</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.lamstr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function for extracting string from a binary TextGrid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ifile</strong> (<em>file</em>) &#8211; Stream with information</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
