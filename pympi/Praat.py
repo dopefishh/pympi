@@ -8,32 +8,6 @@ import sys
 VERSION = '1.30'
 
 
-def _intervallist(tier):
-    srtint = list(tier.get_intervals(sort=True))
-    ints = []
-    if tier.tier_type == 'IntervalTier':
-        # Add empty intervals for undefined spaces
-        if srtint and srtint[0][0] > 0.0:
-            ints.append((0.0, srtint[0][0], ''))
-        for i in srtint:
-            if i[1] - i[0] == 0:
-                continue
-            if ints and ints[-1][1] < i[0]:
-                ints.append((ints[-1][1], i[0], ''))
-            ints.append(i)
-        if ints and ints[-1][1] < tier.xmax:
-            ints.append((ints[-1][1], tier.xmax, ''))
-    return ints or srtint
-
-
-def _wrtval(fi, indent, prefix, value, short, f=''):
-    indent = 0 if short else indent
-    prefix = '' if short else prefix
-    if value is not None or not short:
-        fi.write(u'{{}}{{}}{}\n'.
-                 format(f).format(' '*indent, prefix, value))
-
-
 class TextGrid:
     """Read write and edit Praat's TextGrid files.
 
@@ -61,7 +35,7 @@ class TextGrid:
             ignored for binary TextGrids.
         :param bool stream: Flag for loading from a stream (Only use this if
             you know what you are doing...)
-        :raises Exception: If filepath is specified but no xmax
+        :raises Exception: If filepath is not specified but no xmax
         """
         self.tiers = []
         self.codec = codec
@@ -75,11 +49,11 @@ class TextGrid:
             if stream:
                 self.from_stream(file_path, codec)
             else:
-                ifile = sys.stdin if file_path == '-' else\
-                    open(file_path, 'rb')
-                self.from_stream(ifile, codec)
-                if file_path != '-':
-                    ifile.close()
+                if file_path == '-':
+                    self.from_stream(sys.stdin, codec)
+                else:
+                    with open(file_path, 'rb') as f:
+                        self.from_stream(f, codec)
 
     def from_stream(self, ifile, codec='ascii'):
         """Read textgrid from stream.
@@ -160,11 +134,7 @@ class TextGrid:
                         t = regstr.search(next(ifile)).group(1)
                         tier.intervals.append((x1, t))
 
-    def update(self):
-        """Update the xmin, xmax and number of tiers value"""
-        self.tier_num = len(self.tiers)
-
-    def sort_tiers(self, key=None):
+    def sort_tiers(self, key=lambda x: x.name):
         """Sort the tiers given the key. Example key functions:
 
         Sort according to the tiername in a list:
@@ -175,38 +145,28 @@ class TextGrid:
 
         ``lambda x: len(x.get_intervals())``
 
-        Sort by name in reverse:
-
-        ``lambda x: list(reversed(['name1', 'name2' ...
-        'namen'])).index(x.name)``.
-
-        :param func key: A key function. Default sorts on name.
+        :param func key: A key function. Default sorts alphabetically.
         """
-        if not key:
-            key = lambda x: x.name
         self.tiers.sort(key=key)
 
     def add_tier(self, name, tier_type='IntervalTier', number=None):
         """Add an IntervalTier or a TextTier on the specified location.
 
         :param str name: Name of the tier, duplicate names is allowed.
-        :param str tier_type: Type of the tier. ('IntervalTier', 'TextTier')
+        :param str tier_type: Type of the tier.
         :param int number: Place to insert the tier, when ``None`` the number
-                           is generated and the tier will be placed on the
-                           bottom.
+            is generated and the tier will be placed on the bottom.
         :returns: The created tier.
         :raises ValueError: If the number is out of bounds.
         """
         if number is None:
             number = 1 if not self.tiers else len(self.tiers)+1
         elif number < 1 or number > len(self.tiers):
-            raise ValueError(
-                'Number has to be in [1..{}]'.format(len(self.tiers)))
-        elif tier_type not in ['IntervalTier', 'TextTier']:
-            raise ValueError(
-                'tier_type has to be either IntervalTier or TextTier')
+            raise ValueError('Number not in [1..{}]'.format(len(self.tiers)))
+        elif tier_type not in Tier.P_TIERS:
+            raise ValueError('tier_type has to be in {}'.format(self.P_TIERS))
         self.tiers.insert(number-1, Tier(name, tier_type))
-        return self.tiers[-1]
+        return self.tiers[number-1]
 
     def remove_tier(self, name_num):
         """Remove a tier, when multiple tiers exist with that name only the
@@ -214,16 +174,12 @@ class TextGrid:
 
         :param name_num: Name or number of the tier to remove.
         :type name_num: int or str
-        :raises TierNotFoundException: If the tier doesn't exist.
+        :raises IndexError: If there is no tier with that number.
         """
-        num = isinstance(name_num, int)
-        for tier in self.tiers:
-            if (num and self.tiers.index(tier)+1 == name_num) or\
-                    not num and tier.name == name_num:
-                self.tiers.remove(tier)
-                break
+        if isinstance(name_num, int):
+            del(self.tiers[name_num-1])
         else:
-            raise Exception('Tier not found.')
+            self.tiers = [i for i in self.tiers if i.name != name_num]
 
     def get_tier(self, name_num):
         """Gives a tier, when multiple tiers exist with that name only the
@@ -232,14 +188,10 @@ class TextGrid:
         :param name_num: Name or number of the tier to return.
         :type name_num: int or str
         :returns: The tier.
-        :raises TierNotFoundException: If the tier doesn't exist.
+        :raises IndexError: If the tier doesn't exist.
         """
-        num = isinstance(name_num, int)
-        for tier in self.tiers:
-            if (num and self.tiers.index(tier)+1 == name_num) or\
-                    not num and tier.name == name_num:
-                return tier
-        raise Exception('Tier not found.')
+        return self.tiers[name_num - 1] if isinstance(name_num, int) else\
+            [i for i in self.tiers if i.name == name_num][0]
 
     def change_tier_name(self, name_num, name2):
         """Changes the name of the tier, when multiple tiers exist with that
@@ -248,14 +200,14 @@ class TextGrid:
         :param name_num: Name or number of the tier to rename.
         :type name_num: int or str
         :param str name2: New name of the tier.
-        :raises TierNotFoundException: If the tier doesn't exist.
+        :raises IndexError: If the tier doesn't exist.
         """
         self.get_tier(name_num).name = name2
 
     def get_tiers(self):
         """Give all tiers.
 
-        :yields: Available tiers
+        :yields: All tiers
         """
         for tier in self.tiers:
             yield tier
@@ -263,10 +215,9 @@ class TextGrid:
     def get_tier_name_num(self):
         """Give all tiers with their numbers.
 
-        :returns: List consisting of the form
-                  ``[(num1, tier1), (num2, tier2) ... (numn, tiern)]``
+        :yield: Enumerate of the form ``[(num1, tier1),  ... (numn, tiern)]``
         """
-        return list(enumerate((s.name for s in self.tiers), 1))
+        return enumerate((s.name for s in self.tiers), 1)
 
     def to_file(self, filepath, codec='utf-8', mode='normal'):
         """Write the object to a file.
@@ -276,14 +227,14 @@ class TextGrid:
         :param string mode: Flag to for write mode, possible modes:
             'n'/'normal', 's'/'short' and 'b'/'binary'
         """
-        try:
-            stream = sys.stdout if filepath == '-' else open(filepath, 'wb')\
-                if mode in ['binary', 'b'] else\
-                codecs.open(filepath, 'w', codec)
-            self.to_stream(stream, codec, mode)
-        finally:
-            if stream != sys.stdout:
-                stream.close()
+        if filepath == '-':
+            self.to_stream(sys.stdout, codec, mode)
+        elif mode in ['binary', 'b']:
+            with open(filepath, 'wb') as f:
+                self.to_stream(f, codec, mode)
+        else:
+            with codecs.open(filepath, 'w', codec) as f:
+                self.to_stream(f, codec, mode)
 
     def to_stream(self, f, codec='utf-8', mode='normal'):
         """Write the object to a stream.
@@ -295,41 +246,46 @@ class TextGrid:
         """
         for t in self.tiers:
             t.update()
-        self.update()
+        self.tier_num = len(self.tiers)
 
         if mode in ['short', 'normal', 's', 'n']:
-            s = mode[0] == 's'
-            f.write(u'File type = "ooTextFile"\nObject class = "TextGrid"\n\n')
-            _wrtval(f, 0, u'xmin = ', self.xmin, s, '{:f}')
-            _wrtval(f, 0, u'xmax = ', self.xmax, s, '{:f}')
-            _wrtval(f, 0, u'tiers? ', u'<exists>', s, '{}')
-            _wrtval(f, 0, u'size = ', self.tier_num, s, '{:d}')
-            _wrtval(f, 0, u'item []:', None, s)
-            for tnum, tier in enumerate(self.tiers, 1):
-                _wrtval(f, 4, u'item [{:d}]:'.format(tnum), None, s)
-                _wrtval(f, 8, u'class = ', tier.tier_type, s, '"{}"')
-                _wrtval(f, 8, u'name = ', tier.name, s, '"{}"')
-                _wrtval(f, 8, u'xmin = ', tier.xmin, s, '{:f}')
-                _wrtval(f, 8, u'xmax = ', tier.xmax, s, '{:f}')
+            short = mode[0] == 's'
 
-                ints = _intervallist(tier)
+            def wrtval(indent, prefix, value, ff=''):
+                indent = 0 if short else indent
+                prefix = '' if short else prefix
+                if value is not None or not short:
+                    f.write(u'{{}}{{}}{}\n'.
+                            format(ff).format(' '*indent, prefix, value))
+
+            f.write(u'File type = "ooTextFile"\nObject class = "TextGrid"\n\n')
+            wrtval(0, u'xmin = ', self.xmin, '{:f}')
+            wrtval(0, u'xmax = ', self.xmax, '{:f}')
+            wrtval(0, u'tiers? ', u'<exists>', '{}')
+            wrtval(0, u'size = ', self.tier_num, '{:d}')
+            wrtval(0, u'item []:', None)
+            for tnum, tier in enumerate(self.tiers, 1):
+                wrtval(4, u'item [{:d}]:'.format(tnum), None)
+                wrtval(8, u'class = ', tier.tier_type, '"{}"')
+                wrtval(8, u'name = ', tier.name, '"{}"')
+                wrtval(8, u'xmin = ', tier.xmin, '{:f}')
+                wrtval(8, u'xmax = ', tier.xmax, '{:f}')
                 if tier.tier_type == 'IntervalTier':
-                    _wrtval(f, 8, u'intervals: size = ', len(ints), s, '{:d}')
+                    ints = tier.get_all_intervals()
+                    wrtval(8, u'intervals: size = ', len(ints), '{:d}')
                     for i, c in enumerate(ints):
-                        _wrtval(f, 8, 'intervals [{:d}]:'.format(i+1), None, s)
-                        _wrtval(f, 12, 'xmin = ', c[0], s, '{:f}')
-                        _wrtval(f, 12, 'xmax = ', c[1], s, '{:f}')
-                        _wrtval(f, 12, 'text = ',
-                                c[2].replace('"', '""'), s, '"{}"')
+                        wrtval(8, 'intervals [{:d}]:'.format(i+1), None)
+                        wrtval(12, 'xmin = ', c[0], '{:f}')
+                        wrtval(12, 'xmax = ', c[1], '{:f}')
+                        wrtval(12, 'text = ', c[2].replace('"', '""'), '"{}"')
                 elif tier.tier_type == 'TextTier':
-                    _wrtval(f, 8, u'points: size = ', len(ints), s, '{:d}')
-                    for i, c in enumerate(ints):
-                        _wrtval(f, 8, 'points [{:d}]:'.format(i+1), None, s)
-                        _wrtval(f, 12, 'number = ', c[0], s, '{:f}')
-                        _wrtval(f, 12, 'mark = ',
-                                c[1].replace('"', '""'), s, '"{}"')
+                    wrtval(8, u'points: size = ', len(tier.intervals), '{:d}')
+                    for i, c in enumerate(tier.get_intervals()):
+                        wrtval(8, 'points [{:d}]:'.format(i+1), None)
+                        wrtval(12, 'number = ', c[0], '{:f}')
+                        wrtval(12, 'mark = ', c[1].replace('"', '""'), '"{}"')
         elif mode in ['binary', 'b']:
-            def writebstr(s, ofile):
+            def writebstr(s):
                 try:
                     bytestring = s.encode('ascii')
                 except UnicodeError:
@@ -346,16 +302,16 @@ class TextGrid:
             for tier in self.tiers:
                 f.write(chr(len(tier.tier_type)).encode('ascii'))
                 f.write(tier.tier_type.encode('ascii'))
-                writebstr(tier.name, f)
+                writebstr(tier.name)
                 f.write(struct.pack('>d', tier.xmin))
                 f.write(struct.pack('>d', tier.xmax))
-                ints = _intervallist(tier)
+                ints = tier.get_all_intervals()
                 f.write(struct.pack('>i', len(ints)))
                 itier = tier.tier_type == 'IntervalTier'
                 for c in ints:
                     f.write(struct.pack('>d', c[0]))
                     itier and f.write(struct.pack('>d', c[1]))
-                    writebstr(c[2 if itier else 1], f)
+                    writebstr(c[2 if itier else 1])
         else:
             raise Exception('Writing mode unknown or unsupported')
 
@@ -377,8 +333,8 @@ class TextGrid:
             for ann in tier.get_intervals(True):
                 if tier.tier_type == 'TextTier':
                     ann = (ann[0], ann[0]+pointlength, ann[1])
-                eaf_out.insert_annotation(tier.name, int(round(ann[0]*1000)),
-                                          int(round(ann[1]*1000)), ann[2])
+                eaf_out.add_annotation(tier.name, int(round(ann[0]*1000)),
+                                       int(round(ann[1]*1000)), ann[2])
         return eaf_out
 
 
@@ -392,10 +348,10 @@ class Tier:
     :var int xmin: Minimum x value.
     :var int xmax: Maximum x value.
     """
+    P_TIERS = {'IntervalTier', 'TextTier'}
 
     def __init__(self, name=None, tier_type=None):
-        """Creates a tier, if lines is ``None`` a new tier is created and codec
-        is ignored.
+        """Creates a tier, if lines is ``None`` a new tier is created.
 
         :param str name: Name of the tier.
         :param str tier_type: Type of the tier('IntervalTier' or 'TextTier').
@@ -405,18 +361,15 @@ class Tier:
         self.name = name
         self.tier_type = tier_type
         self.xmin, self.xmax = 0, 0
-        if tier_type not in ['IntervalTier', 'TextTier']:
+        if tier_type not in self.P_TIERS:
             raise Exception('Tiertype does not exist.')
 
     def update(self):
         """Update the internal values"""
-        self.intervals.sort()
-        if self.tier_type is 'TextTier' and self.intervals:
-            self.xmin = min(self.intervals)[0]
-            self.xmax = max(self.intervals)[0]
-        elif self.tier_type is 'IntervalTier' and self.intervals:
-            self.xmin = min(self.intervals)[0]
-            self.xmax = max(self.intervals)[1]
+        m = 0 if self.tier_type == 'TextTier' else 1
+        for i in self.intervals:
+            self.xmin = i[0] if i[0] < self.xmin else self.xmin
+            self.xmax = i[m] if i[m] < self.xmax else self.xmax
 
     def add_point(self, point, value, check=True):
         """Add a point to the TextTier
@@ -424,15 +377,13 @@ class Tier:
         :param int point: Time of the point.
         :param str value: Text of the point.
         :param bool check: Flag to check for overlap.
-        :raises TierTypeException: If the tier is not a TextTier.
-        :raises Exception: If there is already a point at that time.
+        :raises Exception: If overlap or wrong tiertype.
         """
-        if self.tier_type is not 'TextTier':
+        if self.tier_type != 'TextTier':
             raise Exception('Tiertype must be TextTier.')
-        if check is False or point not in [i[0] for i in self.intervals]:
-            self.intervals.append((point, value))
-        else:
-            raise Exception('No overlap is allowed')
+        if check and any(i for i in self.intervals if i[0] == point):
+                raise Exception('No overlap is allowed')
+        self.intervals.append((point, value))
 
     def add_interval(self, begin, end, value, check=True):
         """Add an interval to the IntervalTier.
@@ -441,18 +392,16 @@ class Tier:
         :param float end: End time of the interval.
         :param str value: Text of the interval.
         :param bool check: Flag to check for overlap.
-        :raises TierTypeException: If the tier is not a IntervalTier.
-        :raises Exception: If there is already an interval in that time.
+        :raises Exception: If overlap, begin > end or wrong tiertype.
         """
         if self.tier_type != 'IntervalTier':
-            raise Exception('Tiertype must be IntervalTier.')
-        if check is False or\
-                not [i for i in self.intervals if begin < i[1] and end > i[0]]\
-                and begin < end:
-            self.intervals.append((begin, end, value))
-        else:
-            raise Exception(
-                'No overlap is allowed!, and begin should be smaller then end')
+            raise Exception('Tiertype must be IntervalTier')
+        if check:
+            if any(i for i in self.intervals if begin < i[1] and end > i[0]):
+                raise Exception('No overlap is allowed')
+            if begin > end:
+                raise Exception('Begin must be smaller then end')
+        self.intervals.append((begin, end, value))
 
     def remove_interval(self, time):
         """Remove an interval, if no interval is found nothing happens.
@@ -462,8 +411,8 @@ class Tier:
         """
         if self.tier_type != 'IntervalTier':
             raise Exception('Tiertype must be IntervalTier.')
-        for r in [i for i in self.intervals if i[0] <= time and i[1] >= time]:
-            self.intervals.remove(r)
+        self.intervals = [i for i in self.intervals
+                          if not(i[0] <= time and i[1] >= time)]
 
     def remove_point(self, time):
         """Remove a point, if no point is found nothing happens.
@@ -473,8 +422,7 @@ class Tier:
         """
         if self.tier_type != 'TextTier':
             raise Exception('Tiertype must be TextTier.')
-        for r in [i for i in self.intervals if i[0] == time]:
-            self.intervals.remove(r)
+        self.intervals = [i for i in self.intervals if i[0] != time]
 
     def get_intervals(self, sort=False):
         """Give all the intervals or points.
@@ -488,3 +436,21 @@ class Tier:
     def clear_intervals(self):
         """Removes all the intervals in the tier"""
         self.intervals = []
+
+    def get_all_intervals(self):
+        """Returns the true list of intervals including the empty intervals."""
+        ints = sorted(self.get_intervals(True))
+        if self.tier_type == 'IntervalTier':
+            if not ints:
+                ints.append((self.xmin, self.xmax, ''))
+            else:
+                if ints[0][0] > self.xmin:
+                    ints.insert(0, (self.xmin, ints[0][0], ''))
+                if ints[-1][1] < self.xmax:
+                    ints.append((ints[-1][1], self.xmax, ''))
+                p = ints[-1]
+                for index, i in reversed(list(enumerate(ints[:-1], 1))):
+                    if p[0] - i[1] != 0:
+                        ints.insert(index, (i[1], p[0], ''))
+                    p = i
+        return ints

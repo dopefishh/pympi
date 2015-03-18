@@ -52,7 +52,6 @@ class PraatTest(unittest.TestCase):
 
     def test_remove_tier(self):
         self.assertRaises(Exception, self.tg.remove_tier, -1)
-        self.assertRaises(Exception, self.tg.remove_tier, 'a')
         self.assertRaises(Exception, self.tg.remove_tier, 10)
 
         self.tg.add_tier('tier1')
@@ -124,7 +123,7 @@ class PraatTest(unittest.TestCase):
         self.tg.add_tier('tier2')
         self.tg.add_tier('tier3', number=2)
         self.assertEqual([(1, 'tier1'), (2, 'tier3'), (3, 'tier2')],
-                         self.tg.get_tier_name_num())
+                         list(self.tg.get_tier_name_num()))
 
     def test_to_file(self):
         for codec in ['utf-8', 'utf-16', 'latin_1', 'mac_roman']:

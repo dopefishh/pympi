@@ -2,13 +2,13 @@
 
 from distutils.core import setup
 
-licence = '"THE BEER-WARE LICENSE" (Revision 42)',
-version = '1.3a'
+licence = '"THE BEER-WARE LICENSE" (Revision 42)'
+version = '1.31'
 
 setup(name='pympi-ling',
       version=version,
       description=
-      'A python module for processing ELAN and Praat annotation files',
+        'A python module for processing ELAN and Praat annotation files',
       author='Mart Lubbers',
       long_description="""\
 Documentation as well as a detailed changelog can be found on:
@@ -57,5 +57,4 @@ a Python module for processing ELAN and Praat annotation files.}},
                    'Programming Language :: Python :: 2.7',
                    'Programming Language :: Python :: 3.4',
                    'Topic :: Text Processing :: Linguistic'],
-      packages=['pympi']
-      )
+      packages=['pympi'])
