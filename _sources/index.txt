@@ -33,8 +33,8 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
-| 15-03-18   | 1.39    | - Simplified Praat code                              |
-|            |         |                                                      |
+| 15-03-19   | 1.39    | - Simplified Praat code                              |
+|            |         | - Simplified Elan code                               |
 +------------+---------+------------------------------------------------------+
 | 15-02-05   | 1.3a    | - Fixed a small unicode bug in Elan.py               |
 |            |         | - Added information for developing                   |
