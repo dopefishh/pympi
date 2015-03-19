@@ -590,7 +590,7 @@ class Elan(unittest.TestCase):
     def test_to_textgrid(self):
         self.eaf.remove_tier('default')
         tg = self.eaf.to_textgrid()
-        self.assertEqual(tg.get_tier_name_num(), [])
+        self.assertEqual(list(tg.get_tier_name_num()), [])
         self.eaf.add_tier('t1')
         self.eaf.add_annotation('t1', 0, 100, 'a11')
         self.eaf.add_annotation('t1', 100, 200, 'a21')
@@ -653,7 +653,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_annotation('tier1', 3000, 4000, 'a4')
         self.eaf.add_tier('tier2')
         e1 = self.eaf.extract(1500, 2500)
-        self.assertEqual(e1.annotation_document, self.eaf.annotation_document)
+        self.assertEqual(e1.adocument, self.eaf.adocument)
         self.assertEqual(e1.licenses, self.eaf.licenses)
         self.assertEqual(e1.header, self.eaf.header)
         self.assertEqual(e1.media_descriptors, self.eaf.media_descriptors)

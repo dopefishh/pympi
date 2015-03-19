@@ -1,25 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from xml.etree import cElementTree as etree
-# from xml.etree import ElementTree as etree
 import os
 import re
 import sys
 import time
 
-VERSION = '1.29'
-
-CONSTRAINTS = {
-    'Time_Subdivision': 'Time subdivision of parent annotation\'s time interva'
-    'l, no time gaps allowed within this interval',
-    'Symbolic_Subdivision': 'Symbolic subdivision of a parent annotation. Anno'
-    'tations refering to the same parent are ordered',
-    'Symbolic_Association': '1-1 association with a parent annotation',
-    'Included_In': 'Time alignable annotations within the parent annotation\'s'
-    ' time interval, gaps are allowed'}
-
-MIMES = {'wav': 'audio/x-wav', 'mpg': 'video/mpeg', 'mpeg': 'video/mpg',
-         'xml': 'text/xml'}
+VERSION = '1.39'
 
 
 class Eaf:
@@ -27,7 +14,7 @@ class Eaf:
 
     .. note:: All times are in milliseconds and can't have decimals.
 
-    :var dict annotation_document: Annotation document TAG entries.
+    :var dict adocument: Annotation document TAG entries.
     :var list licenses: Licences included in the file of the form:
         ``(name, url)``.
     :var dict header: XML header.
@@ -72,6 +59,17 @@ class Eaf:
     :var dict annotations: Dictionary of annotations of the form:
         ``{id -> tier}``, this is only used internally.
     """
+    ETYPES = {'iso12620', 'ecv', 'cve_id', 'lexen_id', 'resource_url'}
+    CONSTRAINTS = {
+        'Time_Subdivision': "Time subdivision of parent annotation's time inte"
+        'rval, no time gaps allowed within this interval',
+        'Symbolic_Subdivision': 'Symbolic subdivision of a parent annotation. '
+        'Annotations refering to the same parent are ordered',
+        'Symbolic_Association': '1-1 association with a parent annotation',
+        'Included_In': 'Time alignable annotations within the parent annotatio'
+        "n's time interval, gaps are allowed"}
+    MIMES = {'wav': 'audio/x-wav', 'mpg': 'video/mpeg', 'mpeg': 'video/mpg',
+             'xml': 'text/xml'}
 
     def __init__(self, file_path=None, author='pympi'):
         """Construct either a new Eaf file or read on from a file/stream.
@@ -85,7 +83,7 @@ class Eaf:
             time.daylight else -time.timezone
         self.maxts = None
         self.maxaid = None
-        self.annotation_document = {
+        self.adocument = {
             'AUTHOR': author,
             'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
                 ctz // 3600, ctz % 3600),
@@ -109,11 +107,10 @@ class Eaf:
         self.linked_file_descriptors = []
         self.media_descriptors = []
         self.properties = []
-        self.new_time, self.new_ann = 0, 0
 
         if file_path is None:
             self.add_linguistic_type('default-lt')
-            self.constraints = CONSTRAINTS.copy()
+            self.constraints = self.CONSTRAINTS.copy()
             self.properties.append(('lastUsedAnnotation', 0))
             self.add_tier('default')
         else:
@@ -195,9 +192,8 @@ class Eaf:
         :param str value: Value of the external reference.
         :throws KeyError: if etype is not in the list of possible types.
         """
-        if etype not in\
-                ['iso12620', 'ecv', 'cve_id', 'lexen_id', 'resource_url']:
-            raise KeyError('etype not in possible types')
+        if etype not in self.ETYPES:
+            raise KeyError('etype not in {}'.format(self.ETYPES))
         self.external_refs[eid] = (etype, value)
 
     def add_language(self, lang_id, lang_def=None, lang_label=None):
@@ -285,7 +281,7 @@ class Eaf:
                           extension or an unknown mimetype.
         """
         if mimetype is None:
-            mimetype = MIMES[file_path.split('.')[-1]]
+            mimetype = self.MIMES[file_path.split('.')[-1]]
         self.media_descriptors.append({
             'MEDIA_URL': file_path, 'RELATIVE_MEDIA_URL': relpath,
             'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
@@ -352,7 +348,7 @@ class Eaf:
                           extension or an unknown mimetype.
         """
         if mimetype is None:
-            mimetype = MIMES[file_path.split('.')[-1]]
+            mimetype = self.MIMES[file_path.split('.')[-1]]
         self.linked_file_descriptors.append({
             'LINK_URL': file_path, 'RELATIVE_LINK_URL': relpath,
             'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
@@ -420,10 +416,8 @@ class Eaf:
         the flags for cleaning in the functions so that the cleaning is only
         performed afterwards.
         """
-        ts_in_tier = ((a[0], a[1]) for tier in self.tiers.values() for a in
-                      tier[0].values())
-        ts_in_tier = {a for b in ts_in_tier for a in b}
-        for a in ts_in_tier.symmetric_difference(self.timeslots):
+        ts = ((a[0], a[1]) for t in self.tiers.values() for a in t[0].values())
+        for a in {a for b in ts for a in b} ^ set(self.timeslots):
             del(self.timeslots[a])
 
     def copy_tier(self, eaf_obj, tier_name):
@@ -562,11 +556,9 @@ class Eaf:
         if self.tiers[id_tier][1]:
             return self.get_ref_annotation_at_time(id_tier, time)
         anns = self.tiers[id_tier][0]
-        return sorted(
-            [(self.timeslots[m[0]], self.timeslots[m[1]], m[2])
-                for m in anns.values() if
-                self.timeslots[m[0]] <= time and
-                self.timeslots[m[1]] >= time])
+        return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2])
+                       for m in anns.values() if self.timeslots[m[0]] <= time
+                       and self.timeslots[m[1]] >= time])
 
     def get_annotation_data_between_times(self, id_tier, start, end):
         """Gives the annotations within the times.
@@ -602,8 +594,7 @@ class Eaf:
         :returns: Tuple of the form: ``(min_time, max_time)``.
         """
         return (0, 0) if not self.timeslots else\
-            (min(self.timeslots.values()),
-             max(self.timeslots.values()))
+            (min(self.timeslots.values()), max(self.timeslots.values()))
 
     def get_gaps_and_overlaps(self, tier1, tier2, maxlen=-1):
         """Give gaps and overlaps. The return types are shown in the table
@@ -814,7 +805,7 @@ class Eaf:
         return self.linguistic_types[lingtype]
 
     def get_parameters_for_tier(self, id_tier):
-        """Give the parameter dictionary, this is usaable in :func:`add_tier`.
+        """Give the parameter dictionary, this is useable in :func:`add_tier`.
 
         :param str id_tier: Name of the tier.
         :returns: Dictionary of parameters.
@@ -1030,8 +1021,7 @@ class Eaf:
         :param str url: URL of the license.
         """
         for k, v in self.licenses[:]:
-            if (name is None or name == k) and\
-                    (url is None or url == v):
+            if (name is None or name == k) and (url is None or url == v):
                 del(self.licenses[self.licenses.index((k, v))])
 
     def remove_linguistic_type(self, ling_type):
@@ -1082,8 +1072,7 @@ class Eaf:
         :param str value: Value of the property.
         """
         for k, v in self.properties[:]:
-            if (key is None or key == k) and\
-                    (value is None or value == v):
+            if (key is None or key == k) and (value is None or value == v):
                 del(self.properties[self.properties.index((k, v))])
 
     def remove_secondary_linked_files(self, file_path=None, relpath=None,
@@ -1307,8 +1296,8 @@ def parse_eaf(file_path, eaf_obj):
         file_path = sys.stdin
     # Annotation document
     tree_root = etree.parse(file_path).getroot()
-    eaf_obj.annotation_document.update(tree_root.attrib)
-    del(eaf_obj.annotation_document[
+    eaf_obj.adocument.update(tree_root.attrib)
+    del(eaf_obj.adocument[
         '{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation'
         ])
     tier_number = 0
@@ -1330,8 +1319,8 @@ def parse_eaf(file_path, eaf_obj):
         # Time order
         elif elem.tag == 'TIME_ORDER':
             for elem1 in elem:
-                if int(elem1.attrib['TIME_SLOT_ID'][2:]) > eaf_obj.new_time:
-                    eaf_obj.new_time = int(elem1.attrib['TIME_SLOT_ID'][2:])
+                if int(elem1.attrib['TIME_SLOT_ID'][2:]) > eaf_obj.maxts:
+                    eaf_obj.maxts = int(elem1.attrib['TIME_SLOT_ID'][2:])
                 ts = elem1.attrib.get('TIME_VALUE', None)
                 eaf_obj.timeslots[elem1.attrib['TIME_SLOT_ID']] =\
                     ts if ts is None else int(ts)
@@ -1346,8 +1335,8 @@ def parse_eaf(file_path, eaf_obj):
                         if elem2.tag == 'ALIGNABLE_ANNOTATION':
                             annot_id = elem2.attrib['ANNOTATION_ID']
                             if re.match('a\d+', annot_id) and\
-                                    int(annot_id[1:]) > eaf_obj.new_ann:
-                                eaf_obj.new_ann = int(annot_id[1:])
+                                    int(annot_id[1:]) > eaf_obj.maxaid:
+                                eaf_obj.maxaid = int(annot_id[1:])
                             annot_start = elem2.attrib['TIME_SLOT_REF1']
                             annot_end = elem2.attrib['TIME_SLOT_REF2']
                             svg_ref = elem2.attrib.get('SVG_REF', None)
@@ -1362,8 +1351,8 @@ def parse_eaf(file_path, eaf_obj):
                                                         None)
                             annotId = elem2.attrib['ANNOTATION_ID']
                             if re.match('a\d+', annot_id) and\
-                                    int(annot_id[1:]) > eaf_obj.new_ann:
-                                eaf_obj.new_ann = int(annot_id[1:])
+                                    int(annot_id[1:]) > eaf_obj.maxaid:
+                                eaf_obj.maxaid = int(annot_id[1:])
                             svg_ref = elem2.attrib.get('SVG_REF', None)
                             ref[annotId] = (annotRef,
                                             '' if not list(elem2)[0].text else
@@ -1426,7 +1415,7 @@ def indent(el, level=0):
     :param ElementTree.Element el: Current element.
     :param int level: Current level.
     """
-    i = '\n' + level*'\t'
+    i = '\n' + level * '\t'
     if len(el):
         if not el.text or not el.text.strip():
             el.text = i+'\t'
@@ -1448,20 +1437,16 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     :param pympi.Elan.Eaf eaf_obj: Object to write.
     :param bool pretty: Flag to set pretty printing.
     """
-    rm_none = lambda x:\
-        dict((k, str(v)) for k, v in x.items() if v is not None)
+    def rm_none(x):
+        return {k: str(v) for k, v in x.items() if v is not None}
     # Annotation Document
-    ANNOTATION_DOCUMENT = etree.Element('ANNOTATION_DOCUMENT',
-                                        eaf_obj.annotation_document)
-
+    ADOCUMENT = etree.Element('ANNOTATION_DOCUMENT', eaf_obj.adocument)
     # Licence
     for m in eaf_obj.licenses:
-        n = etree.SubElement(ANNOTATION_DOCUMENT, 'LICENSE',
-                             {'LICENSE_URL': m[1]})
+        n = etree.SubElement(ADOCUMENT, 'LICENSE', {'LICENSE_URL': m[1]})
         n.text = m[0]
     # Header
-    HEADER = etree.SubElement(ANNOTATION_DOCUMENT, 'HEADER', eaf_obj.header)
-
+    HEADER = etree.SubElement(ADOCUMENT, 'HEADER', eaf_obj.header)
     # Media descriptiors
     for m in eaf_obj.media_descriptors:
         etree.SubElement(HEADER, 'MEDIA_DESCRIPTOR', rm_none(m))
@@ -1471,17 +1456,14 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     # Properties
     for k, v in eaf_obj.properties:
         etree.SubElement(HEADER, 'PROPERTY', {'NAME': k}).text = str(v)
-
     # Time order
-    TIME_ORDER = etree.SubElement(ANNOTATION_DOCUMENT, 'TIME_ORDER')
-    for t in sorted(eaf_obj.timeslots.items(),
-                    key=lambda x: int(x[0][2:])):
+    TIME_ORDER = etree.SubElement(ADOCUMENT, 'TIME_ORDER')
+    for t in sorted(eaf_obj.timeslots.items(), key=lambda x: int(x[0][2:])):
         etree.SubElement(TIME_ORDER, 'TIME_SLOT', rm_none(
             {'TIME_SLOT_ID': t[0], 'TIME_VALUE': t[1]}))
-
     # Tiers
     for t in eaf_obj.tiers.items():
-        tier = etree.SubElement(ANNOTATION_DOCUMENT, 'TIER', rm_none(t[1][2]))
+        tier = etree.SubElement(ADOCUMENT, 'TIER', rm_none(t[1][2]))
         for a in t[1][0].items():
             ann = etree.SubElement(tier, 'ANNOTATION')
             alan = etree.SubElement(ann, 'ALIGNABLE_ANNOTATION', rm_none(
@@ -1494,30 +1476,25 @@ def to_eaf(file_path, eaf_obj, pretty=True):
                 {'ANNOTATION_ID': a[0], 'ANNOTATION_REF': a[1][0],
                  'PREVIOUS_ANNOTATION': a[1][2], 'SVG_REF': a[1][3]}))
             etree.SubElement(rean, 'ANNOTATION_VALUE').text = a[1][1]
-
     # Linguistic types
     for l in eaf_obj.linguistic_types.values():
-        etree.SubElement(ANNOTATION_DOCUMENT, 'LINGUISTIC_TYPE', rm_none(l))
-
+        etree.SubElement(ADOCUMENT, 'LINGUISTIC_TYPE', rm_none(l))
     # Locales
     for lc, (cc, vr) in eaf_obj.locales.items():
-        etree.SubElement(ANNOTATION_DOCUMENT, 'LOCALE', rm_none(
+        etree.SubElement(ADOCUMENT, 'LOCALE', rm_none(
             {'LANGUAGE_CODE': lc, 'COUNTRY_CODE': cc, 'VARIANT': vr}))
-
     # Languages
     for lid, (ldef, label) in eaf_obj.languages.items():
-        etree.SubElement(ANNOTATION_DOCUMENT, 'LANGUAGE', rm_none(
+        etree.SubElement(ADOCUMENT, 'LANGUAGE', rm_none(
             {'LANG_ID': lid, 'LANG_DEF': ldef, 'LANG_LABEL': label}))
-
     # Constraints
     for l in eaf_obj.constraints.items():
-        etree.SubElement(ANNOTATION_DOCUMENT, 'CONSTRAINT', rm_none(
+        etree.SubElement(ADOCUMENT, 'CONSTRAINT', rm_none(
             {'STEREOTYPE': l[0], 'DESCRIPTION': l[1]}))
-
     # Controlled vocabularies
     for cvid, (descriptions, cv_entries, ext_ref) in\
             eaf_obj.controlled_vocabularies.items():
-        cv = etree.SubElement(ANNOTATION_DOCUMENT, 'CONTROLLED_VOCABULARY',
+        cv = etree.SubElement(ADOCUMENT, 'CONTROLLED_VOCABULARY',
                               rm_none({'CV_ID': cvid, 'EXT_REF': ext_ref}))
         for lang_ref, description in descriptions:
             des = etree.SubElement(cv, 'DESCRIPTION', {'LANG_REF': lang_ref})
@@ -1530,21 +1507,19 @@ def to_eaf(file_path, eaf_obj, pretty=True):
                 val = etree.SubElement(cem, 'CVE_VALUE', rm_none({
                     'LANG_REF': lang_ref, 'DESCRIPTION': description}))
                 val.text = value
-
     # Lexicon refs
     for l in eaf_obj.lexicon_refs.values():
-        etree.SubElement(ANNOTATION_DOCUMENT, 'LEXICON_REF', rm_none(l))
-
+        etree.SubElement(ADOCUMENT, 'LEXICON_REF', rm_none(l))
     # Exteral refs
     for eid, (etype, value) in eaf_obj.external_refs.items():
-        etree.SubElement(ANNOTATION_DOCUMENT, 'EXTERNAL_REF', rm_none(
+        etree.SubElement(ADOCUMENT, 'EXTERNAL_REF', rm_none(
             {'EXT_REF_ID': eid, 'TYPE': etype, 'VALUE': value}))
 
     if pretty:
-        indent(ANNOTATION_DOCUMENT)
+        indent(ADOCUMENT)
     if file_path == '-':
         file_path = sys.stdout
     elif os.access(file_path, os.F_OK):
         os.rename(file_path, '{}.bak'.format(file_path))
-    etree.ElementTree(ANNOTATION_DOCUMENT).write(
+    etree.ElementTree(ADOCUMENT).write(
         file_path, xml_declaration=True, encoding='UTF-8')
