@@ -3,7 +3,6 @@
 import codecs
 import re
 import struct
-import sys
 
 VERSION = '1.30'
 
@@ -19,8 +18,7 @@ class TextGrid:
     :var list tiers: Internal (unsorted) list of tiers.
     :var str codec: Codec of the input file.
     """
-    def __init__(self, file_path=None, xmin=0, xmax=None, codec='ascii',
-                 stream=False):
+    def __init__(self, file_path=None, xmin=0, xmax=None, codec='utf-8'):
         """Construct either a new TextGrid object or read one from a
         file/stream. When you create an empty TextGrid you must at least
         specify the xmax. When you want to load a TextGrid from file you need
@@ -33,8 +31,6 @@ class TextGrid:
         :param int xmax: Xmax value, needed when not loading from file.
         :param str codec: Text encoding for the input. Note that this will be
             ignored for binary TextGrids.
-        :param bool stream: Flag for loading from a stream (Only use this if
-            you know what you are doing...)
         :raises Exception: If filepath is not specified but no xmax
         """
         self.tiers = []
@@ -46,16 +42,10 @@ class TextGrid:
             self.xmin = xmin
             self.xmax = xmax
         else:
-            if stream:
-                self.from_stream(file_path, codec)
-            else:
-                if file_path == '-':
-                    self.from_stream(sys.stdin, codec)
-                else:
-                    with open(file_path, 'rb') as f:
-                        self.from_stream(f, codec)
+            with open(file_path, 'rb') as f:
+                self.from_file(f, codec)
 
-    def from_stream(self, ifile, codec='ascii'):
+    def from_file(self, ifile, codec='ascii'):
         """Read textgrid from stream.
 
         :param file ifile: Stream to read from.
