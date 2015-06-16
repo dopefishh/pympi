@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 licence = '"THE BEER-WARE LICENSE" (Revision 42)'
-version = '1.39'
+version = '1.40'
 
 setup(name='pympi-ling',
       version=version,
@@ -38,7 +38,7 @@ How to cite::
         title={{pympi-ling: a Python module for processing ELANs EAF and Praat\
 s TextGrid annotation files.}},
         howpublished={{\\url{{https://pypi.python.org/pypi/pympi-ling}}}},
-        year={{2013-2014}},
+        year={{2013-2015}},
         note={{Version {}}}
     }}
 
