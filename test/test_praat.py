@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import io
+import tempfile
+import os
 from pympi.Praat import TextGrid
 
 
@@ -126,7 +127,7 @@ class PraatTest(unittest.TestCase):
                          list(self.tg.get_tier_name_num()))
 
     def test_to_file(self):
-        for codec in ['utf-8', 'utf-16', 'latin_1', 'mac_roman']:
+        for codec in ['utf-8', 'latin_1', 'mac_roman']:
             self.tg = TextGrid(xmax=20)
             tier1 = self.tg.add_tier('tier')
             tier1.add_interval(1, 2, 'i1')
@@ -143,69 +144,35 @@ class PraatTest(unittest.TestCase):
             tier2.add_point(2, 'p1')
             tier2.add_point(3, 'p1')
 
+            tempf = tempfile.mkstemp()[1]
+
 # Normal mode
-            tgfile = io.StringIO()
-            self.tg.to_stream(tgfile, codec=codec)
-            tgfile.seek(0)
-            tg1 = tgfile.read()
-            tgfile.seek(0)
-            self.tg = TextGrid(tgfile, codec=codec, stream=True)
-
-            tgfile = io.StringIO()
-            self.tg.to_stream(tgfile, codec=codec)
-            tgfile.seek(0)
-            tg2 = tgfile.read()
-            tgfile.seek(0)
-
-            self.assertEqual(tg2, tg1)
-
+            self.tg.to_file(tempf, codec=codec)
+            TextGrid(tempf, codec=codec)
 # Short mode
-            tgfile = io.StringIO()
-            self.tg.to_stream(tgfile, codec=codec, mode='s')
-            tgfile.seek(0)
-            tg1 = tgfile.read()
-            tgfile.seek(0)
-            self.tg = TextGrid(tgfile, codec=codec, stream=True)
-
-            tgfile = io.StringIO()
-            self.tg.to_stream(tgfile, codec=codec, mode='s')
-            tgfile.seek(0)
-            tg2 = tgfile.read()
-            tgfile.seek(0)
-
-            self.assertEqual(tg2, tg1)
-
+            self.tg.to_file(tempf, codec=codec, mode='s')
+            TextGrid(tempf, codec=codec)
 # Binary mode
-            tgfile = io.BytesIO()
-            self.tg.to_stream(tgfile, codec=codec, mode='b')
-            tgfile.seek(0)
-            tg1 = tgfile.read()
-            tgfile.seek(0)
-            self.tg = TextGrid(tgfile, codec=codec, stream=True)
+            self.tg.to_file(tempf, mode='b')
+            TextGrid(tempf)
 
-            tgfile = io.BytesIO()
-            self.tg.to_stream(tgfile, codec=codec, mode='b')
-            tgfile.seek(0)
-            tg2 = tgfile.read()
-            tgfile.seek(0)
-
-            self.assertEqual(tg2, tg1)
+            os.remove(tempf)
 
     def test_to_eaf(self):
         tier1 = self.tg.add_tier('tier1')
         tier2 = self.tg.add_tier('tier2', tier_type='TextTier')
         tier1.add_interval(0, 1, 'int1')
         tier1.add_interval(2, 3, 'int2')
-        tier1.add_interval(4, 5, 'int3')
+        tier1.add_interval(5, 6, 'int3')
         tier2.add_point(1.5, 'point1')
         tier2.add_point(2.5, 'point2')
         tier2.add_point(3.5, 'point3')
-        eaf = self.tg.to_eaf(0.03)
-        self.assertRaises(ValueError, self.tg.to_eaf, -1)
+        eaf = self.tg.to_eaf(True, 0.03)
+        self.assertRaises(ValueError, self.tg.to_eaf, pointlength=-1)
         self.assertEqual(sorted(eaf.get_tier_names()),
                          sorted(['default', 'tier1', 'tier2']))
         self.assertEqual(sorted(eaf.get_annotation_data_for_tier('tier1')),
-                         sorted([(0, 1000, 'int1'), (4000, 5000, 'int3'),
+                         sorted([(0, 1000, 'int1'), (5000, 6000, 'int3'),
                                  (2000, 3000, 'int2')]))
         self.assertEqual(sorted(eaf.get_annotation_data_for_tier('tier2')),
                          sorted([(2500, 2530, 'point2'),
