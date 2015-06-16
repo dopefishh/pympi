@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Praat &mdash; pympi 1.40 documentation</title>
+    <title>Praat &mdash; pympi 1.30 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.40',
+        VERSION:     '1.30',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 1.40 documentation" href="index.html" />
+    <link rel="top" title="pympi 1.30 documentation" href="index.html" />
     <link rel="next" title="Elan" href="Elan.html" />
     <link rel="prev" title="Welcome to pympi’s documentation!" href="index.html" /> 
   </head>
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="index.html" title="Welcome to pympi’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">pympi 1.40 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.30 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -56,7 +56,7 @@
 <span id="praat"></span><h1>Praat<a class="headerlink" href="#module-pympi.Praat" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pympi.Praat.TextGrid">
-<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">TextGrid</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>xmin=0</em>, <em>xmax=None</em>, <em>codec='utf-8'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">TextGrid</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>xmin=0</em>, <em>xmax=None</em>, <em>codec='ascii'</em>, <em>stream=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read write and edit Praat&#8217;s TextGrid files.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -79,7 +79,7 @@
 </table>
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.__init__">
-<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>xmin=0</em>, <em>xmax=None</em>, <em>codec='utf-8'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>file_path=None</em>, <em>xmin=0</em>, <em>xmax=None</em>, <em>codec='ascii'</em>, <em>stream=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct either a new TextGrid object or read one from a
 file/stream. When you create an empty TextGrid you must at least
 specify the xmax. When you want to load a TextGrid from file you need
@@ -96,6 +96,8 @@ empty TextGrid will be created.</li>
 <li><strong>xmax</strong> (<em>int</em>) &#8211; Xmax value, needed when not loading from file.</li>
 <li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding for the input. Note that this will be
 ignored for binary TextGrids.</li>
+<li><strong>stream</strong> (<em>bool</em>) &#8211; Flag for loading from a stream (Only use this if
+you know what you are doing...)</li>
 </ul>
 </td>
 </tr>
@@ -158,8 +160,8 @@ name only the first is renamed.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Praat.TextGrid.from_file">
-<tt class="descname">from_file</tt><span class="sig-paren">(</span><em>ifile</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.from_file" title="Permalink to this definition">¶</a></dt>
+<dt id="pympi.Praat.TextGrid.from_stream">
+<tt class="descname">from_stream</tt><span class="sig-paren">(</span><em>ifile</em>, <em>codec='ascii'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.from_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read textgrid from stream.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -244,12 +246,12 @@ first is removed.</p>
 
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.sort_tiers">
-<tt class="descname">sort_tiers</tt><span class="sig-paren">(</span><em>key=&lt;function &lt;lambda&gt; at 0x1e45a28&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.sort_tiers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">sort_tiers</tt><span class="sig-paren">(</span><em>key=&lt;function &lt;lambda&gt; at 0x216ba28&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.sort_tiers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sort the tiers given the key. Example key functions:</p>
 <p>Sort according to the tiername in a list:</p>
 <p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">['name1',</span> <span class="pre">'name2'</span> <span class="pre">...</span> <span class="pre">'namen'].index(x.name)</span></tt>.</p>
 <p>Sort according to the number of annotations:</p>
-<p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">len(list(x.get_intervals()))</span></tt></p>
+<p><tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">len(x.get_intervals())</span></tt></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -262,17 +264,14 @@ first is removed.</p>
 
 <dl class="method">
 <dt id="pympi.Praat.TextGrid.to_eaf">
-<tt class="descname">to_eaf</tt><span class="sig-paren">(</span><em>skipempty=True</em>, <em>pointlength=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_eaf" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">to_eaf</tt><span class="sig-paren">(</span><em>pointlength=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_eaf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the object to an pympi.Elan.Eaf object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pointlength</strong> (<em>int</em>) &#8211; Length of respective interval from points in
-seconds</li>
-<li><strong>skipempty</strong> (<em>bool</em>) &#8211; Skip the empty annotations</li>
-</ul>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pointlength</strong> (<em>int</em>) &#8211; Length of respective interval from points in
+seconds</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="Elan.html#pympi.Elan.Eaf" title="pympi.Elan.Eaf"><tt class="xref py py-class docutils literal"><span class="pre">pympi.Elan.Eaf</span></tt></a> object</p>
@@ -297,7 +296,27 @@ seconds</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filepath</strong> (<em>str</em>) &#8211; Path of the fil.</li>
+<li><strong>filepath</strong> (<em>str</em>) &#8211; Path of the file, &#8216;-&#8216; for stdout.</li>
+<li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding.</li>
+<li><strong>mode</strong> (<em>string</em>) &#8211; Flag to for write mode, possible modes:
+&#8216;n&#8217;/&#8217;normal&#8217;, &#8216;s&#8217;/&#8217;short&#8217; and &#8216;b&#8217;/&#8217;binary&#8217;</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympi.Praat.TextGrid.to_stream">
+<tt class="descname">to_stream</tt><span class="sig-paren">(</span><em>f</em>, <em>codec='utf-8'</em>, <em>mode='normal'</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.TextGrid.to_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the object to a stream.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>f</strong> (<em>file</em>) &#8211; Open stream to write to.</li>
 <li><strong>codec</strong> (<em>str</em>) &#8211; Text encoding.</li>
 <li><strong>mode</strong> (<em>string</em>) &#8211; Flag to for write mode, possible modes:
 &#8216;n&#8217;/&#8217;normal&#8217;, &#8216;s&#8217;/&#8217;short&#8217; and &#8216;b&#8217;/&#8217;binary&#8217;</li>
@@ -312,7 +331,7 @@ seconds</li>
 
 <dl class="class">
 <dt id="pympi.Praat.Tier">
-<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">Tier</tt><span class="sig-paren">(</span><em>xmin</em>, <em>xmax</em>, <em>name=None</em>, <em>tier_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pympi.Praat.</tt><tt class="descname">Tier</tt><span class="sig-paren">(</span><em>name=None</em>, <em>tier_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class representing a TextGrid tier, either an Interval or TextTier</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -332,7 +351,7 @@ seconds</li>
 </table>
 <dl class="method">
 <dt id="pympi.Praat.Tier.__init__">
-<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>xmin</em>, <em>xmax</em>, <em>name=None</em>, <em>tier_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><span class="sig-paren">(</span><em>name=None</em>, <em>tier_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a tier, if lines is <tt class="docutils literal"><span class="pre">None</span></tt> a new tier is created.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -461,6 +480,12 @@ seconds</li>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="pympi.Praat.Tier.update">
+<tt class="descname">update</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Praat.Tier.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the internal values</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -522,11 +547,11 @@ seconds</li>
         <li class="right" >
           <a href="index.html" title="Welcome to pympi’s documentation!"
              >previous</a> |</li>
-        <li><a href="index.html">pympi 1.40 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.30 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2015, Mart Lubbers.
+        &copy; Copyright 2014, Mart Lubbers (mart@martlubbers.net).
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>

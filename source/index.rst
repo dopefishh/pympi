@@ -22,6 +22,7 @@ Todo
 
 Old versions
 ============
+- `Version 1.39 <docs_1.39/index.html>`_.
 - `Version 1.30 <docs_1.30/index.html>`_.
 - `Version 1.29 <docs_1.29/index.html>`_.
 - `Version 1.2 <docs_1.2/index.html>`_.
@@ -33,6 +34,20 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 15-06-16   | 1.4     | - Fixed unicode bugs in Praat                        |
+|            |         | - Removed from/to stream and updated test module     |
+|            |         | - Removed read and write from stdin/out in Praat     |
+|            |         | - Better python3 code in Praat and refactored tofile |
+|            |         | - Made UTF-8 default for Praat reading               |
+|            |         | - Fixed a bug in the creation of new textgrids with  |
+|            |         |   bounds outside the file                            |
+|            |         | - Added option to skip empty annotations in Praat to |
+|            |         |   Elan conversion. Note that empty annotations will  |
+|            |         |   always be parsed from TextGrid but they are        |
+|            |         |   generated just in time for writing. This flag      |
+|            |         |   therefore only makes sense when converting         |
+|            |         |   textgrids written to disk and read back to elan    |
++------------+---------+------------------------------------------------------+
 | 15-03-19   | 1.39    | - Simplified Praat code                              |
 |            |         | - Simplified Elan code                               |
 +------------+---------+------------------------------------------------------+
