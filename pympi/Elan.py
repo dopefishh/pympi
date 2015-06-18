@@ -496,6 +496,7 @@ class Eaf:
             matches.
         :param bool safe: Ignore zero length annotations(when working with
             possible malformed data).
+        :returns: Name of the created tier.
         :raises KeyError: If the tier is non existent.
         """
         if tier_name is None:
@@ -509,6 +510,7 @@ class Eaf:
             if not safe or end > begin:
                 self.add_annotation(tier_name, begin, end, value)
         self.clean_time_slots()
+        return tier_name
 
     def generate_annotation_id(self):
         """Generate the next annotation id, this function is mainly used
@@ -901,10 +903,11 @@ class Eaf:
         :param str sep: Separator for the merged annotations.
         :param bool safe: Ignore zero length annotations(when working with
             possible malformed data).
+        :returns: Name of the created tier.
         :raises KeyError: If a tier is non existent.
         """
         if tiernew is None:
-            tiernew = '{}_merged'.format('_'.join(tiers))
+            tiernew = u'{}_merged'.format('_'.join(tiers))
         self.add_tier(tiernew)
         aa = [(sys.maxsize, sys.maxsize, None)] + sorted((
             a for t in tiers for a in self.get_annotation_data_for_tier(t)),
@@ -922,6 +925,7 @@ class Eaf:
                 if end > l[1]:
                     l[1] = end
                 l[2].append(value)
+        return tiernew
 
     def remove_all_annotations_from_tier(self, id_tier, clean=True):
         """remove all annotations from a tier
