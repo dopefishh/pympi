@@ -35,6 +35,8 @@ Changelog
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
 | 15-00-00   | 1.49    | - Fixed unicode bug in Elan for tiernames            |
+|            |         | - Added return names in :func:`merge_tier` and       |
+|            |         |   :func:`filter_annotations`                         |
 +------------+---------+------------------------------------------------------+
 | 15-06-16   | 1.4     | - Fixed unicode bugs in Praat                        |
 |            |         | - Removed from/to stream and updated test module     |
