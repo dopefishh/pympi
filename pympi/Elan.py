@@ -1438,7 +1438,14 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     :param bool pretty: Flag to set pretty printing.
     """
     def rm_none(x):
-        return {k: str(v) for k, v in x.items() if v is not None}
+        try: # Ugly hack to test if s is a string in py3 and py2
+            basestring
+            def isstr(s):
+                return isinstance(s, basestring)
+        except NameError:
+            def isstr(s):
+                return isinstance(s, str)
+        return {k: v if isstr(v) else str(v) for k, v in x.items() if v is not None}
     # Annotation Document
     ADOCUMENT = etree.Element('ANNOTATION_DOCUMENT', eaf_obj.adocument)
     # Licence
