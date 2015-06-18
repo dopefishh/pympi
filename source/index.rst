@@ -34,6 +34,8 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 15-00-00   | 1.49    | - Fixed unicode bug in Elan for tiernames            |
++------------+---------+------------------------------------------------------+
 | 15-06-16   | 1.4     | - Fixed unicode bugs in Praat                        |
 |            |         | - Removed from/to stream and updated test module     |
 |            |         | - Removed read and write from stdin/out in Praat     |
