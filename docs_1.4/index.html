@@ -1,0 +1,430 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to pympi’s documentation! &mdash; pympi 1.40 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.40',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pympi 1.40 documentation" href="#" />
+    <link rel="next" title="Praat" href="Praat.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Praat.html" title="Praat"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">pympi 1.40 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-pympi-s-documentation">
+<h1>Welcome to pympi&#8217;s documentation!<a class="headerlink" href="#welcome-to-pympi-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>API Documentation:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Praat.html">Praat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Elan.html">Elan</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="todo">
+<h1>Todo<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Elan</li>
+<li>Praat</li>
+<li>General</li>
+</ul>
+</div>
+<div class="section" id="old-versions">
+<h1>Old versions<a class="headerlink" href="#old-versions" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference external" href="docs_1.39/index.html">Version 1.39</a>.</li>
+<li><a class="reference external" href="docs_1.30/index.html">Version 1.30</a>.</li>
+<li><a class="reference external" href="docs_1.29/index.html">Version 1.29</a>.</li>
+<li><a class="reference external" href="docs_1.2/index.html">Version 1.2</a>.</li>
+<li><a class="reference external" href="docs_1.19/index.html">Version 1.19</a>.</li>
+<li><a class="reference external" href="docs_1.1/index.html">Version 1.1</a>.</li>
+</ul>
+</div>
+<div class="section" id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="12%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Date</th>
+<th class="head">Version</th>
+<th class="head">Changelog</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>15-06-16</td>
+<td>1.4</td>
+<td><ul class="first last simple">
+<li>Fixed unicode bugs in Praat</li>
+<li>Removed from/to stream and updated test module</li>
+<li>Removed read and write from stdin/out in Praat</li>
+<li>Better python3 code in Praat and refactored tofile</li>
+<li>Made UTF-8 default for Praat reading</li>
+<li>Fixed a bug in the creation of new textgrids with
+bounds outside the file</li>
+<li>Added option to skip empty annotations in Praat to
+Elan conversion. Note that empty annotations will
+always be parsed from TextGrid but they are
+generated just in time for writing. This flag
+therefore only makes sense when converting
+textgrids written to disk and read back to elan</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>15-03-19</td>
+<td>1.39</td>
+<td><ul class="first last simple">
+<li>Simplified Praat code</li>
+<li>Simplified Elan code</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>15-02-05</td>
+<td>1.3a</td>
+<td><ul class="first last simple">
+<li>Fixed a small unicode bug in Elan.py</li>
+<li>Added information for developing</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>15-01-21</td>
+<td>1.3</td>
+<td><ul class="first last simple">
+<li>Sort tier function for praat tiers</li>
+<li>Faster TextGrid constructor with itertools</li>
+<li>Binary TextGrid support</li>
+<li>Short TextGrid support</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>14-11-20</td>
+<td>1.29</td>
+<td><ul class="first last simple">
+<li>Import chat files to elan files.</li>
+<li>Added some example scripts that portay possible
+things you can do with the package and can be used
+as possible templates.</li>
+<li>Fixed a non fatal bug about constraints.</li>
+<li>Internal update for textgrids, tiers don&#8217;t know
+their number anymore, numbers are inherited from
+index in the array.</li>
+<li>Python 3 support.</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>14-11-13</td>
+<td>1.2</td>
+<td><ul class="first last simple">
+<li>Bugfixes.</li>
+<li>Changed the names of the insert functions, the old
+names are still usable. But the preferable method
+is to use the new functions:
+<tt class="xref py py-func docutils literal"><span class="pre">add_annotation()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">add_ref_annotation()</span></tt>.</li>
+<li>Added controlled vocabulary functions:<ul>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_controlled_vocabulary()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_cv_entry()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_cv_description()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_controlled_vocabulary_names()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_cv_entries()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_cv_descriptions()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_controlled_vocabulary()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_cv_entry()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_cv_description()</span></tt></li>
+</ul>
+</li>
+<li>Added external reference functions:<ul>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_external_ref()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_external_ref_names()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_external_ref()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_external_ref()</span></tt></li>
+</ul>
+</li>
+<li>Added lexicon reference functions:<ul>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_lexicon_ref()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_lexicon_ref_names()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">get_lexicon_ref()</span></tt></li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">remove_lexicon_ref()</span></tt></li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>14-11-12</td>
+<td>1.19</td>
+<td><ul class="first last simple">
+<li>Locale functions added: <tt class="xref py py-func docutils literal"><span class="pre">add_locale()</span></tt>,
+<tt class="xref py py-func docutils literal"><span class="pre">remove_locale()</span></tt> and <tt class="xref py py-func docutils literal"><span class="pre">get_locales()</span></tt>.</li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_tier()</span></tt> extended so that you can only
+assign a locale to a tier when the locale is
+available, if not no locale will be assigned.</li>
+<li>Language functions added: <tt class="xref py py-func docutils literal"><span class="pre">add_language()</span></tt>,
+<tt class="xref py py-func docutils literal"><span class="pre">remove_language()</span></tt> and <tt class="xref py py-func docutils literal"><span class="pre">get_languages()</span></tt>.</li>
+<li><tt class="xref py py-func docutils literal"><span class="pre">add_tier()</span></tt> extended so that you can only
+assign a language to a tier when the language is
+available, if not no language will be assigned.</li>
+<li>Property functions added: <tt class="xref py py-func docutils literal"><span class="pre">add_property()</span></tt>,
+<tt class="xref py py-func docutils literal"><span class="pre">remove_property()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">get_properties()</span></tt>.</li>
+<li>Property functions added: <tt class="xref py py-func docutils literal"><span class="pre">add_license()</span></tt>,
+<tt class="xref py py-func docutils literal"><span class="pre">remove_license()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">get_licenses()</span></tt>.</li>
+<li>File io in the elan class is now testable, this
+will require the lxml library. It uses a sample
+file that includes almost all data structures
+possible.</li>
+<li>Added a rename tier function: <tt class="xref py py-func docutils literal"><span class="pre">rename_tier()</span></tt>.</li>
+<li>Updated how to cite with bibtex.</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>14-10-17</td>
+<td>1.1a</td>
+<td><ul class="first last simple">
+<li>Fixed bugs in ref annotations.</li>
+<li>Updated repo description.</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>14-10-17</td>
+<td>1.1</td>
+<td><ul class="first last simple">
+<li>Faster filter_annotions functions</li>
+<li>to_textgrid unit test and added regex option</li>
+<li>Rewritten the gaps and overlaps function, the
+method is now different, if you want to use the
+exact heldner and edlund method you can still use
+<tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps()</span></tt>. If you want to
+benefit from speed you can use
+<tt class="xref py py-func docutils literal"><span class="pre">get_gaps_and_overlaps2()</span></tt>. They yield almost
+the same result but the second one is almost 10
+times faster.</li>
+<li>Added two new functions for adding and viewing
+secondary linked files:
+<tt class="xref py py-func docutils literal"><span class="pre">get_secondary_linked_files()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">add_secondary_linked_file()</span></tt>.</li>
+<li>Added two functions to remove linked files:
+<tt class="xref py py-func docutils literal"><span class="pre">remove_linked_files()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">remove_secondary_linked_files()</span></tt></li>
+<li>Added <tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_at_time()</span></tt> for finer
+control over ref annotations.</li>
+<li>Adapted <tt class="xref py py-func docutils literal"><span class="pre">insert_ref_annotation()</span></tt> to work with
+the other ref annotation functions</li>
+<li>Adapted <tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_data_for_tier()</span></tt>
+so that it returns more information, check the
+documentation for the exact specification.</li>
+<li>After contact with the elan programmers we&#8217;ve
+dumbed down the id generation so everything is
+much faster for big files. Analysis with
+kcachegrind made everything almost ten times
+faster.</li>
+<li>Added on how to cite.</li>
+<li>Even faster merge tiers.</li>
+<li>Used cElementTree instead of ElementTree for more
+speed.</li>
+<li>Extract function is now also tested.</li>
+<li>Added safe option for merging and filtering so
+that if you eaf is malformed by something else
+because it has zero length annotations then these
+will be discarded in a merge or filter.</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>2014-10-08</td>
+<td>1.0</td>
+<td><ul class="first last simple">
+<li>Glue annotations is removed(you can get the same
+functionality by using merge tiers.</li>
+<li>Merge tiers is rewritten and much faster(plans for
+using the same algorithm in the gaps and overlaps.</li>
+<li>Unit tests for all classes.</li>
+<li>Reference annotations work but not very usable,
+this is on the todo list.</li>
+<li>Idem for controlled vocabularies.</li>
+<li>Shift annotations now returns a tuple of lists
+instead of an entire eaf object.</li>
+<li>get_annotation_datas_between_times is renamed to
+get_annotation_data_between_times.</li>
+<li>Filter annotations now has a regex option.</li>
+<li>TextGrid constructor now requires xmax for
+creating a new TextGrid.</li>
+<li>Added a parameter dict function for linguistic
+types.</li>
+<li>Changed the function name: get_linguistic_types to
+get_linguistic_type_names.</li>
+<li>Added todo section for list of things that don&#8217;t
+have unit tests yet(or incomplete ones) or for
+things that are to be implemented.</li>
+<li>Fixed typo in the to_textgrid function.</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>2014-09-26</td>
+<td>0.99a</td>
+<td>Unit tests for Praat finished and Praat module is on
+version 1.0, meaning no api changes in the future
+that break compatibility</td>
+</tr>
+<tr class="row-odd"><td>2014-09-11</td>
+<td>0.99</td>
+<td>Unit tests for Praat and Elan and from version 1.0
+no api changes.</td>
+</tr>
+<tr class="row-even"><td>2014-08-06</td>
+<td>0.91d</td>
+<td>New documentation format(sphinx) and github pages.</td>
+</tr>
+<tr class="row-odd"><td>2014-07-17</td>
+<td>0.91</td>
+<td>Controlled vocabularies (eaf file format 2.8) added
+and quickly tested.</td>
+</tr>
+<tr class="row-even"><td>2014-07-16</td>
+<td>0.9</td>
+<td>Added support for licences(eaf file format 2.8) and
+planned extended controlled vocabulary support.</td>
+</tr>
+<tr class="row-odd"><td>2014-07-09</td>
+<td>0.7</td>
+<td>Changed the style to pep8 and thus some functions
+(read all) have changed name.</td>
+</tr>
+<tr class="row-even"><td>2014-03-24</td>
+<td>&nbsp;</td>
+<td>Fixed a lot of TextGrid bugs and have written a
+better parser using more regexp.</td>
+</tr>
+<tr class="row-odd"><td>2014-02-17</td>
+<td>&nbsp;</td>
+<td>Started branching and fixed a few bugs.</td>
+</tr>
+<tr class="row-even"><td>2014-02-03</td>
+<td>&nbsp;</td>
+<td>Fixed the praat tofile function so that it writes
+silence intervals (that praat convention).</td>
+</tr>
+<tr class="row-odd"><td>2014-01-27</td>
+<td>&nbsp;</td>
+<td>Added documentation via pdoc in html and cleaned up
+some documentation in EafIO.py.</td>
+</tr>
+<tr class="row-even"><td>2013-12-02</td>
+<td>&nbsp;</td>
+<td>IO is now in a different file, the old tofile is
+removed because the new one is much better.</td>
+</tr>
+<tr class="row-odd"><td>2013-11-15</td>
+<td>&nbsp;</td>
+<td>Rewritten the tofile function, the old function is a
+bit faster but less reliable. The old function can
+still be used by using tofileOLD().</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="author">
+<h1>Author<a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h1>
+<p>Mart Lubbers(<tt class="docutils literal"><span class="pre">mart</span> <span class="pre">at</span> <span class="pre">martlubbers.net</span></tt>)</p>
+<p>Supervision: Francisco Toreirra(<tt class="docutils literal"><span class="pre">francisco.torreira</span> <span class="pre">at</span> <span class="pre">mpi.nl</span></tt>)</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="Praat.html">Praat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Elan.html">Elan</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Praat.html"
+                        title="next chapter">Praat</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Praat.html" title="Praat"
+             >next</a> |</li>
+        <li><a href="#">pympi 1.40 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Mart Lubbers.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>
