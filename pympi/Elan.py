@@ -517,7 +517,8 @@ class Eaf:
         internally.
         """
         if not self.maxaid:
-            valid_anns = [int(filter(str.isdigit, a)) for a in self.timeslots]
+            valid_anns = [int(''.join(filter(str.isdigit, a)))
+                          for a in self.timeslots]
             self.maxaid = max(valid_anns + [1])+1
         else:
             self.maxaid += 1
@@ -533,7 +534,8 @@ class Eaf:
         if time and time < 0:
             raise ValueError('Time is negative...')
         if not self.maxts:
-            valid_ts = [int(filter(str.isdigit, a)) for a in self.timeslots]
+            valid_ts = [int(''.join(filter(str.isdigit, a)))
+                        for a in self.timeslots]
             self.maxts = max(valid_ts + [1])+1
         else:
             self.maxts += 1
@@ -1320,7 +1322,7 @@ def parse_eaf(file_path, eaf_obj):
         elif elem.tag == 'TIME_ORDER':
             for elem1 in elem:
                 tsid = elem1.attrib['TIME_SLOT_ID']
-                tsnum = int(filter(str.isdigit, tsid))
+                tsnum = int(''.join(filter(str.isdigit, tsid)))
                 if tsnum and tsnum > eaf_obj.maxts:
                     eaf_obj.maxts = tsnum
                 ts = elem1.attrib.get('TIME_VALUE', None)
@@ -1335,7 +1337,7 @@ def parse_eaf(file_path, eaf_obj):
                     for elem2 in elem1:
                         if elem2.tag == 'ALIGNABLE_ANNOTATION':
                             annot_id = elem2.attrib['ANNOTATION_ID']
-                            annot_num = int(filter(str.isdigit, annot_id))
+                            annot_num = int(''.join(filter(str.isdigit, annot_id)))
                             if annot_num and annot_num > eaf_obj.maxaid:
                                 eaf_obj.maxaid = annot_num
                             annot_start = elem2.attrib['TIME_SLOT_REF1']
@@ -1351,7 +1353,7 @@ def parse_eaf(file_path, eaf_obj):
                             previous = elem2.attrib.get('PREVIOUS_ANNOTATION',
                                                         None)
                             annot_id = elem2.attrib['ANNOTATION_ID']
-                            annot_num = int(filter(str.isdigit, annot_id))
+                            annot_num = int(''.join(filter(str.isdigit, annot_id)))
                             if annot_num and annot_num > eaf_obj.maxaid:
                                 eaf_obj.maxaid = annot_num
                             svg_ref = elem2.attrib.get('SVG_REF', None)
