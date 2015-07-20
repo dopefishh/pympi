@@ -4,8 +4,8 @@ pympi version 1.49
 Pympi is a package that allows you to interact with [Elan][1] files and
 [TextGrid][2] files. You can create, edit and convert both formats into each
 other. It includes besides all the basic functions also functions for:
-- Calculating gaps and overlaps between speakers conform Heldner and Edlund's
-  method[3]. (Could be used to calculate floor transfers)
+- Calculating gaps and overlaps between speakers conform [Heldner and Edlund's
+  method][3]. (Could be used to calculate floor transfers)
 - Shift annotations in both directions (Could be used when due to an error all
   annotations are misaligned).
 - Import from CLAN's chat files.
