@@ -516,11 +516,9 @@ class Eaf:
         """Generate the next annotation id, this function is mainly used
         internally.
         """
-        if self.maxaid is None:
-            self.maxaid = 1
-            valid_anns = [a for a in self.annotations if re.match('.\d+', a)]
-            if valid_anns:
-                self.maxaid = max(int(x[1:]) for x in valid_anns)+1
+        if not self.maxaid:
+            valid_anns = [int(filter(str.isdigit, a)) for a in self.timeslots]
+            self.maxaid = max(valid_anns + [1])+1
         else:
             self.maxaid += 1
         return 'a{:d}'.format(self.maxaid)
@@ -534,11 +532,9 @@ class Eaf:
         """
         if time and time < 0:
             raise ValueError('Time is negative...')
-        if self.maxts is None:
-            self.maxts = 1
-            valid_ts = [a for a in self.timeslots if re.match('..\d+', a)]
-            if valid_ts:
-                self.maxts = max(int(x[2:]) for x in valid_ts)+1
+        if not self.maxts:
+            valid_ts = [int(filter(str.isdigit, a)) for a in self.timeslots]
+            self.maxts = max(valid_ts + [1])+1
         else:
             self.maxts += 1
         ts = 'ts{:d}'.format(self.maxts)
@@ -1360,9 +1356,9 @@ def parse_eaf(file_path, eaf_obj):
                                 eaf_obj.maxaid = annot_num
                             svg_ref = elem2.attrib.get('SVG_REF', None)
                             ref[annot_id] = (annot_ref,
-                                            '' if not list(elem2)[0].text else
-                                            list(elem2)[0].text,
-                                            previous, svg_ref)
+                                             '' if not list(elem2)[0].text else
+                                             list(elem2)[0].text,
+                                             previous, svg_ref)
                             eaf_obj.annotations[annot_id] = tier_id
             eaf_obj.tiers[tier_id] = (align, ref, elem.attrib, tier_number)
             tier_number += 1
@@ -1443,14 +1439,16 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     :param bool pretty: Flag to set pretty printing.
     """
     def rm_none(x):
-        try: # Ugly hack to test if s is a string in py3 and py2
+        try:  # Ugly hack to test if s is a string in py3 and py2
             basestring
+
             def isstr(s):
                 return isinstance(s, basestring)
         except NameError:
             def isstr(s):
                 return isinstance(s, str)
-        return {k: v if isstr(v) else str(v) for k, v in x.items() if v is not None}
+        return {k: v if isstr(v) else str(v) for k, v in x.items()
+                if v is not None}
     # Annotation Document
     ADOCUMENT = etree.Element('ANNOTATION_DOCUMENT', eaf_obj.adocument)
     # Licence
