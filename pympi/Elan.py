@@ -6,7 +6,7 @@ import re
 import sys
 import time
 
-VERSION = '1.39'
+VERSION = '1.49'
 
 
 class Eaf:
