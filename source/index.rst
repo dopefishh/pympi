@@ -22,6 +22,7 @@ Todo
 
 Old versions
 ============
+- `Version 1.4 <docs_1.4/index.html>`_.
 - `Version 1.39 <docs_1.39/index.html>`_.
 - `Version 1.3 <docs_1.3/index.html>`_.
 - `Version 1.29 <docs_1.29/index.html>`_.
