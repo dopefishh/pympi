@@ -81,8 +81,8 @@ class Eaf:
 
         ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
             time.daylight else -time.timezone
-        self.maxts = None
-        self.maxaid = None
+        self.maxts = 1
+        self.maxaid = 1
         self.adocument = {
             'AUTHOR': author,
             'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
@@ -1319,11 +1319,12 @@ def parse_eaf(file_path, eaf_obj):
         # Time order
         elif elem.tag == 'TIME_ORDER':
             for elem1 in elem:
-                if int(elem1.attrib['TIME_SLOT_ID'][2:]) > eaf_obj.maxts:
-                    eaf_obj.maxts = int(elem1.attrib['TIME_SLOT_ID'][2:])
+                tsid = elem1.attrib['TIME_SLOT_ID']
+                tsnum = int(filter(str.isdigit, tsid))
+                if tsnum and tsnum > eaf_obj.maxts:
+                    eaf_obj.maxts = tsnum
                 ts = elem1.attrib.get('TIME_VALUE', None)
-                eaf_obj.timeslots[elem1.attrib['TIME_SLOT_ID']] =\
-                    ts if ts is None else int(ts)
+                eaf_obj.timeslots[tsid] = ts if ts is None else int(ts)
         # Tier
         elif elem.tag == 'TIER':
             tier_id = elem.attrib['TIER_ID']
@@ -1334,9 +1335,9 @@ def parse_eaf(file_path, eaf_obj):
                     for elem2 in elem1:
                         if elem2.tag == 'ALIGNABLE_ANNOTATION':
                             annot_id = elem2.attrib['ANNOTATION_ID']
-                            if re.match('a\d+', annot_id) and\
-                                    int(annot_id[1:]) > eaf_obj.maxaid:
-                                eaf_obj.maxaid = int(annot_id[1:])
+                            annot_num = int(filter(str.isdigit, annot_id))
+                            if annot_num and annot_num > eaf_obj.maxaid:
+                                eaf_obj.maxaid = annot_num
                             annot_start = elem2.attrib['TIME_SLOT_REF1']
                             annot_end = elem2.attrib['TIME_SLOT_REF2']
                             svg_ref = elem2.attrib.get('SVG_REF', None)
@@ -1346,19 +1347,19 @@ def parse_eaf(file_path, eaf_obj):
                                                svg_ref)
                             eaf_obj.annotations[annot_id] = tier_id
                         elif elem2.tag == 'REF_ANNOTATION':
-                            annotRef = elem2.attrib['ANNOTATION_REF']
+                            annot_ref = elem2.attrib['ANNOTATION_REF']
                             previous = elem2.attrib.get('PREVIOUS_ANNOTATION',
                                                         None)
-                            annotId = elem2.attrib['ANNOTATION_ID']
-                            if re.match('a\d+', annot_id) and\
-                                    int(annot_id[1:]) > eaf_obj.maxaid:
-                                eaf_obj.maxaid = int(annot_id[1:])
+                            annot_id = elem2.attrib['ANNOTATION_ID']
+                            annot_num = int(filter(str.isdigit, annot_id))
+                            if annot_num and annot_num > eaf_obj.maxaid:
+                                eaf_obj.maxaid = annot_num
                             svg_ref = elem2.attrib.get('SVG_REF', None)
-                            ref[annotId] = (annotRef,
+                            ref[annot_id] = (annot_ref,
                                             '' if not list(elem2)[0].text else
                                             list(elem2)[0].text,
                                             previous, svg_ref)
-                            eaf_obj.annotations[annotId] = tier_id
+                            eaf_obj.annotations[annot_id] = tier_id
             eaf_obj.tiers[tier_id] = (align, ref, elem.attrib, tier_number)
             tier_number += 1
         # Linguistic type
