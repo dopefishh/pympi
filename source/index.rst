@@ -22,6 +22,7 @@ Todo
 
 Old versions
 ============
+- `Version 1.49 <docs_1.49/index.html>`_.
 - `Version 1.4 <docs_1.4/index.html>`_.
 - `Version 1.39 <docs_1.39/index.html>`_.
 - `Version 1.3 <docs_1.3/index.html>`_.
@@ -35,6 +36,8 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 15-07-27   | 1.5     | - Support for Eaf 2.7                                |
++------------+---------+------------------------------------------------------+
 | 15-07-20   | 1.49    | - Fixed unicode bug in Elan for tiernames            |
 |            |         | - Added return names in :func:`merge_tier` and       |
 |            |         |   :func:`filter_annotations`                         |
