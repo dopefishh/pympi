@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 licence = '"THE BEER-WARE LICENSE" (Revision 42)'
-version = '1.49c'
+version = '1.50'
 
 setup(name='pympi-ling',
       version=version,

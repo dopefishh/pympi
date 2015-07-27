@@ -6,7 +6,7 @@ import re
 import sys
 import time
 
-VERSION = '1.49'
+VERSION = '1.5'
 
 
 class Eaf:
@@ -1298,10 +1298,12 @@ def parse_eaf(file_path, eaf_obj):
         file_path = sys.stdin
     # Annotation document
     tree_root = etree.parse(file_path).getroot()
+    if tree_root.attrib['VERSION'] not in ['2.8', '2.7']:
+        sys.stdout.write('Parsing unknown version of ELAN spec... '
+                         'This could result in errors...\n')
     eaf_obj.adocument.update(tree_root.attrib)
-    del(eaf_obj.adocument[
-        '{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation'
-        ])
+    del(eaf_obj.adocument['{http://www.w3.org/2001/XMLSchema-instance}noNamesp'
+                          'aceSchemaLocation'])
     tier_number = 0
     for elem in tree_root:
         # Licence
@@ -1337,7 +1339,8 @@ def parse_eaf(file_path, eaf_obj):
                     for elem2 in elem1:
                         if elem2.tag == 'ALIGNABLE_ANNOTATION':
                             annot_id = elem2.attrib['ANNOTATION_ID']
-                            annot_num = int(''.join(filter(str.isdigit, annot_id)))
+                            annot_num = int(''.join(
+                                filter(str.isdigit, annot_id)))
                             if annot_num and annot_num > eaf_obj.maxaid:
                                 eaf_obj.maxaid = annot_num
                             annot_start = elem2.attrib['TIME_SLOT_REF1']
@@ -1353,7 +1356,8 @@ def parse_eaf(file_path, eaf_obj):
                             previous = elem2.attrib.get('PREVIOUS_ANNOTATION',
                                                         None)
                             annot_id = elem2.attrib['ANNOTATION_ID']
-                            annot_num = int(''.join(filter(str.isdigit, annot_id)))
+                            annot_num = int(''.join(
+                                filter(str.isdigit, annot_id)))
                             if annot_num and annot_num > eaf_obj.maxaid:
                                 eaf_obj.maxaid = annot_num
                             svg_ref = elem2.attrib.get('SVG_REF', None)
@@ -1387,10 +1391,21 @@ def parse_eaf(file_path, eaf_obj):
             cv_id = elem.attrib['CV_ID']
             ext_ref = elem.attrib.get('EXT_REF', None)
             descriptions = []
+
+            if 'DESCRIPTION' in elem.attrib:
+                eaf_obj.languages['und'] = (
+                    'http://cdb.iso.org/lg/CDB-00130975-001',
+                    'undetermined (und)')
+                descriptions.append(('und', elem.attrib['DESCRIPTION']))
             entries = {}
             for elem1 in elem:
                 if elem1.tag == 'DESCRIPTION':
                     descriptions.append((elem1.attrib['LANG_REF'], elem1.text))
+                elif elem1.tag == 'CV_ENTRY':
+                    cve_value = (elem1.text, 'und',
+                                 elem1.get('DESCRIPTION', None))
+                    entries['cveid{}'.format(len(entries))] = \
+                        ([cve_value], elem1.attrib.get('EXT_REF', None))
                 elif elem1.tag == 'CV_ENTRY_ML':
                     cem_ext_ref = elem1.attrib.get('EXT_REF', None)
                     cve_id = elem1.attrib['CVE_ID']

@@ -1,5 +1,5 @@
-pympi version 1.49
-==================
+pympi version 1.5
+=================
 
 Introduction
 ------------
@@ -74,7 +74,7 @@ How to cite
         title={pympi-ling: a Python module for processing ELANs EAF and Praats TextGrid annotation files.},
         howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
         year={2013-2015},
-        note={Version 1.49a}
+        note={Version 1.5}
     }
 
 Authors

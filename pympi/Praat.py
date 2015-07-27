@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import codecs
 import re
 import struct
 
-VERSION = '1.49'
+VERSION = '1.5'
 
 
 class TextGrid:
