@@ -38,10 +38,10 @@ Changelog
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
 | 15-07-29   | 1.59    | - Added some ref annotations functions.              |
-|            |         |   - :func:`get_ref_annotation_data_between_times`    |
-|            |         |   - :func:`remove_ref_annotation`                    |
-|            |         |   - :func:`remove_annotation` now also removes ref   |
-|            |         |     annotations                                      |
+|            |         | - :func:`get_ref_annotation_data_between_times`      |
+|            |         | - :func:`remove_ref_annotation`                      |
+|            |         | - :func:`remove_annotation` now also removes ref     |
+|            |         |   annotations                                        |
 |            |         | - :func:`child_tiers_for` renamed to                 |
 |            |         |   :func:`get_child_tiers_for`. Note that the old     |
 |            |         |   name is still usable                               |
