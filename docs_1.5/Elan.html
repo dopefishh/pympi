@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Elan &mdash; pympi 1.59 documentation</title>
+    <title>Elan &mdash; pympi 1.49 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.59',
+        VERSION:     '1.49',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 1.59 documentation" href="index.html" />
+    <link rel="top" title="pympi 1.49 documentation" href="index.html" />
     <link rel="prev" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="Praat.html" title="Praat"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">pympi 1.59 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.49 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -508,7 +508,20 @@ dictionaries coming from the
 <dl class="method">
 <dt id="pympi.Elan.Eaf.child_tiers_for">
 <tt class="descname">child_tiers_for</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.child_tiers_for" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use <a class="reference internal" href="#pympi.Elan.Eaf.get_child_tiers_for" title="pympi.Elan.Eaf.get_child_tiers_for"><tt class="xref py py-func docutils literal"><span class="pre">get_child_tiers_for()</span></tt></a></p>
+<dd><p>Give all child tiers for a tier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of all children</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">If the tier is non existent.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -691,9 +704,7 @@ reference annotations this will be returned, check
 <dl class="method">
 <dt id="pympi.Elan.Eaf.get_annotation_data_between_times">
 <tt class="descname">get_annotation_data_between_times</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_between_times" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gives the annotations within the times.
-When the tier contains reference annotations this will be returned,
-check <a class="reference internal" href="#pympi.Elan.Eaf.get_ref_annotation_data_between_times" title="pympi.Elan.Eaf.get_ref_annotation_data_between_times"><tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_data_between_times()</span></tt></a> for the format.</p>
+<dd><p>Gives the annotations within the times.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -720,7 +731,7 @@ check <a class="reference internal" href="#pympi.Elan.Eaf.get_ref_annotation_dat
 <dt id="pympi.Elan.Eaf.get_annotation_data_for_tier">
 <tt class="descname">get_annotation_data_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_for_tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gives a list of annotations of the form: <tt class="docutils literal"><span class="pre">(begin,</span> <span class="pre">end,</span> <span class="pre">value)</span></tt>
-When the tier contains reference annotations this will be returned,
+When th tier contains reference annotations this will be returned,
 check <a class="reference internal" href="#pympi.Elan.Eaf.get_ref_annotation_data_for_tier" title="pympi.Elan.Eaf.get_ref_annotation_data_for_tier"><tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_data_for_tier()</span></tt></a> for the format.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -730,25 +741,6 @@ check <a class="reference internal" href="#pympi.Elan.Eaf.get_ref_annotation_dat
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body">If the tier is non existent.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pympi.Elan.Eaf.get_child_tiers_for">
-<tt class="descname">get_child_tiers_for</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_child_tiers_for" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give all child tiers for a tier.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of all children</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">If the tier is non existent.</td>
 </tr>
 </tbody>
 </table>
@@ -1074,33 +1066,6 @@ no maximum will be used.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Elan.Eaf.get_ref_annotation_data_between_times">
-<tt class="descname">get_ref_annotation_data_between_times</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_ref_annotation_data_between_times" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give the ref annotations between times of the form
-<tt class="docutils literal"><span class="pre">[(start,</span> <span class="pre">end,</span> <span class="pre">value,</span> <span class="pre">refvalue)]</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
-<li><strong>start</strong> (<em>int</em>) &#8211; End time of the annotation of the parent.</li>
-<li><strong>end</strong> (<em>int</em>) &#8211; Start time of the annotation of the parent.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of annotations at that time.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="pympi.Elan.Eaf.get_ref_annotation_data_for_tier">
 <tt class="descname">get_ref_annotation_data_for_tier</tt><span class="sig-paren">(</span><em>id_tier</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_ref_annotation_data_for_tier" title="Permalink to this definition">¶</a></dt>
 <dd><p>&#8220;Give a list of all reference annotations of the form:
@@ -1237,9 +1202,7 @@ possible malformed data).</li>
 <dt id="pympi.Elan.Eaf.remove_annotation">
 <tt class="descname">remove_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em>, <em>clean=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_annotation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove an annotation in a tier, if you need speed the best thing is
-to clean the timeslots after the last removal. When the tier contains 
-reference annotations <a class="reference internal" href="#pympi.Elan.Eaf.remove_ref_annotation" title="pympi.Elan.Eaf.remove_ref_annotation"><tt class="xref py py-func docutils literal"><span class="pre">remove_ref_annotation()</span></tt></a> will be executed
-instead.</p>
+to clean the timeslots after the last removal.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1457,31 +1420,6 @@ are <tt class="docutils literal"><span class="pre">None</span></tt> are ignored.
 <li><strong>key</strong> (<em>str</em>) &#8211; Key of the property.</li>
 <li><strong>value</strong> (<em>str</em>) &#8211; Value of the property.</li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pympi.Elan.Eaf.remove_ref_annotation">
-<tt class="descname">remove_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.remove_ref_annotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove a reference annotation.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>id_tier</strong> (<em>str</em>) &#8211; Name of tier.</li>
-<li><strong>time</strong> (<em>int</em>) &#8211; Time of the referenced annotation</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">If the tier is non existent.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of removed annotations.</p>
 </td>
 </tr>
 </tbody>
@@ -1785,7 +1723,7 @@ inferring the file is broken.</p>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              >previous</a> |</li>
-        <li><a href="index.html">pympi 1.59 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.49 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

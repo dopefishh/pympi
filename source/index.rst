@@ -22,6 +22,7 @@ Todo
 
 Old versions
 ============
+- `Version 1.5 <docs_1.5/index.html>`_.
 - `Version 1.49 <docs_1.49/index.html>`_.
 - `Version 1.4 <docs_1.4/index.html>`_.
 - `Version 1.39 <docs_1.39/index.html>`_.
@@ -36,6 +37,17 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 15-07-29   | 1.59    | - Added some ref annotations functions.              |
+|            |         |   - :func:`get_ref_annotation_data_between_times`    |
+|            |         |   - :func:`remove_ref_annotation`                    |
+|            |         |   - :func:`remove_annotation` now also removes ref   |
+|            |         |     annotations                                      |
+|            |         | - :func:`child_tiers_for` renamed to                 |
+|            |         |   :func:`get_child_tiers_for`. Note that the old     |
+|            |         |   name is still usable                               |
+|            |         | - Reordered the test alphabetically and added tests  |
+|            |         |   for the new functions.                             |
++------------+---------+------------------------------------------------------+
 | 15-07-27   | 1.5     | - Support for Eaf 2.7                                |
 +------------+---------+------------------------------------------------------+
 | 15-07-20   | 1.49    | - Fixed unicode bug in Elan for tiernames            |
