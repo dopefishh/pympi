@@ -6,7 +6,7 @@ import re
 import sys
 import time
 
-VERSION = '1.5'
+VERSION = '1.59'
 
 
 class Eaf:
@@ -558,6 +558,8 @@ class Eaf:
 
     def get_annotation_data_between_times(self, id_tier, start, end):
         """Gives the annotations within the times.
+        When the tier contains reference annotations this will be returned,
+        check :func:`get_ref_annotation_data_between_times` for the format.
 
         :param str id_tier: Name of the tier.
         :param int start: Start time of the annotation.
@@ -565,13 +567,16 @@ class Eaf:
         :returns: List of annotations within that time.
         :raises KeyError: If the tier is non existent.
         """
+        if self.tiers[id_tier][1]:
+            return self.get_ref_annotation_data_between_times(
+                id_tier, start, end)
         anns = ((self.timeslots[a[0]], self.timeslots[a[1]], a[2])
                 for a in self.tiers[id_tier][0].values())
         return sorted(a for a in anns if a[1] >= start and a[0] <= end)
 
     def get_annotation_data_for_tier(self, id_tier):
         """Gives a list of annotations of the form: ``(begin, end, value)``
-        When th tier contains reference annotations this will be returned,
+        When the tier contains reference annotations this will be returned,
         check :func:`get_ref_annotation_data_for_tier` for the format.
 
         :param str id_tier: Name of the tier.

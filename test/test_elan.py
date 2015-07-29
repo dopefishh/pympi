@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-#from lxml import etree
+from lxml import etree
 from pympi import Eaf
 import tempfile
 import unittest
@@ -1086,27 +1086,26 @@ class Elan(unittest.TestCase):
         self.assertEqual(list(tg.get_tier('t7').get_intervals()), [])
 
     def test_to_file_to_eaf(self):
-        pass
-       # x, filepath = tempfile.mkstemp()
-       # self.eaf = Eaf('./test/sample_2.8.eaf')
+        x, filepath = tempfile.mkstemp()
+        self.eaf = Eaf('./test/sample_2.8.eaf')
 
-       # self.eaf.to_file(filepath)
+        self.eaf.to_file(filepath)
 
-       # with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
-       #     scheme_root = etree.XML(scheme_in.read())
-       # schema = etree.XMLSchema(scheme_root)
-       # xmlparser = etree.XMLParser(schema=schema)
-       # etree.parse(filepath, xmlparser)
+        with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
+            scheme_root = etree.XML(scheme_in.read())
+        schema = etree.XMLSchema(scheme_root)
+        xmlparser = etree.XMLParser(schema=schema)
+        etree.parse(filepath, xmlparser)
 
-       # self.eaf = Eaf('./test/sample_2.7.eaf')
+        self.eaf = Eaf('./test/sample_2.7.eaf')
 
-       # self.eaf.to_file(filepath)
+        self.eaf.to_file(filepath)
 
-       # with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
-       #     scheme_root = etree.XML(scheme_in.read())
-       # schema = etree.XMLSchema(scheme_root)
-       # xmlparser = etree.XMLParser(schema=schema)
-       # etree.parse(filepath, xmlparser)
+        with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
+            scheme_root = etree.XML(scheme_in.read())
+        schema = etree.XMLSchema(scheme_root)
+        xmlparser = etree.XMLParser(schema=schema)
+        etree.parse(filepath, xmlparser)
 
     def test_parse_eaf(self):
         pass
