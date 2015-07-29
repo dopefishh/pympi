@@ -397,15 +397,11 @@ class Eaf:
             self.tiers[tier_id] = ({}, {}, tier_dict, len(self.tiers))
 
     def child_tiers_for(self, id_tier):
-        """Give all child tiers for a tier.
-
-        :param str id_tier: Name of the tier.
-        :returns: List of all children
-        :raises KeyError: If the tier is non existent.
+        """.. deprecated: 1.5
+        
+        Use :func:`get_child_tiers_for`
         """
-        self.tiers[id_tier]
-        return [m for m in self.tiers if 'PARENT_REF' in self.tiers[m][2] and
-                self.tiers[m][2]['PARENT_REF'] == id_tier]
+        return self.get_child_tiers_for(id_tier)
 
     def clean_time_slots(self):
         """Clean up all unused timeslots.
@@ -586,6 +582,17 @@ class Eaf:
         a = self.tiers[id_tier][0]
         return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2])
                 for b in a]
+
+    def get_child_tiers_for(self, id_tier):
+        """Give all child tiers for a tier.
+
+        :param str id_tier: Name of the tier.
+        :returns: List of all children
+        :raises KeyError: If the tier is non existent.
+        """
+        self.tiers[id_tier]
+        return [m for m in self.tiers if 'PARENT_REF' in self.tiers[m][2] and
+                self.tiers[m][2]['PARENT_REF'] == id_tier]
 
     def get_full_time_interval(self):
         """Give the full time interval of the file. Note that the real interval
@@ -835,6 +842,25 @@ class Eaf:
                 bucket.append((begin, end, value, rvalue))
         return bucket
 
+    def get_ref_annotation_data_between_times(self, id_tier, start, end):
+        """Give the ref annotations between times of the form
+        ``[(start, end, value, refvalue)]``
+
+        :param str tier: Name of the tier.
+        :param int start: End time of the annotation of the parent.
+        :param int end: Start time of the annotation of the parent.
+        :returns: List of annotations at that time.
+        :raises KeyError: If the tier is non existent.
+        """
+        bucket = []
+        for aid, (ref, value, _, _) in self.tiers[id_tier][1].items():
+            begin, end, rvalue, _ = self.tiers[self.annotations[ref]][0][ref]
+            begin = self.timeslots[begin]
+            end = self.timeslots[end]
+            if begin <= end and end >= begin:
+                bucket.append((begin, end, value, rvalue))
+        return bucket
+
     def get_ref_annotation_data_for_tier(self, id_tier):
         """"Give a list of all reference annotations of the form:
         ``[(start, end, value, refvalue)]``
@@ -943,7 +969,9 @@ class Eaf:
 
     def remove_annotation(self, id_tier, time, clean=True):
         """Remove an annotation in a tier, if you need speed the best thing is
-        to clean the timeslots after the last removal.
+        to clean the timeslots after the last removal. When the tier contains 
+        reference annotations :func:`remove_ref_annotation` will be executed
+        instead.
 
         :param str id_tier: Name of the tier.
         :param int time: Timepoint within the annotation.
@@ -951,6 +979,8 @@ class Eaf:
         :raises KeyError: If the tier is non existent.
         :returns: Number of removed annotations.
         """
+        if self.tiers[id_tier][1]:
+            return self.remove_ref_annotation(id_tier, time, clean)
         removed = 0
         for b in [a for a in self.tiers[id_tier][0].items() if
                   self.timeslots[a[1][0]] <= time and
@@ -1077,6 +1107,27 @@ class Eaf:
             if (key is None or key == k) and (value is None or value == v):
                 del(self.properties[self.properties.index((k, v))])
 
+    def remove_ref_annotation(self, id_tier, time):
+        """Remove a reference annotation.
+
+        :param str id_tier: Name of tier.
+        :param int time: Time of the referenced annotation
+        :raises KeyError: If the tier is non existent.
+        :returns: Number of removed annotations.
+        """
+        removed = 0
+        bucket = []
+        for aid, (ref, value, _, _) in self.tiers[id_tier][1].items():
+            begin, end, rvalue, _ = self.tiers[self.annotations[ref]][0][ref]
+            begin = self.timeslots[begin]
+            end = self.timeslots[end]
+            if begin <= time and end >= time:
+                removed += 1
+                bucket.append(aid)
+        for aid in bucket:
+            del(self.tiers[id_tier][1][aid])
+        return removed
+
     def remove_secondary_linked_files(self, file_path=None, relpath=None,
                                       mimetype=None, time_origin=None,
                                       assoc_with=None):
@@ -1135,7 +1186,7 @@ class Eaf:
         :param str id_to: Target name of the tier.
         :throws KeyError: If the tier doesnt' exist.
         """
-        childs = self.child_tiers_for(id_from)
+        childs = self.get_child_tiers_for(id_from)
         self.tiers[id_to] = self.tiers.pop(id_from)
         self.tiers[id_to][2]['TIER_ID'] = id_to
         for child in childs:
