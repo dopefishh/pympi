@@ -5,7 +5,7 @@ import codecs
 import re
 import struct
 
-VERSION = '1.59'
+VERSION = '1.6'
 
 
 class TextGrid:

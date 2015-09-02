@@ -6,7 +6,7 @@ import re
 import sys
 import time
 
-VERSION = '1.59'
+VERSION = '1.6'
 
 
 class Eaf:
@@ -1545,7 +1545,7 @@ def to_eaf(file_path, eaf_obj, pretty=True):
         etree.SubElement(TIME_ORDER, 'TIME_SLOT', rm_none(
             {'TIME_SLOT_ID': t[0], 'TIME_VALUE': t[1]}))
     # Tiers
-    for t in eaf_obj.tiers.items():
+    for t in sorted(eaf_obj.tiers.items(), key=lambda x: x[1][3]):
         tier = etree.SubElement(ADOCUMENT, 'TIER', rm_none(t[1][2]))
         for a in t[1][0].items():
             ann = etree.SubElement(tier, 'ANNOTATION')
