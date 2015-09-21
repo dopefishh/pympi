@@ -306,6 +306,10 @@ class Eaf:
     def add_ref_annotation(self, id_tier, tier2, time, value='',
                            prev=None, svg=None):
         """Add a reference annotation.
+        .. note:: When a timepoint matches two annotations the new reference
+        annotation will reference to the first annotation. To circumvent this
+        it's always safer to take the middle of the annotation you want to
+        reference to.
 
         :param str id_tier: Name of the tier.
         :param str tier2: Tier of the referenced annotation.
