@@ -49,7 +49,7 @@ python setup.py install
 ```tex
 @misc{pympi-ling,
 	author={Lubbers, Mart and Torreira, Francisco},
-	title={pympi-ling: a Python module for processing ELANs EAF and Praats TextGrid annotation files.},
+	title={pympi-ling: a {Python} module for processing {ELAN}s {EAF} and {Praat}s {TextGrid} annotation files.},
 	howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
 	year={2013-2015},
 	note={Version 1.6}

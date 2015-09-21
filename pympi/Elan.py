@@ -78,7 +78,6 @@ class Eaf:
             empty Eaf file will be created.
         :param str author: Author of the file.
         """
-
         ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
             time.daylight else -time.timezone
         self.maxts = 1
