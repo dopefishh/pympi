@@ -3,17 +3,17 @@
 
 from distutils.core import setup
 
-licence = '"THE BEER-WARE LICENSE" (Revision 42)'
-version = '1.6'
+licence = 'MIT Licence'
+version = '1.69'
 
 setup(name='pympi-ling',
       version=version,
       description=
         'A python module for processing ELAN and Praat annotation files',
       author='Mart Lubbers',
-      long_description="""
-pympi version 1.6
-=================
+      long_description=r"""
+pympi version 1.69
+==================
 
 Introduction
 ------------

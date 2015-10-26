@@ -1,4 +1,4 @@
-pympi version 1.6
+pympi version 1.69
 ==================
 ### Introduction
 Pympi is a package that allows you to interact with [Elan][1] files and
@@ -52,7 +52,7 @@ python setup.py install
 	title={pympi-ling: a {Python} module for processing {ELAN}s {EAF} and {Praat}s {TextGrid} annotation files.},
 	howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
 	year={2013-2015},
-	note={Version 1.6}
+	note={Version 1.69}
 }
 ```
 

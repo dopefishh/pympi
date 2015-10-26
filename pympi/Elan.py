@@ -6,7 +6,7 @@ import re
 import sys
 import time
 
-VERSION = '1.6'
+VERSION = '1.7'
 
 
 class Eaf:
@@ -559,6 +559,43 @@ class Eaf:
                        for m in anns.values() if self.timeslots[m[0]] <= time
                        and self.timeslots[m[1]] >= time])
 
+    def get_annotation_data_after_time(self, id_tier, time):
+        """Give the annotation before a given time. When the tier contains
+        reference annotations this will be returned, check
+        :func:`get_ref_annotation_data_before_time` for the format. If an
+        annotation overlaps with ``time`` that annotation will be returned.
+        
+        :param str id_tier: Name of the tier.
+        :param int time: Time to get the annotation before.
+        :raises KeyError: If the tier is non existent.
+        """
+        if self.tiers[id_tier][1]:
+            return self.get_ref_annotation_after_time(id_tier, time)
+        befores = self.get_annotation_data_between_times(
+            id_tier, time, self.get_full_time_interval()[1])
+        if befores:
+            return [min(befores, key=lambda x: x[0])]
+        else:
+            return []
+
+    def get_annotation_data_before_time(self, id_tier, time):
+        """Give the annotation before a given time. When the tier contains
+        reference annotations this will be returned, check
+        :func:`get_ref_annotation_data_before_time` for the format. If an
+        annotation overlaps with ``time`` that annotation will be returned.
+        
+        :param str id_tier: Name of the tier.
+        :param int time: Time to get the annotation before.
+        :raises KeyError: If the tier is non existent.
+        """
+        if self.tiers[id_tier][1]:
+            return self.get_ref_annotation_before_time(id_tier, time)
+        befores = self.get_annotation_data_between_times(id_tier, 0, time)
+        if befores:
+            return [max(befores, key=lambda x: x[0])]
+        else:
+            return []
+
     def get_annotation_data_between_times(self, id_tier, start, end):
         """Gives the annotations within the times.
         When the tier contains reference annotations this will be returned,
@@ -849,6 +886,37 @@ class Eaf:
             if begin <= time and end >= time:
                 bucket.append((begin, end, value, rvalue))
         return bucket
+
+    def get_ref_annotation_data_after_time(self, id_tier, time):
+        """Give the ref annotation after a time. If an annotation overlaps
+        with `ktime`` that annotation will be returned.
+        
+        :param str id_tier: Name of the tier.
+        :param int time: Time to get the annotation after.
+        :returns: Annotation after that time in a list
+        :raises KeyError: If the tier is non existent.
+        """
+        befores = self.get_ref_annotation_data_between_times(
+            id_tier, time, self.get_full_time_interval())
+        if befores:
+            return [min(befores, key=lambda x: x[0])]
+        else:
+            return []
+
+    def get_ref_annotation_data_before_time(self, id_tier, time):
+        """Give the ref annotation before a time. If an annotation overlaps
+        with ``time`` that annotation will be returned.
+        
+        :param str id_tier: Name of the tier.
+        :param int time: Time to get the annotation before.
+        :returns: Annotation before that time in a list
+        :raises KeyError: If the tier is non existent.
+        """
+        befores = self.get_ref_annotation_data_between_times(id_tier, 0, time)
+        if befores:
+            return [max(befores, key=lambda x: x[0])]
+        else:
+            return []
 
     def get_ref_annotation_data_between_times(self, id_tier, start, end):
         """Give the ref annotations between times of the form
@@ -1356,7 +1424,11 @@ def parse_eaf(file_path, eaf_obj):
     if file_path == '-':
         file_path = sys.stdin
     # Annotation document
-    tree_root = etree.parse(file_path).getroot()
+    try:
+        tree_root = etree.parse(file_path).getroot()
+    except etree.ParseError:
+        raise Exception('Unable to parse eaf, can you open it in ELAN?')
+
     if tree_root.attrib['VERSION'] not in ['2.8', '2.7']:
         sys.stdout.write('Parsing unknown version of ELAN spec... '
                          'This could result in errors...\n')
