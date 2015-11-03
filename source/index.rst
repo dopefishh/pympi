@@ -22,6 +22,7 @@ Todo
 
 Old versions
 ============
+- `Version 1.6 <docs_1.6/index.html>`_.
 - `Version 1.59 <docs_1.59/index.html>`_.
 - `Version 1.5 <docs_1.5/index.html>`_.
 - `Version 1.49 <docs_1.49/index.html>`_.
@@ -38,6 +39,12 @@ Changelog
 +------------+---------+------------------------------------------------------+
 | Date       | Version | Changelog                                            |
 +============+=========+======================================================+
+| 15-10-26   | 1.69    | - Added get_annotation_before and after functions:   |
+|            |         |   :func:`get_annotation_data_after_times`            |
+|            |         |   :func:`get_annotation_data_before_times`           |
+|            |         |   :func:`get_ref_annotation_data_after_times`        |
+|            |         |   :func:`get_ref_annotation_data_before_times`       |
++------------+---------+------------------------------------------------------+
 | 15-08-02   | 1.6     | - Tiers are kept in order.                           |
 |            |         | - Readme now inline rst.                             |
 +------------+---------+------------------------------------------------------+

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Elan &mdash; pympi 1.69 documentation</title>
+    <title>Elan &mdash; pympi 1.6 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.69',
+        VERSION:     '1.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pympi 1.69 documentation" href="index.html" />
+    <link rel="top" title="pympi 1.6 documentation" href="index.html" />
     <link rel="prev" title="Praat" href="Praat.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="Praat.html" title="Praat"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">pympi 1.69 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.6 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -415,11 +415,7 @@ extension or an unknown mimetype.</p>
 <dl class="method">
 <dt id="pympi.Elan.Eaf.add_ref_annotation">
 <tt class="descname">add_ref_annotation</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>tier2</em>, <em>time</em>, <em>value=''</em>, <em>prev=None</em>, <em>svg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.add_ref_annotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a reference annotation.
-.. note:: When a timepoint matches two annotations the new reference
-annotation will reference to the first annotation. To circumvent this
-it&#8217;s always safer to take the middle of the annotation you want to
-reference to.</p>
+<dd><p>Add a reference annotation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -666,31 +662,6 @@ internally</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pympi.Elan.Eaf.get_annotation_data_after_time">
-<tt class="descname">get_annotation_data_after_time</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_after_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give the annotation before a given time. When the tier contains
-reference annotations this will be returned, check
-<a class="reference internal" href="#pympi.Elan.Eaf.get_ref_annotation_data_before_time" title="pympi.Elan.Eaf.get_ref_annotation_data_before_time"><tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_data_before_time()</span></tt></a> for the format. If an
-annotation overlaps with <tt class="docutils literal"><span class="pre">time</span></tt> that annotation will be returned.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
-<li><strong>time</strong> (<em>int</em>) &#8211; Time to get the annotation before.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="pympi.Elan.Eaf.get_annotation_data_at_time">
 <tt class="descname">get_annotation_data_at_time</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_at_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give the annotations at the given time. When the tier contains
@@ -711,31 +682,6 @@ reference annotations this will be returned, check
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
 <tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pympi.Elan.Eaf.get_annotation_data_before_time">
-<tt class="descname">get_annotation_data_before_time</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_annotation_data_before_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give the annotation before a given time. When the tier contains
-reference annotations this will be returned, check
-<a class="reference internal" href="#pympi.Elan.Eaf.get_ref_annotation_data_before_time" title="pympi.Elan.Eaf.get_ref_annotation_data_before_time"><tt class="xref py py-func docutils literal"><span class="pre">get_ref_annotation_data_before_time()</span></tt></a> for the format. If an
-annotation overlaps with <tt class="docutils literal"><span class="pre">time</span></tt> that annotation will be returned.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
-<li><strong>time</strong> (<em>int</em>) &#8211; Time to get the annotation before.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
 </td>
 </tr>
 </tbody>
@@ -1117,58 +1063,6 @@ no maximum will be used.</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of annotations at that time.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pympi.Elan.Eaf.get_ref_annotation_data_after_time">
-<tt class="descname">get_ref_annotation_data_after_time</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_ref_annotation_data_after_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give the ref annotation after a time. If an annotation overlaps
-with <cite>ktime`</cite> that annotation will be returned.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
-<li><strong>time</strong> (<em>int</em>) &#8211; Time to get the annotation after.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Annotation after that time in a list</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">If the tier is non existent.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pympi.Elan.Eaf.get_ref_annotation_data_before_time">
-<tt class="descname">get_ref_annotation_data_before_time</tt><span class="sig-paren">(</span><em>id_tier</em>, <em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#pympi.Elan.Eaf.get_ref_annotation_data_before_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Give the ref annotation before a time. If an annotation overlaps
-with <tt class="docutils literal"><span class="pre">time</span></tt> that annotation will be returned.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>id_tier</strong> (<em>str</em>) &#8211; Name of the tier.</li>
-<li><strong>time</strong> (<em>int</em>) &#8211; Time to get the annotation before.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Annotation before that time in a list</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Raises KeyError:</th></tr>
@@ -1891,7 +1785,7 @@ inferring the file is broken.</p>
         <li class="right" >
           <a href="Praat.html" title="Praat"
              >previous</a> |</li>
-        <li><a href="index.html">pympi 1.69 documentation</a> &raquo;</li> 
+        <li><a href="index.html">pympi 1.6 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
