@@ -6,7 +6,7 @@ import re
 import sys
 import time
 
-VERSION = '1.7'
+VERSION = '1.69'
 
 
 class Eaf:
@@ -401,7 +401,7 @@ class Eaf:
 
     def child_tiers_for(self, id_tier):
         """.. deprecated: 1.5
-        
+
         Use :func:`get_child_tiers_for`
         """
         return self.get_child_tiers_for(id_tier)
@@ -454,8 +454,8 @@ class Eaf:
             tier_name = '{}_{}_ftos'.format(tier1, tier2)
         self.add_tier(tier_name)
         ftos = []
-        ftogen = self.get_gaps_and_overlaps2(tier1, tier2, maxlen) if fast else\
-            self.get_gaps_and_overlaps(tier1, tier2, maxlen)
+        ftogen = self.get_gaps_and_overlaps2(tier1, tier2, maxlen) if fast\
+            else self.get_gaps_and_overlaps(tier1, tier2, maxlen)
         for fto in ftogen:
             ftos.append(fto)
             if fto[1]-fto[0] >= 1:
@@ -556,15 +556,16 @@ class Eaf:
             return self.get_ref_annotation_at_time(id_tier, time)
         anns = self.tiers[id_tier][0]
         return sorted([(self.timeslots[m[0]], self.timeslots[m[1]], m[2])
-                       for m in anns.values() if self.timeslots[m[0]] <= time
-                       and self.timeslots[m[1]] >= time])
+                       for m in anns.values() if
+                       self.timeslots[m[0]] <= time and
+                       self.timeslots[m[1]] >= time])
 
     def get_annotation_data_after_time(self, id_tier, time):
         """Give the annotation before a given time. When the tier contains
         reference annotations this will be returned, check
         :func:`get_ref_annotation_data_before_time` for the format. If an
         annotation overlaps with ``time`` that annotation will be returned.
-        
+
         :param str id_tier: Name of the tier.
         :param int time: Time to get the annotation before.
         :raises KeyError: If the tier is non existent.
@@ -583,7 +584,7 @@ class Eaf:
         reference annotations this will be returned, check
         :func:`get_ref_annotation_data_before_time` for the format. If an
         annotation overlaps with ``time`` that annotation will be returned.
-        
+
         :param str id_tier: Name of the tier.
         :param int time: Time to get the annotation before.
         :raises KeyError: If the tier is non existent.
@@ -697,8 +698,10 @@ class Eaf:
         spkr2anns = sorted((self.timeslots[a[0]], self.timeslots[a[1]])
                            for a in self.tiers[tier2][0].values())
         line1 = []
-        isin = lambda x, lst: False if\
-            len([i for i in lst if i[0] <= x and i[1] >= x]) == 0 else True
+
+        def isin(x, lst):
+            return False if\
+                len([i for i in lst if i[0] <= x and i[1] >= x]) == 0 else True
         minmax = (min(spkr1anns[0][0], spkr2anns[0][0]),
                   max(spkr1anns[-1][1], spkr2anns[-1][1]))
         last = (1, minmax[0])
@@ -762,7 +765,9 @@ class Eaf:
                      self.get_annotation_data_for_tier(t)), reverse=True)
         if ad:
             last = (lambda x: (x[0][0], x[0][1], x[1]))(ad.pop())
-            thr = lambda x, y: maxlen == -1 or abs(x-y) < maxlen
+
+            def thr(x, y):
+                return maxlen == -1 or abs(x-y) < maxlen
             while ad:
                 (begin, end, _), current = ad.pop()
                 if last[2] == current and thr(begin, last[1]):
@@ -890,7 +895,7 @@ class Eaf:
     def get_ref_annotation_data_after_time(self, id_tier, time):
         """Give the ref annotation after a time. If an annotation overlaps
         with `ktime`` that annotation will be returned.
-        
+
         :param str id_tier: Name of the tier.
         :param int time: Time to get the annotation after.
         :returns: Annotation after that time in a list
@@ -906,7 +911,7 @@ class Eaf:
     def get_ref_annotation_data_before_time(self, id_tier, time):
         """Give the ref annotation before a time. If an annotation overlaps
         with ``time`` that annotation will be returned.
-        
+
         :param str id_tier: Name of the tier.
         :param int time: Time to get the annotation before.
         :returns: Annotation before that time in a list
@@ -1045,7 +1050,7 @@ class Eaf:
 
     def remove_annotation(self, id_tier, time, clean=True):
         """Remove an annotation in a tier, if you need speed the best thing is
-        to clean the timeslots after the last removal. When the tier contains 
+        to clean the timeslots after the last removal. When the tier contains
         reference annotations :func:`remove_ref_annotation` will be executed
         instead.
 

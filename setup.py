@@ -83,12 +83,12 @@ How to cite
 
 .. code:: tex
 
-    @misc{pympi-ling,
+    @misc{pympi-1.69,
         author={Lubbers, Mart and Torreira, Francisco},
         title={pympi-ling: a Python module for processing ELANs EAF and Praats TextGrid annotation files.},
         howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
         year={2013-2015},
-        note={Version 1.6}
+        note={Version 1.69}
     }
 
 Authors

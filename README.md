@@ -47,7 +47,7 @@ python setup.py install
 
 ### How to cite
 ```tex
-@misc{pympi-ling,
+@misc{pympi-1.69,
 	author={Lubbers, Mart and Torreira, Francisco},
 	title={pympi-ling: a {Python} module for processing {ELAN}s {EAF} and {Praat}s {TextGrid} annotation files.},
 	howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
