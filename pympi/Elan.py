@@ -1681,8 +1681,12 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     if pretty:
         indent(ADOCUMENT)
     if file_path == '-':
-        file_path = sys.stdout
-    elif os.access(file_path, os.F_OK):
-        os.rename(file_path, '{}.bak'.format(file_path))
-    etree.ElementTree(ADOCUMENT).write(
-        file_path, xml_declaration=True, encoding='UTF-8')
+        try:
+            sys.stdout.write(etree.tostring(ADOCUMENT, encoding='unicode'))
+        except LookupError:
+            sys.stdout.write(etree.tostring(ADOCUMENT, encoding='UTF-8'))
+    else:
+        if os.access(file_path, os.F_OK):
+            os.rename(file_path, '{}.bak'.format(file_path))
+        etree.ElementTree(ADOCUMENT).write(
+            file_path, xml_declaration=True, encoding='UTF-8')
