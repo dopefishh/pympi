@@ -1,15 +1,13 @@
 pympi version 1.69
 ==================
 ### Introduction
-Pympi is a package that allows you to interact with [Elan][1] files and
-[TextGrid][2] files. You can create, edit and convert both formats into each
-other. It includes besides all the basic functions also functions for:
-- Calculating gaps and overlaps between speakers conform [Heldner and Edlund's
-  method][3]. (Could be used to calculate floor transfers)
-- Shift annotations in both directions (Could be used when due to an error all
-  annotations are misaligned).
+Pympi is a package that allows you to interact with [Elan][1] files and [TextGrid][2] (regular, short and binary) files.
+You can create, edit and convert both formats into each other.
+It includes besides all the basic functions also functions for:
+- Calculating gaps and overlaps between speakers conform [Heldner and Edlund's method][3]. (Could be used to calculate floor transfers)
+- Shift annotations in both directions (Could be used when due to an error all annotations are misaligned).
 - Import from CLAN's chat files.
-- Merge and or filter tiers (Could be used to combine hands in gesture coding)
+- Merge and or filter tiers (could be used to combine hands in gesture coding)
 - Move tiers between elan files.
 - Etc.
 
@@ -51,15 +49,14 @@ python setup.py install
 	author={Lubbers, Mart and Torreira, Francisco},
 	title={pympi-ling: a {Python} module for processing {ELAN}s {EAF} and {Praat}s {TextGrid} annotation files.},
 	howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
-	year={2013-2015},
+	year={2013-2018},
 	note={Version 1.69}
 }
 ```
 
 ### Authors
 Mart Lubbers (mart at martlubbers.net)
-
-Under supervision of:
+and
 Francisco Toreirra (francisco.torreira at mpi.nl)
 
 [1]: https://tla.mpi.nl/tools/tla-tools/elan/
