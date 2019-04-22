@@ -952,10 +952,24 @@ class Eaf:
         """
         bucket = []
         for aid, (ref, value, prev, _) in self.tiers[id_tier][1].items():
-            refann = self.tiers[self.annotations[ref]][0][ref]
+            refann = self.get_parent_aligned_annotation(ref)
             bucket.append((self.timeslots[refann[0]],
                            self.timeslots[refann[1]], value, refann[2]))
         return bucket
+
+    def get_parent_aligned_annotation(self, ref_id):
+        """" Give the aligment annotation that a reference annotation belongs to directly, or indirectly through other
+        reference annotations.
+        :param str ref_id: Id of a reference annotation.
+        :raises KeyError: If no annotation exists with the id or if it belongs to an alignment annotation.
+        :returns: The alignment annotation at the end of the reference chain.
+        """
+        parentTier = self.tiers[self.annotations[ref_id]]
+        while "PARENT_REF" in parentTier[2] and len(parentTier[2]) > 0:
+            ref_id = parentTier[1][ref_id][0]
+            parentTier = self.tiers[self.annotations[ref_id]]
+
+        return parentTier[0][ref_id]
 
     def get_secondary_linked_files(self):
         """Give all linked files."""
