@@ -475,7 +475,7 @@ class Eaf:
         for t in eaf_out.get_tier_names():
             for ab, ae, value in eaf_out.get_annotation_data_for_tier(t):
                 if ab > end or ae < start:
-                    eaf_out.remove_annotation(t, (start-end)//2, False)
+                    eaf_out.remove_annotation(t, (ae - ab) // 2, False)
         eaf_out.clean_time_slots()
         return eaf_out
 
