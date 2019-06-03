@@ -532,6 +532,16 @@ class Eaf:
         """
         if time and time < 0:
             raise ValueError('Time is negative...')
+	
+	# try to find it in the list of elements - if so, return immediately. Using an exception
+        # prevents the need to pass the list twice.
+        try:
+            ts = list(self.timeslots.keys())[list(self.timeslots.values()).index(time)]
+            return ts
+        except ValueError:
+            # if we can not find the key -> continue
+            pass
+
         if not self.maxts:
             valid_ts = [int(''.join(filter(str.isdigit, a)))
                         for a in self.timeslots]
