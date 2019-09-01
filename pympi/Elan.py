@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import time
+import warnings
 
 VERSION = '1.69'
 
@@ -532,7 +533,7 @@ class Eaf:
         """
         if time and time < 0:
             raise ValueError('Time is negative...')
-	
+
 	# try to find it in the list of elements - if so, return immediately. Using an exception
         # prevents the need to pass the list twice.
         try:
@@ -1459,8 +1460,8 @@ def parse_eaf(file_path, eaf_obj):
         raise Exception('Unable to parse eaf, can you open it in ELAN?')
 
     if tree_root.attrib['VERSION'] not in ['2.8', '2.7']:
-        sys.stdout.write('Parsing unknown version of ELAN spec... '
-                         'This could result in errors...\n')
+        warnings.warn('Parsing unknown version of ELAN spec... '
+                      'This could result in errors...')
     eaf_obj.adocument.update(tree_root.attrib)
     del(eaf_obj.adocument['{http://www.w3.org/2001/XMLSchema-instance}noNamesp'
                           'aceSchemaLocation'])
