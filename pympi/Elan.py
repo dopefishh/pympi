@@ -1373,7 +1373,7 @@ def eaf_from_chat(file_path, codec='ascii', extension='wav'):
     since the library is designed for it. All CHAT headers will be added as
     Properties in the object and the headers that have a similar field in an
     Eaf file will be added there too. The file description of chat files can be
-    found `here <http://childes.psy.cmu.edu/manuals/CHAT.pdf>`_.
+    found `here <https://talkbank.org/manuals/CHAT.pdf>`_.
 
     :param str file_path: The file path of the .cha file.
     :param str codec: The codec, if the @UTF8 header is present it will choose
