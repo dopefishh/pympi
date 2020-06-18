@@ -976,7 +976,7 @@ class Eaf:
         :returns: The alignment annotation at the end of the reference chain.
         """
         parentTier = self.tiers[self.annotations[ref_id]]
-        while "PARENT_REF" in parentTier[2] and len(parentTier[2]) > 0:
+        while 'PARENT_REF' in parentTier[2] and parentTier[2]['PARENT_REF'] and len(parentTier[2]) > 0:
             ref_id = parentTier[1][ref_id][0]
             parentTier = self.tiers[self.annotations[ref_id]]
 
