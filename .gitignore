@@ -14,3 +14,14 @@ pyvenv.cfg
 *.pfsx
 *.eaf
 *.pyc
+
+# Vim files
+*~
+*.swp
+
+# Pyenv
+.python-version
+
+
+# Python egg
+*.egg-info

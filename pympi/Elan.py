@@ -325,12 +325,23 @@ class Eaf:
         if self.tiers[id_tier][0]:
             raise ValueError('This tier already contains normal annotations.')
         ann = None
-        for aid, (begin, end, _, _) in self.tiers[tier2][0].items():
-            begin = self.timeslots[begin]
-            end = self.timeslots[end]
-            if begin <= time and end >= time:
-                ann = aid
-                break
+        # tier2 is an independent (aligned reference) tier
+        if self.tiers[tier2][0]:
+            for aid, (begin, end, _, _) in self.tiers[tier2][0].items():
+                begin = self.timeslots[begin]
+                end = self.timeslots[end]
+                if begin <= time and end >= time:
+                    ann = aid
+                    break
+        # tier2 is a reference tier, so we grab the top tier in the hierarchy
+        else:
+            for aid, (reference, _, _, _) in self.tiers[tier2][1].items():
+                refann = self.get_parent_aligned_annotation(aid)
+                begin = self.timeslots[refann[0]]
+                end = self.timeslots[refann[1]]
+                if begin <= time and end >= time:
+                    ann = aid
+                    break
         if not ann:
             raise ValueError('There is no annotation to reference to.')
         aid = self.generate_annotation_id()
