@@ -1125,6 +1125,20 @@ class Elan(unittest.TestCase):
                           (0.2, 0.3, 'a31'), (0.3, 0.4, 'a41')])
         self.assertEqual(list(tg.get_tier('t7').get_intervals()), [])
 
+    def test_add_nested_reference_annotations(self):
+        self.eaf.add_linguistic_type('refT')
+        self.eaf.add_linguistic_type('orthT', 'Symbolic_Association')
+        self.eaf.add_linguistic_type('wordT', 'Symbolic_Subdivision')
+
+        self.eaf.add_tier('ref', ling='refT')
+        self.eaf.add_tier('orth', ling='orthT', parent='ref')
+        self.eaf.add_tier('word', ling='wordT', parent='orth')
+
+        self.eaf.add_annotation('ref', 0, 1, 'test.001')
+        self.eaf.add_ref_annotation('orth', 'ref', 0, 'Words here.')
+        self.eaf.add_ref_annotation('word', 'orth', 0, 'Words')
+
+
     #def test_to_file_to_eaf(self):
     #    x, filepath = tempfile.mkstemp()
     #    self.eaf = Eaf('./test/sample_2.8.eaf')
