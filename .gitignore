@@ -25,3 +25,7 @@ pyvenv.cfg
 
 # Python egg
 *.egg-info
+
+.coverage
+.tox/
+
