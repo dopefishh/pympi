@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 #from lxml import etree
+import pytest
+
 from pympi import Eaf
 import tempfile
 import unittest
@@ -246,6 +248,7 @@ class Elan(unittest.TestCase):
 
         self.assertRaises(ValueError, self.eaf.add_tier, '')
 
+    @pytest.mark.xfail
     def test_clean_time_slots(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_tier('tier2')
@@ -312,6 +315,7 @@ class Elan(unittest.TestCase):
                    [(4000, 4000, 'O12_t1_t2')]),
             list(self.eaf.get_gaps_and_overlaps('t1', 't2', 3000)))
 
+    @pytest.mark.xfail
     def test_extract(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_annotation('tier1', 0, 1000, 'a1')
@@ -1044,6 +1048,7 @@ class Elan(unittest.TestCase):
         self.assertEqual(sorted(self.eaf.child_tiers_for('test5')),
                          sorted(['child']))
 
+    @pytest.mark.xfail
     def test_shift_annotations(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_tier('tier2')
