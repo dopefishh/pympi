@@ -7,7 +7,7 @@ import sys
 import time
 import warnings
 
-VERSION = '1.69'
+VERSION = '1.7'
 
 
 class Eaf:
