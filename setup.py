@@ -115,4 +115,12 @@ sarpu, hadware, thomaskisler, mome, mimrock and xrotwang
                    'Operating System :: OS Independent',
                    'Programming Language :: Python :: 3.4',
                    'Topic :: Text Processing :: Linguistic'],
-      packages=['pympi'])
+      packages=['pympi'],
+      extras_require={
+        'test': [
+            'pytest>=5',
+            'pytest-mock',
+            'pytest-cov',
+            'coverage>=4.2',
+        ],
+      })
