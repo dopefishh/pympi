@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 from xml.etree import cElementTree as etree
-import os
 import re
 import sys
 import time
+import pathlib
 import warnings
 
 VERSION = '1.7'
@@ -663,7 +661,8 @@ class Eaf:
         :returns: Tuple of the form: ``(min_time, max_time)``.
         """
         return (0, 0) if not self.timeslots else\
-            (min(self.timeslots.values()), max(self.timeslots.values()))
+            (min(v for v in self.timeslots.values() if v is not None),
+             max(v for v in self.timeslots.values() if v is not None))
 
     def get_gaps_and_overlaps(self, tier1, tier2, maxlen=-1):
         """Give gaps and overlaps. The return types are shown in the table
@@ -1460,7 +1459,8 @@ def parse_eaf(file_path, eaf_obj, suppress_version_warning=False):
         file_path = sys.stdin
     # Annotation document
     try:
-        tree_root = etree.parse(file_path).getroot()
+        # py3.5 compat: etree.parse does not support pathlib.Path objects in py3.5.
+        tree_root = etree.parse(str(file_path)).getroot()
     except etree.ParseError:
         raise Exception('Unable to parse eaf, can you open it in ELAN?')
 
@@ -1623,15 +1623,7 @@ def to_eaf(file_path, eaf_obj, pretty=True):
     :param bool pretty: Flag to set pretty printing.
     """
     def rm_none(x):
-        try:  # Ugly hack to test if s is a string in py3 and py2
-            basestring
-
-            def isstr(s):
-                return isinstance(s, basestring)
-        except NameError:
-            def isstr(s):
-                return isinstance(s, str)
-        return {k: v if isstr(v) else str(v) for k, v in x.items()
+        return {k: v if isinstance(v, str) else str(v) for k, v in x.items()
                 if v is not None}
     # Annotation Document
     ADOCUMENT = etree.Element('ANNOTATION_DOCUMENT', eaf_obj.adocument)
@@ -1717,7 +1709,8 @@ def to_eaf(file_path, eaf_obj, pretty=True):
         except LookupError:
             sys.stdout.write(etree.tostring(ADOCUMENT, encoding='UTF-8'))
     else:
-        if os.access(file_path, os.F_OK):
-            os.rename(file_path, '{}.bak'.format(file_path))
+        file_path = pathlib.Path(file_path)
+        if file_path.exists():
+            file_path.rename(file_path.with_suffix('.bak'))
         etree.ElementTree(ADOCUMENT).write(
-            file_path, xml_declaration=True, encoding='UTF-8')
+            str(file_path), xml_declaration=True, encoding='UTF-8')

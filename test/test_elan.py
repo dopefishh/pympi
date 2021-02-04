@@ -1153,10 +1153,14 @@ class Elan(unittest.TestCase):
     ]
 )
 def test_to_file_to_eaf(eaf, schema, test_dir, tmp_path):
-    filepath = tmp_path / 'test.eaf'
-    eaf = Eaf(test_dir / eaf)
+    filepath = str(tmp_path / 'test.eaf')
+    eaf = Eaf(str(test_dir / eaf))
     eaf.to_file(filepath)
 
     schema = etree.XMLSchema(etree.XML(test_dir.joinpath(schema).read_text(encoding='utf8')))
     xmlparser = etree.XMLParser(schema=schema)
     etree.parse(str(filepath), xmlparser)
+
+
+def test_to_textgrid(test_dir):
+    _ = Eaf(str(test_dir / 'sample_2.7.eaf')).to_textgrid()
