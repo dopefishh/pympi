@@ -10,9 +10,7 @@ lib64
 pyvenv.cfg
 
 # Test files or temporary data files
-*.TextGrid
 *.pfsx
-*.eaf
 *.pyc
 
 # Vim files
@@ -28,4 +26,5 @@ pyvenv.cfg
 
 .coverage
 .tox/
+.idea/
 
