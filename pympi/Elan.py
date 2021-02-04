@@ -72,12 +72,15 @@ class Eaf:
     MIMES = {'wav': 'audio/x-wav', 'mpg': 'video/mpeg', 'mpeg': 'video/mpg',
              'xml': 'text/xml'}
 
-    def __init__(self, file_path=None, author='pympi'):
+    def __init__(self, file_path=None, author='pympi',
+                 suppress_version_warning=False):
         """Construct either a new Eaf file or read on from a file/stream.
 
         :param str file_path: Path to read from, - for stdin. If ``None`` an
             empty Eaf file will be created.
         :param str author: Author of the file.
+        :param bool supress_version_warning: Suppress the warning for
+            unsupported EAF file versions
         """
         ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
             time.daylight else -time.timezone
@@ -114,7 +117,7 @@ class Eaf:
             self.properties.append(('lastUsedAnnotation', 0))
             self.add_tier('default')
         else:
-            parse_eaf(file_path, self)
+            parse_eaf(file_path, self, suppress_version_warning)
 
     def add_annotation(self, id_tier, start, end, value='', svg_ref=None):
         """Add an annotation.
@@ -1446,7 +1449,7 @@ def eaf_from_chat(file_path, codec='ascii', extension='wav'):
     return eafob
 
 
-def parse_eaf(file_path, eaf_obj):
+def parse_eaf(file_path, eaf_obj, suppress_version_warning=False):
     """Parse an EAF file
 
     :param str file_path: Path to read from, - for stdin.
@@ -1461,7 +1464,8 @@ def parse_eaf(file_path, eaf_obj):
     except etree.ParseError:
         raise Exception('Unable to parse eaf, can you open it in ELAN?')
 
-    if tree_root.attrib['VERSION'] not in ['2.8', '2.7']:
+    if not suppress_version_warning and \
+            tree_root.attrib['VERSION'] not in ['2.8', '2.7']:
         warnings.warn('Parsing unknown version of ELAN spec... '
                       'This could result in errors...')
     eaf_obj.adocument.update(tree_root.attrib)
