@@ -1,11 +1,7 @@
-#!/bin/env python
-# -*- coding: utf-8 -*-
-
-#from lxml import etree
+from lxml import etree
 import pytest
 
 from pympi import Eaf
-import tempfile
 import unittest
 
 
@@ -248,7 +244,6 @@ class Elan(unittest.TestCase):
 
         self.assertRaises(ValueError, self.eaf.add_tier, '')
 
-    @pytest.mark.xfail
     def test_clean_time_slots(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_tier('tier2')
@@ -563,7 +558,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_external_ref('er2', 'lexen_id', 'location2')
         self.assertEqual(self.eaf.get_external_ref('er1'), ('ecv', 'location'))
         self.assertRaises(KeyError, self.eaf.get_external_ref, 'er3')
-        
+
     def test_get_external_ref_names(self):
         self.assertEqual(sorted(self.eaf.get_external_ref_names()),
                          [])
@@ -1048,7 +1043,6 @@ class Elan(unittest.TestCase):
         self.assertEqual(sorted(self.eaf.child_tiers_for('test5')),
                          sorted(['child']))
 
-    @pytest.mark.xfail
     def test_shift_annotations(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_tier('tier2')
@@ -1143,34 +1137,26 @@ class Elan(unittest.TestCase):
         self.eaf.add_ref_annotation('orth', 'ref', 0, 'Words here.')
         self.eaf.add_ref_annotation('word', 'orth', 0, 'Words')
 
-
-    #def test_to_file_to_eaf(self):
-    #    x, filepath = tempfile.mkstemp()
-    #    self.eaf = Eaf('./test/sample_2.8.eaf')
-
-    #    self.eaf.to_file(filepath)
-
-    #    with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
-    #        scheme_root = etree.XML(scheme_in.read())
-    #    schema = etree.XMLSchema(scheme_root)
-    #    xmlparser = etree.XMLParser(schema=schema)
-    #    etree.parse(filepath, xmlparser)
-
-    #    self.eaf = Eaf('./test/sample_2.7.eaf')
-
-    #    self.eaf.to_file(filepath)
-
-    #    with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
-    #        scheme_root = etree.XML(scheme_in.read())
-    #    schema = etree.XMLSchema(scheme_root)
-    #    xmlparser = etree.XMLParser(schema=schema)
-    #    etree.parse(filepath, xmlparser)
-
     def test_parse_eaf(self):
         pass
 
     def test_eaf_from_chat(self):
         pass
 
-if __name__ == '__main__':
-    unittest.main()
+
+@pytest.mark.parametrize(
+    'eaf,schema',
+    [
+        ('sample_2.8.eaf', 'EAFv2.8.xsd'),
+        ('sample_2.7.eaf', 'EAFv2.8.xsd'),
+        ('sample_3.0.eaf', 'EAFv3.0.xsd'),
+    ]
+)
+def test_to_file_to_eaf(eaf, schema, test_dir, tmp_path):
+    filepath = tmp_path / 'test.eaf'
+    eaf = Eaf(test_dir / eaf)
+    eaf.to_file(filepath)
+
+    schema = etree.XMLSchema(etree.XML(test_dir.joinpath(schema).read_text(encoding='utf8')))
+    xmlparser = etree.XMLParser(schema=schema)
+    etree.parse(str(filepath), xmlparser)
