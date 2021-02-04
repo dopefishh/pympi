@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-#from lxml import etree
+from lxml import etree
 import pytest
 
 from pympi import Eaf
@@ -563,7 +563,7 @@ class Elan(unittest.TestCase):
         self.eaf.add_external_ref('er2', 'lexen_id', 'location2')
         self.assertEqual(self.eaf.get_external_ref('er1'), ('ecv', 'location'))
         self.assertRaises(KeyError, self.eaf.get_external_ref, 'er3')
-        
+
     def test_get_external_ref_names(self):
         self.assertEqual(sorted(self.eaf.get_external_ref_names()),
                          [])
@@ -1144,27 +1144,27 @@ class Elan(unittest.TestCase):
         self.eaf.add_ref_annotation('word', 'orth', 0, 'Words')
 
 
-    #def test_to_file_to_eaf(self):
-    #    x, filepath = tempfile.mkstemp()
-    #    self.eaf = Eaf('./test/sample_2.8.eaf')
+    def test_to_file_to_eaf(self):
+        x, filepath = tempfile.mkstemp()
+        self.eaf = Eaf('./test/sample_2.8.eaf')
 
-    #    self.eaf.to_file(filepath)
+        self.eaf.to_file(filepath)
 
-    #    with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
-    #        scheme_root = etree.XML(scheme_in.read())
-    #    schema = etree.XMLSchema(scheme_root)
-    #    xmlparser = etree.XMLParser(schema=schema)
-    #    etree.parse(filepath, xmlparser)
+        with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
+            scheme_root = etree.XML(scheme_in.read())
+        schema = etree.XMLSchema(scheme_root)
+        xmlparser = etree.XMLParser(schema=schema)
+        etree.parse(filepath, xmlparser)
 
-    #    self.eaf = Eaf('./test/sample_2.7.eaf')
+        self.eaf = Eaf('./test/sample_2.7.eaf')
 
-    #    self.eaf.to_file(filepath)
+        self.eaf.to_file(filepath)
 
-    #    with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
-    #        scheme_root = etree.XML(scheme_in.read())
-    #    schema = etree.XMLSchema(scheme_root)
-    #    xmlparser = etree.XMLParser(schema=schema)
-    #    etree.parse(filepath, xmlparser)
+        with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
+            scheme_root = etree.XML(scheme_in.read())
+        schema = etree.XMLSchema(scheme_root)
+        xmlparser = etree.XMLParser(schema=schema)
+        etree.parse(filepath, xmlparser)
 
     def test_parse_eaf(self):
         pass

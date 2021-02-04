@@ -1,0 +1,816 @@
+<?xml version="1.0"?>
+<!--
+	VERSION 3.0
+	DATE December 2016
+	- added two referential link elements, CROSS_REF_LINK and GROUP_REF_LINK, contained in 
+	sets of such elements, REF_LINK_SET.
+		
+	VERSION 2.8
+	DATE April 2014
+	- changes that add support for multilingual controlled vocabularies and for associating tiers
+	and annotations with a specific language
+	    - added new element LANGUAGE
+	    - changed the structure of CONTROLLED_VOCABULARY and CV_ENTRY elements
+	    - a cv entry can now have multiple CVE_VALUE child nodes with a language reference
+	- introduction of a LICENSE element
+	- added an EXT_REF attribute on the TIER level, so that e.g. a data category reference can be specified on
+	  the tier level (overriding the one specified on the TYPE level)
+	
+	VERSION 2.7
+	DATE December 2010
+	- new elements and attributes where added in relation to
+	  - support for externally defined controlled vocabularies. A new possible root element CV_RESOURCE 
+	    has been added for such vocabularies in an eaf like xml file. Annotations can hold a reference
+	    to the id of ean entry in an external CV.
+	- a new element for storing information about a lexicon and about a link to an entry or a field 
+	  in a lexicon has been added. A linguistic type can be associated with a lexicon or a field / 
+	  data category in a lexicon
+	
+	VERSION 2.6
+	DATE May 2008
+	- added elements and attributes for references to concepts defined in the ISO Data Category Registry 
+	and possibly/eventually other external resources.
+	  - attribute EXT_REF added to type annotationAttribute, to elements CV_ENTRY and LINGUISTIC_TYPE
+	  - element EXTERNAL_REF with attributes EXT_REF_ID, TYPE and VALUE
+	
+	DATE November 2007
+	- added optional attributes: RELATIVE_MEDIA_URL to MEDIA_DESCRIPTOR and RELATIVE_LINK_URL to 
+	LINKED_FILE_DESCRIPTOR for storage of relative url's
+	- changed the FORMAT from fixed to default, and from 2.4. to 2.5
+	
+	DATE December 2006
+	- added attribute: ANNOTATOR to element TIER
+	- added element: PROPERTY to element HEADER
+	- changed the type of attribute SVG_REF of ALIGNABLE_ANNOTATION to xsd:string since 
+	it does not refer to an ID in the same file
+	- changed the type of the TIME_ALIGNABLE and GRAPHIC_REFERENCES attributes of the LINGUISTIC_TYPE
+	element to type="xsd:boolean" (was xsd:string)
+	- changed the ID/IDREF mechanism for the combinations of:
+	  - TIER/TIER_ID and TIER/PARENT_REF
+	  - LINGUISTIC_TYPE/LINGUISTIC_TYPE_ID and TIER/LINGUISTIC_TYPE_REF
+	  - CONTROLLED_VOCABULARY/CV_ID and LINGUISTIC_TYPE/CONTROLLED_VOCABULARY_REF
+	  into pairs of xsd:key and xsd:keyref elements.
+	  The advantage is that the ID's only have to be unique per element type (e.g. TIER_ID's
+	  should be unique within the TIER elements but can be the same as a LINGUISTIC_TYPE_ID) 
+	  and that there are no constraints on characters that can be used in id's/names.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			ELAN Annotation Format
+			version 3.0
+			December 2016
+			Schema by Alexander Klassmann 17/01/03
+			Adapted by Hennie Brugman, Han Sloetjes, Micha Hulsbosch
+		</xsd:documentation>
+	</xsd:annotation>
+	
+	<xsd:element name="ANNOTATION_DOCUMENT">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="LICENSE" type="licenseType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="HEADER" type="headType"/>
+				<xsd:element name="TIME_ORDER" type="timeType"/>
+				<xsd:element name="TIER" type="tierType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="LINGUISTIC_TYPE" type="lingType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="LOCALE" type="localeType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="LANGUAGE" type="langType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="CONSTRAINT" type="constraintType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="CONTROLLED_VOCABULARY" type="convocType" minOccurs="0" maxOccurs="unbounded">
+				    <xsd:key name="cvEntryKey">
+					    <xsd:annotation>
+						    <xsd:documentation xml:lang="en">
+							    The entry id should be unique within the collection of entry elements
+						    </xsd:documentation>
+					    </xsd:annotation>
+					    <xsd:selector xpath="CV_ENTRY_ML"/>
+					    <xsd:field xpath="@CVE_ID"/>
+				    </xsd:key>
+				</xsd:element>
+				<xsd:element name="LEXICON_REF" type="lexRefType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="REF_LINK_SET" type="refLinksType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="EXTERNAL_REF" type="extRefType" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="DATE" type="xsd:dateTime" use="required"/>
+			<xsd:attribute name="AUTHOR" type="xsd:string" use="required"/>
+			<xsd:attribute name="VERSION" type="xsd:string" use="required"/>
+			<xsd:attribute name="FORMAT" type="xsd:string" use="optional" default="3.0"/>
+		</xsd:complexType>
+		
+		<!-- define key - keyref pairs -->
+		<xsd:key name="tierNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					The Tier name/id should be unique within the collection 
+					of Tier elements
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="TIER"/>
+			<xsd:field xpath="@TIER_ID"/>
+		</xsd:key>
+		<xsd:keyref name="tierNameRef" refer="tierNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					A Tier can be associated with a parent Tier by referring to an existing Tier id.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="TIER"/>
+			<xsd:field xpath="@PARENT_REF"/>
+		</xsd:keyref>
+		
+		<xsd:key name="linTypeNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					The Linguistic Type name/id should be unique within the collection 
+					of Linguistic Type elements
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="LINGUISTIC_TYPE"/>
+			<xsd:field xpath="@LINGUISTIC_TYPE_ID"/>
+		</xsd:key>
+		<xsd:keyref name="linTypeNameRef" refer="linTypeNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					A Tier must refer to an existing Linguistic Type id.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="TIER"/>
+			<xsd:field xpath="@LINGUISTIC_TYPE_REF"/>
+		</xsd:keyref>
+		
+		<xsd:key name="cvNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					The Controlled Vocabulary name/id should be unique within the  
+					collection of Controlled Vocabulary elements
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="CONTROLLED_VOCABULARY"/>
+			<xsd:field xpath="@CV_ID"/>
+		</xsd:key>
+		<xsd:keyref name="cvNameRef" refer="cvNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					A Linguistic Type can be associated with a Controlled Vocabulary by 
+					referring to an existing Controlled Vocabulary id.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="LINGUISTIC_TYPE"/>
+			<xsd:field xpath="@CONTROLLED_VOCABULARY_REF"/>
+		</xsd:keyref>
+		
+		<xsd:key name="lexNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					The Lexicon Service name/id should be unique within the  
+					collection of Lexicon Service elements
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="LEXICON_REF"/>
+			<xsd:field xpath="@LEX_REF_ID"/>
+		</xsd:key>
+		<xsd:keyref name="lexNameRef" refer="lexNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					A Linguistic Type can be associated with a Lexicon Service by 
+					referring to an existing Lexicon Service id.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="LINGUISTIC_TYPE"/>
+			<xsd:field xpath="@LEXICON_REF"/>
+		</xsd:keyref>
+		
+		<!-- added in 2.8 but unrelated to the introduction of new elements and attributes -->
+		<!-- previous annotation reference -->
+		<xsd:key name="prevAnnoKey">
+			<xsd:annotation>
+				<xsd:documentation>
+					A key and keyref pair to enforce that a previous annotation idref at least refers
+					to an annotation id of a reference annotation.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="TIER/ANNOTATION/REF_ANNOTATION"/>
+			<xsd:field xpath="@ANNOTATION_ID"/>
+		</xsd:key>
+		<xsd:keyref name="prevAnnoRef" refer="prevAnnoKey">
+			<xsd:selector xpath="TIER/ANNOTATION/REF_ANNOTATION"/>
+			<xsd:field xpath="@PREVIOUS_ANNOTATION"/>
+		</xsd:keyref>
+		<!-- time slot references -->
+		<xsd:key name="timeSlotKey">
+			<xsd:annotation>
+				<xsd:documentation>
+					Two key-keyref pairs to enforce that time slot references refer to the id of a time slot.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="TIME_ORDER/TIME_SLOT"/>
+			<xsd:field xpath="@TIME_SLOT_ID"/>
+		</xsd:key>
+		<xsd:keyref name="timeSlotRef1" refer="timeSlotKey">
+			<xsd:selector xpath="TIER/ANNOTATION/ALIGNABLE_ANNOTATION"/>
+			<xsd:field xpath="@TIME_SLOT_REF1"/>
+		</xsd:keyref>
+		<xsd:keyref name="timeSlotRef2" refer="timeSlotKey">
+			<xsd:selector xpath="TIER/ANNOTATION/ALIGNABLE_ANNOTATION"/>
+			<xsd:field xpath="@TIME_SLOT_REF2"/>
+		</xsd:keyref>
+		
+		<!-- introduced in 2.8 -->
+		<xsd:key name="langIdKey">
+			<xsd:annotation>
+				<xsd:documentation>
+					The ID of a language identifier, can be referred to by any element that
+					needs a reference to a language identifier.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="LANGUAGE"/>
+			<xsd:field xpath="@LANG_ID"/>
+		</xsd:key>
+		<xsd:keyref name="cvValueLangRef" refer="langIdKey">
+			<xsd:annotation>
+				<xsd:documentation>
+					Reference from a value in a multilingual CV to a language identifier.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="CONTROLLED_VOCABULARY/CV_ENTRY_ML/CVE_VALUE"/>
+			<xsd:field xpath="@LANG_REF"/>
+		</xsd:keyref>
+		<xsd:keyref name="cvDescLangRef" refer="langIdKey">
+			<xsd:annotation>
+				<xsd:documentation>
+					Reference from a description in a multilingual CV to a language identifier.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="CONTROLLED_VOCABULARY/DESCRIPTION"/>
+			<xsd:field xpath="@LANG_REF"/>
+		</xsd:keyref>
+		<xsd:keyref name="tierLangRef" refer="langIdKey">
+			<xsd:annotation>
+				<xsd:documentation>
+					Reference from a tier to a language identifier, to indicate the (main) language recorded
+					on that tier.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="TIER"/>
+			<xsd:field xpath="@LANG_REF"/>
+		</xsd:keyref>
+		<xsd:keyref name="annoAlignLangRef" refer="langIdKey">
+			<xsd:annotation>
+				<xsd:documentation>
+					Reference from an individual alignable annotation to a language identifier.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="TIER/ANNOTATION/ALIGNABLE_ANNOTATION"/>
+			<xsd:field xpath="@LANG_REF"/>
+		</xsd:keyref>
+		<xsd:keyref name="annoRefLangRef" refer="langIdKey">
+			<xsd:annotation>
+				<xsd:documentation>
+					Reference from an individual reference annotation to a language identifier.
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="TIER/ANNOTATION/REF_ANNOTATION"/>
+			<xsd:field xpath="@LANG_REF"/>
+		</xsd:keyref>
+		<!--
+		     Since we try to describe that the @CVE_IDs are unique within the CONTROLLED_VOCABULARY,
+		     the xsd:key element must be located just inside the CONTROLLED_VOCABULARY.
+		<xsd:key name="cvEntryKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					The entry id should be unique within the collection of entry elements
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="CV_ENTRY_ML"/>
+			<xsd:field xpath="@CVE_ID"/>
+		</xsd:key>
+		-->
+		<!--
+		     Getting from the CVE_REF to the appropriately matching CVE_ID isn't so simple!
+		     It probably can't be done in XPath, never mind the more restricted version that is
+		     allowed here.
+		     http://www.w3.org/TR/2004/PER-xmlschema-1-20040318/structures.html#coss-identity-constraint
+
+		     TIER/ALIGNABLE_ANNOTATION/@CVE_REF/../../@LINGUISTIC_TYPE_REF => call this value x
+		     search for a value equal to x in
+		     LINGUISTIC_TYPE/@LINGUISTIC_TYPE_ID . When found, take (relative to that)
+		     ../@CONTROLLED_VOCABULARY_REF => call this value y
+		     search for a value equal to y in
+		     CONTROLLED_VOCABULARY/@CV_ID and this is the CONTROLLED_VOCABULARY which should
+		     contain (in CVE_ENTRY_ML/@CVE_ID) the value from @CVE_REF.
+
+
+		     A weaker check could just try to find any matching CONTROLLED_VOCABULARY/CVE_ENTRY_ML/@CVE_ID,
+		     without checking if this is in the correct CONTROLLED_VOCABULARY.
+
+		     According to http://docstore.mik.ua/orelly/xml/schema/ch09_02.htm, putting a keyref
+		     in a parent node of some key definition creates an extra uniqueness constraint on
+		     the key values. That is not desired here.
+		     (The validator that we use doesn't seem to check that but gives other, strange, error
+		     messages)			
+		<xsd:keyref name="cvEntryAlignRef" refer="cvEntryKey">
+			<xsd:selector xpath="TIER/ANNOTATION/ALIGNABLE_ANNOTATION"/>
+			<xsd:field xpath="@CVE_REF"/>
+		</xsd:keyref>
+		<xsd:keyref name="cvEntryRefRef" refer="cvEntryKey">
+			<xsd:selector xpath="TIER/ANNOTATION/REF_ANNOTATION"/>
+			<xsd:field xpath="@CVE_REF"/>
+		</xsd:keyref>
+		-->
+		<xsd:key name="alignAnnotationIdKey">
+			<xsd:selector xpath="TIER/ANNOTATION/ALIGNABLE_ANNOTATION"/>
+			<xsd:field xpath="@ANNOTATION_ID"/>
+		</xsd:key>
+		<xsd:key name="refAnnotationIdKey">
+			<xsd:selector xpath="TIER/ANNOTATION/REF_ANNOTATION"/>
+			<xsd:field xpath="@ANNOTATION_ID"/>
+		</xsd:key>
+		<!-- set of key and key refs for referential links 
+			4 keys for links to refer to: alignable and reference annotation id's and cross link and group link id.
+			2 x 4 keyrefs for the cross link ref1 and ref2 idrefs to one of the 4 keys and  
+			1 x 4 keyrefs for the group link refs idrefs to one of the 4 keys.
+		-->
+		<xsd:key name="crossRefLinkIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="@REF_LINK_ID"/>
+		</xsd:key>
+		<xsd:key name="groupRefLinkIdKey">
+			<xsd:selector xpath="REF_LINK_SET/GROUP_REF_LINK"/>
+			<xsd:field xpath="@REF_LINK_ID"/>
+		</xsd:key>
+		
+		<xsd:keyref name="crossLinkRef1AlignAnnoKeyRef" refer="alignAnnotationIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="REF1"/>
+		</xsd:keyref> 
+		<xsd:keyref name="crossLinkRef1RefAnnoKeyRef" refer="refAnnotationIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="REF1"/>
+		</xsd:keyref>
+		<xsd:keyref name="crossLinkRef1CrossLinkKeyRef" refer="crossRefLinkIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="REF1"/>
+		</xsd:keyref>
+		<xsd:keyref name="crossLinkRef1GroupLinkKeyRef" refer="groupRefLinkIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="REF1"/>
+		</xsd:keyref>
+		
+		<xsd:keyref name="crossLinkRef2AlignAnnoKeyRef" refer="alignAnnotationIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="REF2"/>
+		</xsd:keyref>
+		<xsd:keyref name="crossLinkRef2RefAnnoKeyRef" refer="refAnnotationIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="REF2"/>
+		</xsd:keyref>
+		<xsd:keyref name="crossLinkRef2CrossLinkKeyRef" refer="crossRefLinkIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="REF2"/>
+		</xsd:keyref>
+		<xsd:keyref name="crossLinkRef2GroupLinkKeyRef" refer="groupRefLinkIdKey">
+			<xsd:selector xpath="REF_LINK_SET/CROSS_REF_LINK"/>
+			<xsd:field xpath="REF2"/>
+		</xsd:keyref>
+		
+		
+		<xsd:keyref name="groupLinkRefsAlignAnnoKeyRef" refer="alignAnnotationIdKey">
+			<xsd:selector xpath="REF_LINK_SET/GROUP_REF_LINK"/>
+			<xsd:field xpath="REFS"/>
+		</xsd:keyref>
+		<xsd:keyref name="groupLinkRefsRefAnnoKeyRef" refer="refAnnotationIdKey">
+			<xsd:selector xpath="REF_LINK_SET/GROUP_REF_LINK"/>
+			<xsd:field xpath="REFS"/>
+		</xsd:keyref>
+		<xsd:keyref name="groupLinkRefsCrossLinkKeyRef" refer="crossRefLinkIdKey">
+			<xsd:selector xpath="REF_LINK_SET/GROUP_REF_LINK"/>
+			<xsd:field xpath="REFS"/>
+		</xsd:keyref>
+		<xsd:keyref name="groupLinkRefsGroupLinkKeyRef" refer="groupRefLinkIdKey">
+			<xsd:selector xpath="REF_LINK_SET/GROUP_REF_LINK"/>
+			<xsd:field xpath="REFS"/>
+		</xsd:keyref>
+		<!-- end of key - keyref pairs -->
+	</xsd:element>
+	
+	<xsd:complexType name="headType">
+		<xsd:sequence>
+			<xsd:element name="MEDIA_DESCRIPTOR" minOccurs="0" maxOccurs="unbounded">
+				<xsd:complexType>
+					<xsd:attribute name="MEDIA_URL" type="xsd:anyURI" use="required"/>
+					<xsd:attribute name="RELATIVE_MEDIA_URL" type="xsd:anyURI" use="optional"/>
+					<xsd:attribute name="MIME_TYPE" type="xsd:string" use="required"/>
+					<xsd:attribute name="TIME_ORIGIN" type="xsd:long" use="optional"/>
+					<xsd:attribute name="EXTRACTED_FROM" type="xsd:anyURI" use="optional"/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="LINKED_FILE_DESCRIPTOR" minOccurs="0" maxOccurs="unbounded">
+				<xsd:complexType>
+					<xsd:attribute name="LINK_URL" type="xsd:anyURI" use="required"/>
+					<xsd:attribute name="RELATIVE_LINK_URL" type="xsd:anyURI" use="optional"/>
+					<xsd:attribute name="MIME_TYPE" type="xsd:string" use="required"/>
+					<xsd:attribute name="TIME_ORIGIN" type="xsd:long" use="optional"/>
+					<xsd:attribute name="ASSOCIATED_WITH" type="xsd:anyURI" use="optional"/>
+				</xsd:complexType>
+			</xsd:element>
+		    <xsd:element name="PROPERTY" type="propType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="MEDIA_FILE" use="optional" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					This attribute is deprecated. Use MEDIA_DESCRIPTOR elements instead. 
+				</xsd:documentation>
+				<xsd:appinfo>Ignore</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="TIME_UNITS" use="optional" default="milliseconds">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="NTSC-frames"/>
+					<xsd:enumeration value="PAL-frames"/>
+					<xsd:enumeration value="milliseconds"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:complexType name="timeType">
+		<xsd:sequence>
+			<xsd:element name="TIME_SLOT" minOccurs="0" maxOccurs="unbounded">
+				<xsd:complexType>
+					<xsd:attribute name="TIME_SLOT_ID" type="xsd:ID" use="required"/>
+					<xsd:attribute name="TIME_VALUE" type="xsd:unsignedInt" use="optional"/>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="tierType">
+		<xsd:sequence>
+			<xsd:element name="ANNOTATION" type="annotationType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="TIER_ID" type="xsd:string" use="required"/>
+		<xsd:attribute name="PARTICIPANT" type="xsd:string" use="optional"/>
+		<xsd:attribute name="ANNOTATOR" type="xsd:string" use="optional"/>
+		<xsd:attribute name="LINGUISTIC_TYPE_REF" type="xsd:string" use="required"/>
+		<xsd:attribute name="DEFAULT_LOCALE" type="xsd:IDREF" use="optional"/>
+		<xsd:attribute name="PARENT_REF" type="xsd:string" use="optional"/>
+		<!-- since 2.8, to overrule an EXT_REF on the type level -->
+		<xsd:attribute name="EXT_REF" type="xsd:IDREF" use="optional"/>
+		<!-- since 2.8 -->
+		<xsd:attribute name="LANG_REF" type="xsd:IDREF" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="annotationType">
+		<xsd:choice>
+			<xsd:element name="ALIGNABLE_ANNOTATION" type="alignableType"/>
+			<xsd:element name="REF_ANNOTATION" type="refAnnoType"/>
+		</xsd:choice>
+	</xsd:complexType>
+	
+	<xsd:complexType name="alignableType">
+		<xsd:sequence>
+			<xsd:element name="ANNOTATION_VALUE" type="xsd:string"/>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="annotationAttribute"/>
+		<xsd:attribute name="TIME_SLOT_REF1" type="xsd:IDREF" use="required"/>
+		<xsd:attribute name="TIME_SLOT_REF2" type="xsd:IDREF" use="required"/>
+		<xsd:attribute name="SVG_REF" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="refAnnoType">
+		<xsd:sequence>
+			<xsd:element name="ANNOTATION_VALUE" type="xsd:string"/>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="annotationAttribute"/>
+		<xsd:attribute name="ANNOTATION_REF" type="xsd:IDREF" use="required">
+			<xsd:annotation>
+				<xsd:documentation>
+					This is in fact a reference to the parent annotation.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="PREVIOUS_ANNOTATION" type="xsd:IDREF" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="lingType">
+		<xsd:attribute name="LINGUISTIC_TYPE_ID" type="xsd:string" use="required"/>
+		<xsd:attribute name="TIME_ALIGNABLE" type="xsd:boolean" use="optional"/>
+		<xsd:attribute name="CONSTRAINTS" type="xsd:IDREF" use="optional"/>
+		<xsd:attribute name="GRAPHIC_REFERENCES" type="xsd:boolean" use="optional"/>
+		<xsd:attribute name="CONTROLLED_VOCABULARY_REF" type="xsd:string" use="optional"/>
+		<xsd:attribute name="EXT_REF" type="xsd:IDREF" use="optional"/>
+		<xsd:attribute name="LEXICON_REF" type="xsd:IDREF" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="localeType">
+		<xsd:attribute name="LANGUAGE_CODE" type="xsd:ID" use="required"/>
+		<xsd:attribute name="COUNTRY_CODE" type="xsd:string" use="optional"/>
+		<xsd:attribute name="VARIANT" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="constraintType">
+		<xsd:attribute name="STEREOTYPE" type="xsd:ID" use="required"/>
+		<xsd:attribute name="DESCRIPTION" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="convocType">
+		<!-- change in 2.8, now it contains 
+			a list of multilingual entries plus possible multiple description elements -->
+		<xsd:sequence>
+			<xsd:element name="DESCRIPTION" type="descMultiLangType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="CV_ENTRY_ML" type="cventryType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		
+		<xsd:attribute name="CV_ID" type="xsd:string" use="required"/>
+		<xsd:attribute name="EXT_REF" type="xsd:IDREF" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>
+					A reference to an url of an external Controlled Vocabulary.
+					Is intended to be mutually exclusive with a sequence of CV_ENTRY_ML elements. 
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+	<!-- introduced in 2.8, modification that breaks compatibility with previous version -->
+	<xsd:complexType name="cventryType">
+		<xsd:annotation>
+			<xsd:documentation>
+				An entry in a multilingual controlled vocabulary, containing the values and the descriptions 
+				in multiple languages.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="CVE_VALUE" type="cveValueType" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="CVE_ID" type="xsd:string" use="required"/><!-- in 2.8 moved from ecventry to cv entry -->
+		<xsd:attribute name="EXT_REF" type="xsd:IDREF" use="optional"/>		
+	</xsd:complexType>
+	
+	<!-- introduced in 2.8 -->
+	<xsd:complexType name="cveValueType">
+		<xsd:annotation>
+			<xsd:documentation>
+				A controlled vocabulary entry value with a language attribute. 
+				This allows multilingual controlled vocabularies. It adds a language reference attribute
+				compared to the mono-lingual cv entry element.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="LANG_REF" type="xsd:IDREF" use="required"/>
+				<xsd:attribute name="DESCRIPTION" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<!-- introduced in 2.8 -->
+	<xsd:complexType name="descMultiLangType">
+		<xsd:annotation>
+			<xsd:documentation>
+				A description element with a language reference attribute.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="LANG_REF" type="xsd:IDREF" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<xsd:complexType name="propType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="NAME" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<xsd:complexType name="extRefType">
+		<xsd:attribute name="EXT_REF_ID" type="xsd:ID" use="required"/>
+		<xsd:attribute name="TYPE" use="required">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="iso12620">
+						<xsd:annotation>
+							<xsd:documentation>
+								A reference to the id of an ISO Data Category (url including id).
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:enumeration>
+					<xsd:enumeration value="ecv">
+						<xsd:annotation>
+							<xsd:documentation>
+								A reference to an external (closed) Controlled Vocabulary (url).
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:enumeration>
+					<xsd:enumeration value="cve_id">
+						<xsd:annotation>
+							<xsd:documentation>
+								A reference to the id of an Entry in an external Controlled Vocabulary (id).
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:enumeration>
+					<xsd:enumeration value="lexen_id">
+						<xsd:annotation>
+							<xsd:documentation>
+								A reference to the id of an entry in a lexicon (url, url+id or id)
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:enumeration>
+					<xsd:enumeration value="resource_url">
+						<xsd:annotation>
+							<xsd:documentation>
+								A reference or hyperlink to any type document (url)
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:enumeration>
+					<!-- other external reference types can be added later -->
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="VALUE" type="xsd:string" use="required"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="lexRefType">
+		<xsd:attribute name="LEX_REF_ID" type="xsd:ID" use="required"/>
+		<xsd:attribute name="NAME" type="xsd:string" use="required"/>
+		<xsd:attribute name="TYPE" type="xsd:string" use="required"/>
+		<xsd:attribute name="URL" type="xsd:string" use="required"/>
+		<xsd:attribute name="LEXICON_ID" type="xsd:string" use="required"/>
+		<xsd:attribute name="LEXICON_NAME" type="xsd:string" use="required"/>
+		<xsd:attribute name="DATCAT_ID" type="xsd:string" use="optional"/>
+		<xsd:attribute name="DATCAT_NAME" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="langType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				The Language element containing a reference to a language name or (if possible persistent) definition. 
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="LANG_ID" type="xsd:ID" use="required"/>
+		<!-- definition is optional so that user defined languages are easy to add -->
+		<xsd:attribute name="LANG_DEF" type="xsd:string" use="optional">
+			<xsd:annotation><xsd:documentation>
+				ISO-639-3 still seems to be the best choice for language codes and closest to persistent language ID's 
+				seem to be the http://cdb.iso.org/lg/... identifiers also used by the iso-language-639-3 component in
+				the CLARIN ComponentRegistry?
+			</xsd:documentation></xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="LANG_LABEL" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	<!-- since 2.8 -->
+	<xsd:complexType name="licenseType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				The license element can be used to include license information in the eaf file itself.  
+			</xsd:documentation>			
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="LICENSE_URL" type="xsd:anyURI" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<!-- introduced in 3.0 -->
+	<xsd:complexType name="refLinksType">
+		<xsd:annotation>
+			<xsd:documentation>
+				A set containing referential links. 
+				A set can contain both cross-references and grouping referential links. 
+				Apart from an ID the set can have a meaningful, "friendly" name.
+				A set can have an external reference, a language and a CV reference.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="CROSS_REF_LINK" type="crossLinkType"/>
+				<xsd:element name="GROUP_REF_LINK" type="groupLinkType"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attribute name="LINK_SET_ID" type="xsd:ID" use="required"/>
+		<xsd:attribute name="LINK_SET_NAME" type="xsd:string" use="optional"/>
+		<xsd:attribute name="EXT_REF" type="xsd:IDREFS" use="optional"/>
+		<xsd:attribute name="LANG_REF" type="xsd:IDREF" use="optional"/>
+		<xsd:attribute name="CV_REF" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	<!-- introduced in 3.0 -->
+	<!-- a cross reference element -->
+	<xsd:complexType name="crossLinkType">
+		<xsd:annotation>
+			<xsd:documentation>
+				A cross reference is a referential link between two existing elements (REF1 and REF2).
+				Each of these elements can be either an annotation or a referential link. 
+				Optionally the direction of the link can be specified.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<!-- refers to the ID of an annotation or a reference link -->
+				<xsd:attribute name="REF1" type="xsd:IDREF" use="required"/>
+				<xsd:attribute name="REF2" type="xsd:IDREF" use="required"/>
+				<xsd:attribute name="DIRECTIONALITY" use="optional">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:enumeration value="undirected"/>
+							<xsd:enumeration value="unidirectional"/>
+							<xsd:enumeration value="bidirectional"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:attribute>
+				
+				<xsd:attributeGroup ref="refLinkAttribute"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<!-- a grouping reference element -->
+	<xsd:complexType name="groupLinkType">
+		<xsd:annotation>
+			<xsd:documentation>
+				A referential element for grouping any number of existing elements (the REFS). 
+				Each element can be an annotation or a referential link.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="REFS" type="xsd:IDREFS" use="required"/>
+				<xsd:attributeGroup ref="refLinkAttribute"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<!-- attributes shared by reference link elements -->
+	<xsd:attributeGroup name="refLinkAttribute">
+		<xsd:annotation>
+			<xsd:documentation>
+				Attributes common for both cross- and group references. 
+				Apart from an ID it is possible to associate a meaningful, "friendly"
+				name to the link. Furthermore a link can have an external reference, a language and a 
+				CV entry reference and a type attribute.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="REF_LINK_ID" type="xsd:ID" use="required"/>
+		<xsd:attribute name="REF_LINK_NAME" type="xsd:string" use="optional"/>
+		<xsd:attribute name="EXT_REF" type="xsd:IDREFS" use="optional"/>
+		<xsd:attribute name="LANG_REF" type="xsd:IDREF" use="optional"/>
+		<xsd:attribute name="CVE_REF" type="xsd:string" use="optional"/>
+		<xsd:attribute name="REF_TYPE" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>
+					An attribute that allows to specify the type of the cross- or group reference/link.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<!-- end of new in 3.0 -->
+
+	<xsd:attributeGroup name="annotationAttribute">
+		<xsd:attribute name="ANNOTATION_ID" type="xsd:ID" use="required"/>
+		<xsd:attribute name="EXT_REF" type="xsd:IDREFS" use="optional"/>
+		<xsd:attribute name="LANG_REF" type="xsd:IDREF" use="optional"/><!-- since 2.8 -->
+		<xsd:attribute name="CVE_REF" type="xsd:string" use="optional"/><!-- since 2.8 -->
+	</xsd:attributeGroup>
+	
+	
+	<!-- Start of CV_RESOURCE part, an alternative root element -->
+	<xsd:element name="CV_RESOURCE">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="LANGUAGE" type="langType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="CONTROLLED_VOCABULARY" type="convocType" minOccurs="1" maxOccurs="unbounded">
+					<xsd:key name="cvEntryKey2">
+						<xsd:annotation>
+							<xsd:documentation xml:lang="en">
+								The entry id should be unique within the  
+								collection of entry elements
+							</xsd:documentation>
+						</xsd:annotation>
+						<xsd:selector xpath="CV_ENTRY_ML"/>
+						<xsd:field xpath="@CVE_ID"/>
+					</xsd:key>
+					
+				</xsd:element>
+				<xsd:element name="EXTERNAL_REF" type="extRefType" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="DATE" type="xsd:dateTime" use="optional"/>
+			<xsd:attribute name="AUTHOR" type="xsd:string" use="optional"/>
+			<xsd:attribute name="VERSION" type="xsd:string" use="optional"/>
+		</xsd:complexType>
+		<!-- define key - keyref pairs -->
+		<!-- If not commented this is considered a double global definition of cvNameKey -->
+		<!-- <xsd:key name="cvNameKey">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					The Controlled Vocabulary name/id should be unique within the  
+					collection of Controlled Vocabulary elements
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:selector xpath="CONTROLLED_VOCABULARY"/>
+			<xsd:field xpath="@CV_ID"/>
+		</xsd:key>-->
+	</xsd:element>
+	
+</xsd:schema>

@@ -1465,7 +1465,7 @@ def parse_eaf(file_path, eaf_obj, suppress_version_warning=False):
         raise Exception('Unable to parse eaf, can you open it in ELAN?')
 
     if not suppress_version_warning and \
-            tree_root.attrib['VERSION'] not in ['2.8', '2.7']:
+            tree_root.attrib['VERSION'] not in ['3.0', '2.8', '2.7']:
         warnings.warn('Parsing unknown version of ELAN spec... '
                       'This could result in errors...')
     eaf_obj.adocument.update(tree_root.attrib)
