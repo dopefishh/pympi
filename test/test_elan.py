@@ -244,7 +244,6 @@ class Elan(unittest.TestCase):
 
         self.assertRaises(ValueError, self.eaf.add_tier, '')
 
-    @pytest.mark.xfail
     def test_clean_time_slots(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_tier('tier2')
@@ -1044,7 +1043,6 @@ class Elan(unittest.TestCase):
         self.assertEqual(sorted(self.eaf.child_tiers_for('test5')),
                          sorted(['child']))
 
-    @pytest.mark.xfail
     def test_shift_annotations(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_tier('tier2')
@@ -1151,7 +1149,7 @@ class Elan(unittest.TestCase):
     [
         ('sample_2.8.eaf', 'EAFv2.8.xsd'),
         ('sample_2.7.eaf', 'EAFv2.8.xsd'),
-        #('sample_3.0.eaf', 'EAFv3.0.xsd'),  # FIXME: sample file not there yet
+        ('sample_3.0.eaf', 'EAFv3.0.xsd'),
     ]
 )
 def test_to_file_to_eaf(eaf, schema, test_dir, tmp_path):
