@@ -1157,10 +1157,18 @@ class Elan(unittest.TestCase):
         etree.parse(filepath, xmlparser)
 
         self.eaf = Eaf('./test/sample_2.7.eaf')
-
         self.eaf.to_file(filepath)
 
         with open('./test/EAFv2.8.xsd', 'r') as scheme_in:
+            scheme_root = etree.XML(scheme_in.read())
+        schema = etree.XMLSchema(scheme_root)
+        xmlparser = etree.XMLParser(schema=schema)
+        etree.parse(filepath, xmlparser)
+
+        self.eaf = Eaf('./test/sample_3.0.eaf')
+        self.eaf.to_file(filepath)
+
+        with open('./test/EAFv3.0.xsd', 'r') as scheme_in:
             scheme_root = etree.XML(scheme_in.read())
         schema = etree.XMLSchema(scheme_root)
         xmlparser = etree.XMLParser(schema=schema)
