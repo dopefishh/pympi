@@ -1,9 +1,7 @@
-#!/bin/env python
-# -*- coding: utf-8 -*-
-
+import pathlib
 import unittest
-import tempfile
-import os
+import pytest
+
 from pympi.Praat import TextGrid
 
 
@@ -126,38 +124,6 @@ class PraatTest(unittest.TestCase):
         self.assertEqual([(1, 'tier1'), (2, 'tier3'), (3, 'tier2')],
                          list(self.tg.get_tier_name_num()))
 
-    def test_to_file(self):
-        for codec in ['utf-8', 'latin_1', 'mac_roman']:
-            self.tg = TextGrid(xmax=20)
-            tier1 = self.tg.add_tier('tier')
-            tier1.add_interval(1, 2, 'i1')
-            tier1.add_interval(2, 3, 'i2')
-            tier1.add_interval(4, 5, 'i3')
-
-            tier4 = self.tg.add_tier('tier')
-            tier4.add_interval(1, 2, u'i1ü')
-            tier4.add_interval(2.0, 3, 'i2')
-            tier4.add_interval(4, 5.0, 'i3')
-
-            tier2 = self.tg.add_tier('tier2', tier_type='TextTier')
-            tier2.add_point(1, u'p1ü')
-            tier2.add_point(2, 'p1')
-            tier2.add_point(3, 'p1')
-
-            tempf = tempfile.mkstemp()[1]
-
-# Normal mode
-            self.tg.to_file(tempf, codec=codec)
-            TextGrid(tempf, codec=codec)
-# Short mode
-            self.tg.to_file(tempf, codec=codec, mode='s')
-            TextGrid(tempf, codec=codec)
-# Binary mode
-            self.tg.to_file(tempf, mode='b')
-            TextGrid(tempf)
-
-            os.remove(tempf)
-
     def test_to_eaf(self):
         tier1 = self.tg.add_tier('tier1')
         tier2 = self.tg.add_tier('tier2', tier_type='TextTier')
@@ -267,5 +233,33 @@ class PraatTest(unittest.TestCase):
         self.tier2.clear_intervals()
         self.assertEqual([], self.tier2.intervals)
 
-if __name__ == '__main__':
-    unittest.main()
+
+@pytest.mark.parametrize('codec', ['utf-8', 'latin_1', 'mac_roman'])
+def test_to_file(codec, tmp_path):
+    tg = TextGrid(xmax=20)
+    tier1 = tg.add_tier('tier')
+    tier1.add_interval(1, 2, 'i1')
+    tier1.add_interval(2, 3, 'i2')
+    tier1.add_interval(4, 5, 'i3')
+
+    tier4 = tg.add_tier('tier')
+    tier4.add_interval(1, 2, u'i1ü')
+    tier4.add_interval(2.0, 3, 'i2')
+    tier4.add_interval(4, 5.0, 'i3')
+
+    tier2 = tg.add_tier('tier2', tier_type='TextTier')
+    tier2.add_point(1, u'p1ü')
+    tier2.add_point(2, 'p1')
+    tier2.add_point(3, 'p1')
+
+    tempf = str(tmp_path / 'test')
+
+    # Normal mode
+    tg.to_file(pathlib.Path(tempf), codec=codec)
+    TextGrid(tempf, codec=codec)
+    # Short mode
+    tg.to_file(tempf, codec=codec, mode='s')
+    TextGrid(tempf, codec=codec)
+    # Binary mode
+    tg.to_file(tempf, mode='b')
+    TextGrid(tempf)

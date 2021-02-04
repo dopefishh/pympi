@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import codecs
 import re
 import struct
@@ -63,11 +60,9 @@ class TextGrid:
                 elif textlen == -1:
                     textlen = struct.unpack('>h', ifile.read(2))[0]
                     data = ifile.read(textlen*2)
-                    # Hack to go from number to unicode in python3 and python2
-                    fun = unichr if 'unichr' in __builtins__ else chr
                     charlist = (data[i:i+2] for i in range(0, len(data), 2))
-                    return u''.join(
-                        fun(struct.unpack('>h', i)[0]) for i in charlist)
+                    return ''.join(
+                        chr(struct.unpack('>h', i)[0]) for i in charlist)
 
             ifile.read(ord(ifile.read(1)))  # skip oo type
             self.xmin = struct.unpack('>d', ifile.read(8))[0]
@@ -98,9 +93,9 @@ class TextGrid:
                 line = next(ifile).decode(codec)
                 return pat.search(line).group(1)
 
-            regfloat = re.compile('([\d.]+)\s*$', flags=re.UNICODE)
-            regint = re.compile('([\d]+)\s*$', flags=re.UNICODE)
-            regstr = re.compile('"(.*)"\s*$', flags=re.UNICODE)
+            regfloat = re.compile(r'([\d.]+)\s*$', flags=re.UNICODE)
+            regint = re.compile(r'([\d]+)\s*$', flags=re.UNICODE)
+            regstr = re.compile(r'"(.*)"\s*$', flags=re.UNICODE)
             # Skip the Headers and empty line
             next(ifile), next(ifile), next(ifile)
             self.xmin = float(nn(ifile, regfloat))
@@ -159,7 +154,7 @@ class TextGrid:
         elif number < 1 or number > len(self.tiers):
             raise ValueError('Number not in [1..{}]'.format(len(self.tiers)))
         elif tier_type not in Tier.P_TIERS:
-            raise ValueError('tier_type has to be in {}'.format(self.P_TIERS))
+            raise ValueError('tier_type has to be in {}'.format(Tier.P_TIERS))
         self.tiers.insert(number-1,
                           Tier(self.xmin, self.xmax, name, tier_type))
         return self.tiers[number-1]
@@ -254,7 +249,8 @@ class TextGrid:
                         itier and f.write(struct.pack('>d', c[1]))
                         writebstr(c[2 if itier else 1])
         elif mode in ['normal', 'n', 'short', 's']:
-            with codecs.open(filepath, 'w', codec) as f:
+            # py3.5 compat: codecs.open does not support pathlib.Path objects in py3.5.
+            with codecs.open(str(filepath), 'w', codec) as f:
                 short = mode[0] == 's'
 
                 def wrt(indent, prefix, value, ff=''):
