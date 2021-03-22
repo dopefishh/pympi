@@ -1,4 +1,4 @@
-pympi version 1.7
+pympi version 1.70
 ==================
 ### Introduction
 Pympi is a package that allows you to interact with [Elan][1] files and [TextGrid][2] (regular, short and binary) files.
@@ -45,12 +45,12 @@ python setup.py install
 
 ### How to cite
 ```tex
-@misc{pympi-1.7,
+@misc{pympi-1.70,
 	author={Lubbers, Mart and Torreira, Francisco},
 	title={pympi-ling: a {Python} module for processing {ELAN}s {EAF} and {Praat}s {TextGrid} annotation files.},
 	howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
 	year={2013-2021},
-	note={Version 1.7}
+	note={Version 1.70}
 }
 ```
 
