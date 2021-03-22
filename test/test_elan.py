@@ -310,7 +310,6 @@ class Elan(unittest.TestCase):
                    [(4000, 4000, 'O12_t1_t2')]),
             list(self.eaf.get_gaps_and_overlaps('t1', 't2', 3000)))
 
-    @pytest.mark.xfail
     def test_extract(self):
         self.eaf.add_tier('tier1')
         self.eaf.add_annotation('tier1', 0, 1000, 'a1')
@@ -333,15 +332,13 @@ class Elan(unittest.TestCase):
         self.assertEqual(e1.external_refs, self.eaf.external_refs)
         self.assertEqual(e1.lexicon_refs, self.eaf.lexicon_refs)
         self.assertEqual(e1.get_tier_names(), self.eaf.get_tier_names())
-        self.assertEqual(sorted(e1.get_annotation_data_between_times(
-            'tier1', 1500, 2500)), [(1000, 2000, 'a2'), (2000, 3000, 'a3')])
+        self.assertEqual(sorted(e1.get_annotation_data_for_tier('tier1')),
+            [(1000, 2000, 'a2'), (2000, 3000, 'a3')])
         e1 = self.eaf.extract(1000, 2000)
-        self.assertEqual(sorted(e1.get_annotation_data_between_times(
-            'tier1', 1000, 2000)),
-            [(0, 1000, 'a1'), (1000, 2000, 'a2'), (2000, 3000, 'a3')])
+        self.assertEqual(sorted(e1.get_annotation_data_for_tier('tier1')),
+            [(1000, 2000, 'a2'), (2000, 3000, 'a3')])
         e1 = self.eaf.extract(4001, 30000)
-        self.assertEqual(sorted(e1.get_annotation_data_between_times(
-            'tier1', 4001, 30000)), [])
+        self.assertEqual(sorted(e1.get_annotation_data_for_tier('tier1')), [])
 
     def test_filter_annotations(self):
         self.eaf.add_tier('tier1')

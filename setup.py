@@ -4,7 +4,7 @@
 from distutils.core import setup
 
 licence = 'MIT Licence'
-version = '1.7'
+version = '1.70'
 
 setup(name='pympi-ling',
       version=version,
@@ -12,7 +12,7 @@ setup(name='pympi-ling',
         'A python module for processing ELAN and Praat annotation files',
       author='Mart Lubbers',
       long_description=r"""
-pympi version 1.7
+pympi version 1.70
 ==================
 
 Introduction
@@ -83,12 +83,12 @@ How to cite
 
 .. code:: tex
 
-    @misc{pympi-1.7,
+    @misc{pympi-1.70,
         author={Lubbers, Mart and Torreira, Francisco},
         title={pympi-ling: a Python module for processing ELANs EAF and Praats TextGrid annotation files.},
         howpublished={\url{https://pypi.python.org/pypi/pympi-ling}},
         year={2013-2021},
-        note={Version 1.69}
+        note={Version 1.70}
     }
 
 Authors

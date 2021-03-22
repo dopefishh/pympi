@@ -5,7 +5,7 @@ import time
 import pathlib
 import warnings
 
-VERSION = '1.7'
+VERSION = '1.70'
 
 
 class Eaf:
@@ -1092,9 +1092,9 @@ class Eaf:
         if self.tiers[id_tier][1]:
             return self.remove_ref_annotation(id_tier, time, clean)
         removed = 0
-        for b in [a for a in self.tiers[id_tier][0].items() if
+        for b in sorted([a for a in self.tiers[id_tier][0].items() if
                   self.timeslots[a[1][0]] <= time and
-                  self.timeslots[a[1][1]] >= time]:
+                  self.timeslots[a[1][1]] >= time], reverse=True):
             del(self.tiers[id_tier][0][b[0]])
             del(self.annotations[b[0]])
             removed += 1
