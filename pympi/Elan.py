@@ -132,6 +132,8 @@ class Eaf:
         """
         if self.tiers[id_tier][1]:
             raise ValueError('Tier already contains ref annotations...')
+        if not isinstance(start, int) or not isinstance(end, int):
+            raise ValueError('start and end must be an integer...')
         if start == end:
             raise ValueError('Annotation length is zero...')
         if start > end:
