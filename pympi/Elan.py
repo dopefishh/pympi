@@ -5,7 +5,7 @@ import time
 import pathlib
 import warnings
 
-VERSION = '1.70'
+VERSION = '1.70.2'
 
 
 class Eaf:

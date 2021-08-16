@@ -4,7 +4,7 @@
 from distutils.core import setup
 
 licence = 'MIT Licence'
-version = '1.70'
+version = '1.70.2'
 
 setup(name='pympi-ling',
       version=version,
@@ -12,8 +12,8 @@ setup(name='pympi-ling',
         'A python module for processing ELAN and Praat annotation files',
       author='Mart Lubbers',
       long_description=r"""
-pympi version 1.70
-==================
+pympi version 1.70.2
+====================
 
 Introduction
 ------------

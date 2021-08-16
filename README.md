@@ -1,5 +1,5 @@
-pympi version 1.70
-==================
+pympi version 1.70.2
+====================
 ### Introduction
 Pympi is a package that allows you to interact with [Elan][1] files and [TextGrid][2] (regular, short and binary) files.
 You can create, edit and convert both formats into each other.
