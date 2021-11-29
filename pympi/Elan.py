@@ -1743,29 +1743,78 @@ class TSConf:
         :param str file_path: Path to read from, - for stdin. If ``None`` an
             empty TSConf file will be created.
         """
+        self.ts_file_path = file_path
         ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
             time.daylight else -time.timezone
         self.adocument = {
             'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
                 ctz // 3600, ctz % 3600),
             'VERSION': '1.0'}
-        self.trackpanels = {}
-        self.tracks = []
+        self.trackpanels = []
+        self.tracks = {}
 
-    def set_continuous_rate():
-        pass
+    def add_track(self, name, description=None, time_col=0, detect_range=True,
+                    data_col=0, start_row=0, track_panel_num=0, derivative=0, 
+                    range_start=0, range_end=100, color=(0,0,0), continuous=False):
+        self.tracks[name] = {
+            'description': description,
+            'time_col': time_col,
+            'detect_range': detect_range,
+            'data_col': data_col,
+            'start_row': start_row,
+            'track_panel_num': track_panel_num,
+            'derivative': derivative,
+            'range_start': range_start,
+            'range_end': range_end,
+            'color': color,
+            'continuous': continuous
+        }
 
 
 def to_tsconf(file_path, tsconf_obj, pretty=True):
     def rm_none(x):
-        return {k: v if isinstance(v, str) else str(v) for k, v in x.items()
+        return {k: v if isinstance(v, str) else str(v).lower() for k, v in x.items()
                 if v is not None}
     # Timeseries
     ADOCUMENT = etree.Element('timeseries', tsconf_obj.adocument)
-    # Header
-    #HEADER = etree.SubElement(ADOCUMENT, 'HEADER', eaf_obj.header)
-    # Add TSConf as secondary linked file to eaf_filepath
+    # Tracksources and tracks
+    for name, track in tsconf_obj.tracks.items():
+        sample_type = 'Continuous Rate' if track['continuous']\
+            else 'Discontinuous Rate'
+        TRACKSOURCE = etree.SubElement(ADOCUMENT, 'tracksource', rm_none(\
+            {
+                'sample_type': sample_type,
+                'source_url': tsconf_obj.ts_file_path,
+                'time_column': track['time_col']
+            }))
+        TRACKSOURCE_PROPERTY = etree.SubElement(TRACKSOURCE, 'property',\
+            {
+                'key': 'provider', 
+                'value':'mpi.eudico.client.annotator.timeseries.csv.CSVServiceProvider'
+            })
+        TRACK = etree.SubElement(TRACKSOURCE, 'track', rm_none({
+            'derivative': track['derivative'],
+            'name': name
+        }))
+        TRACK_PROPERTY = etree.SubElement(TRACK, 'property', rm_none({
+            'key': 'detect-range',
+            'value': track['detect_range']
+        }))
+        SAMPLE_POSITION = etree.SubElement(TRACK, 'sample_position')
+        pos = etree.SubElement(SAMPLE_POSITION, 'pos', rm_none({
+            'col': track['data_col'],
+            'row': track['start_row']
+        }))
+        description = etree.SubElement(TRACK, 'description')
+        description.text = track['description']
+        units = etree.SubElement(TRACK, 'units')
+        range = etree.SubElement(TRACK, 'range', rm_none({
+            'max': track['range_end'],
+            'min': track['range_start']
+        }))
+        color = etree.SubElement(TRACK, 'color')
+        color.text = re.sub(' ()', '', str(track['color']))
 
 
 def validate_tsconf(file_path):
-    pass
+    return True
