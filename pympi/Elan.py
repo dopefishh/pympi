@@ -82,14 +82,15 @@ class Eaf:
         """
         ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
             time.daylight else -time.timezone
+        self.eaf_file_path = file_path
         self.maxts = 1
         self.maxaid = 1
         self.adocument = {
             'AUTHOR': author,
             'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
                 ctz // 3600, ctz % 3600),
-            'VERSION': '2.8',
-            'FORMAT': '2.8',
+            'VERSION': '3.0',
+            'FORMAT': '3.0',
             'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:noNamespaceSchemaLocation':
                 'http://www.mpi.nl/tools/elan/EAFv2.8.xsd'}
@@ -352,7 +353,7 @@ class Eaf:
         self.tiers[id_tier][1][aid] = (ann, value, prev, svg)
 
     def add_secondary_linked_file(self, file_path, relpath=None, mimetype=None,
-                                  time_origin=None, assoc_with=None):
+                                  time_origin=None, assoc_with=None, tsconf=None):
         """Add a secondary linked file.
 
         :param str file_path: Path of the file.
@@ -369,6 +370,15 @@ class Eaf:
             mimetype = self.MIMES[file_path.split('.')[-1]]
         self.linked_file_descriptors.append({
             'LINK_URL': file_path, 'RELATIVE_LINK_URL': relpath,
+            'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
+            'ASSOCIATED_WITH': assoc_with})
+        # If this is a TXT file, check if its a timeseries file
+        if file_path.endswith('.txt') and validate_tsconf(file_path):
+            parent = pathlib.Path(file_path).parent
+            tsconf = pathlib.Path(parent, str(pathlib.Path(self.eaf_file_path).stem)\
+                 + '_tsconf.xml') if tsconf is None else tsconf
+            self.linked_file_descriptors.append({
+            'LINK_URL': tsconf, 'RELATIVE_LINK_URL': None,
             'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
             'ASSOCIATED_WITH': assoc_with})
 
@@ -1716,3 +1726,46 @@ def to_eaf(file_path, eaf_obj, pretty=True):
             file_path.rename(file_path.with_suffix('.bak'))
         etree.ElementTree(ADOCUMENT).write(
             str(file_path), xml_declaration=True, encoding='UTF-8')
+
+
+class TSConf:
+    """Read and write to {Eaf filename}_tsconf.xml.
+    This is the only way to fully utilize timeseries plotting functionality.
+
+    .. note:: All times are in milliseconds and can't have decimals.
+
+    :var dict adocument: Annotation document TAG entries.
+    """
+
+    def __init__(self, file_path=None):
+        """Construct either a new TSConf file or read on from a file/stream.
+
+        :param str file_path: Path to read from, - for stdin. If ``None`` an
+            empty TSConf file will be created.
+        """
+        ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
+            time.daylight else -time.timezone
+        self.adocument = {
+            'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
+                ctz // 3600, ctz % 3600),
+            'VERSION': '1.0'}
+        self.trackpanels = {}
+        self.tracks = []
+
+    def set_continuous_rate():
+        pass
+
+
+def to_tsconf(file_path, tsconf_obj, pretty=True):
+    def rm_none(x):
+        return {k: v if isinstance(v, str) else str(v) for k, v in x.items()
+                if v is not None}
+    # Timeseries
+    ADOCUMENT = etree.Element('timeseries', tsconf_obj.adocument)
+    # Header
+    #HEADER = etree.SubElement(ADOCUMENT, 'HEADER', eaf_obj.header)
+    # Add TSConf as secondary linked file to eaf_filepath
+
+
+def validate_tsconf(file_path):
+    pass
