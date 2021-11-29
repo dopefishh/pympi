@@ -1814,6 +1814,17 @@ def to_tsconf(file_path, tsconf_obj, pretty=True):
         }))
         color = etree.SubElement(TRACK, 'color')
         color.text = re.sub(' ()', '', str(track['color']))
+    if pretty:
+        indent(ADOCUMENT)
+    if file_path == '-':
+        try:
+            sys.stdout.write(etree.tostring(ADOCUMENT, encoding='unicode'))
+        except LookupError:
+            sys.stdout.write(etree.tostring(ADOCUMENT, encoding='UTF-8'))
+    else:
+        file_path = pathlib.Path(file_path)
+        etree.ElementTree(ADOCUMENT).write(
+            str(file_path), xml_declaration=True, encoding='UTF-8')
 
 
 def validate_tsconf(file_path):
