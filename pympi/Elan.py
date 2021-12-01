@@ -1737,7 +1737,7 @@ class TSConf:
     :var dict adocument: Annotation document TAG entries.
     """
 
-    def __init__(self, file_path=None):
+    def __init__(self, file_path):
         """Construct either a new TSConf file or read on from a file/stream.
 
         :param str file_path: Path to read from, - for stdin. If ``None`` an
@@ -1753,22 +1753,43 @@ class TSConf:
         self.trackpanels = []
         self.tracks = {}
 
-    def add_track(self, name, description=None, time_col=0, detect_range=True,
-                    data_col=0, start_row=0, track_panel_num=0, derivative=0, 
-                    range_start=0, range_end=100, color=(0,0,0), continuous=False):
+    def add_track(self, name, track):
         self.tracks[name] = {
-            'description': description,
-            'time_col': time_col,
-            'detect_range': detect_range,
-            'data_col': data_col,
-            'start_row': start_row,
-            'track_panel_num': track_panel_num,
-            'derivative': derivative,
-            'range_start': range_start,
-            'range_end': range_end,
-            'color': color,
-            'continuous': continuous
+            'description': track.description,
+            'time_col': track.time_col,
+            'detect_range': track.detect_range,
+            'data_col': track.data_col,
+            'start_row': track.start_row,
+            'track_panel_num': track.track_panel_num,
+            'derivative': track.derivative,
+            'range_start': track.range_start,
+            'range_end': track.range_end,
+            'color': track.color,
+            'continuous': track.continuous
         }
+
+
+class TSTrack:
+    """Construct a new timeseries track.
+
+    :param str file_path: Path to read from
+    """
+    def __init__(self, name, description=None, time_col=0, detect_range=True,
+                    data_col=0, start_row=0, track_panel_num=0, derivative=0, 
+                    range_start=0, range_end=100, color=(50,50,50), continuous=False):
+        self.name = name
+        self.description = description
+        self.time_col = time_col
+        self.detect_range = detect_range
+        self.data_col = data_col
+        self.start_row = start_row
+        self.track_panel_num = track_panel_num
+        self.derivative = derivative
+        self.range_start = range_start
+        self.range_end = range_end
+        self.color = color
+        self.continuous = continuous
+        
 
 
 def to_tsconf(file_path, tsconf_obj, pretty=True):
