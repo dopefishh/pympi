@@ -1834,7 +1834,7 @@ def to_tsconf(file_path, tsconf_obj, pretty=True):
             'min': track['range_start']
         }))
         color = etree.SubElement(TRACK, 'color')
-        color.text = re.sub(' ()', '', str(track['color']))
+        color.text = re.sub(' ()', '', str(track['color'])[1:-1])
     if pretty:
         indent(ADOCUMENT)
     if file_path == '-':
