@@ -644,7 +644,41 @@ class Eaf:
         a = self.tiers[id_tier][0]
         return [(self.timeslots[a[b][0]], self.timeslots[a[b][1]], a[b][2])
                 for b in a]
+    
+    def get_annotation_data_for_symbsub_tier(self, id_tier):
+        """"Give a list of all annotations of id_tier with their calculated start, end and value of the form:
+        ``[(start, end, value, value)]``
 
+        :param str id_tier: Name of the tier.
+        :raises KeyError: If the tier is non existent.
+        :returns: Reference annotations within that tier.
+        """
+        ref_ann = self.get_ref_annotation_data_for_tier(id_tier)
+        bucket = []
+        children = []
+        begin,end,value,ref = ref_ann[0]
+        prevEnd = end
+        for i in range(0, len(ref_ann)-1):
+            if ref_ann[i][1] == prevEnd:
+                children.append([ref_ann[i][0],ref_ann[i][1],ref_ann[i][2]])
+            else:
+                nbChildren = len(children)
+                duration = round((children[nbChildren-1][1] - children[0][0])/nbChildren)
+                for j in range(0,nbChildren-1):
+                    children[j][0] = begin
+                    children[j][1] = children[j][0] + duration
+                    begin = children[j][1]
+                children[nbChildren-1][0] = begin
+                children[nbChildren-1][1] = prevEnd
+                for child in children:
+                    bucket.append((child[0],child[1],child[2]))
+                children = []
+                prevEnd = ref_ann[i][1]
+                begin = ref_ann[i][0]
+                children.append([begin, end, ref_ann[i][2]])
+        #print('bucket');print(bucket)
+        return bucket
+    
     def get_child_tiers_for(self, id_tier):
         """Give all child tiers for a tier.
 
