@@ -1406,7 +1406,7 @@ class Eaf:
         return tgout
 
 
-def eaf_from_chat(file_path, codec='ascii', extension='wav'):
+def eaf_from_chat(file_path, codec=None, extension='wav'):
     """Reads a .cha file and converts it to an elan object. The functions tries
     to mimic the CHAT2ELAN program that comes with the CLAN package as close as
     possible. This function however converts to the latest ELAN file format
@@ -1430,9 +1430,15 @@ def eaf_from_chat(file_path, codec='ascii', extension='wav'):
         'child', constraints='Symbolic_Association', timealignable=False)
     participantsdb = {}
     last_annotation = None
-    with open(file_path, 'r') as chatin:
+    # attempt to resolve the file codec
+    if codec is None:
+        codec = 'ascii'
+        with open(file_path, 'r', encoding=codec) as chatin:
+            if '@UTF8' == chatin.readline():
+                codec = 'utf8'
+    with open(file_path, 'r', encoding=codec) as chatin:
         while True:
-            line = chatin.readline().strip().decode(codec)
+            line = chatin.readline().strip()
             if line == '@UTF8':  # Codec marker
                 codec = 'utf8'
                 continue
