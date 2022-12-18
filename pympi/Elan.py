@@ -1434,7 +1434,7 @@ def eaf_from_chat(file_path, codec=None, extension='wav'):
     if codec is None:
         codec = 'latin-1'
         with open(file_path, 'r', encoding=codec) as chatin:
-            if '@UTF8' == chatin.readline():
+            if '@UTF8' == chatin.readline().strip():
                 codec = 'utf8'
     with open(file_path, 'r', encoding=codec) as chatin:
         while True:
@@ -1470,13 +1470,33 @@ def eaf_from_chat(file_path, codec=None, extension='wav'):
                     for tier in eafob.get_tier_names():
                         eafob.tiers[tier][2]['ANNOTATOR'] = value
             elif line.startswith('*'):  # Main tier marker
-                while len(line.split('\x15')) != 3:
-                    line += chatin.readline().strip()
+                # Read lines until we find the the end of the current annotation 
+                # This means either (a) we parse the annotation's time or (b) we
+                # encounter the next annotation. In the case of (b), we will
+                # set the current file read position
+                f_position = chatin.tell()
+                # Check if we have found the time annotation (delimited by \x15)
+                while not (len(line.split('\x15')) == 3):
+                    _line = chatin.readline().strip()
+                    # Check if we have found the beginning of a new annotation
+                    if _line.startswith("*") or _line.startswith("%") or _line.startswith("@End"):
+                        chatin.seek(f_position)
+                        break
+                    line += _line
+                    f_position = chatin.tell()
                 for participant in participantsdb.keys():
                     if line.startswith('*{}:'.format(participant)):
                         splits = ''.join(line.split(':')[1:]).strip()
-                        utt, time, _ = splits.split('\x15')
-                        time = [int(part) for part in time.split('_')]
+                        if len(splits.split('\x15')) == 3:
+                            utt, time, _ = splits.split('\x15')
+                            time = [int(part) for part in time.split('_')]
+                        else:
+                            utt = splits
+                            if last_annotation is not None:
+                                # use the last annotation time as a fallback
+                                time = last_annotation[1], last_annotation[2]
+                            else:
+                                time = [0, 1] # fallback annotation
                         last_annotation = (participant, time[0], time[1], utt)
                         eafob.add_annotation(*last_annotation)
             elif line.startswith('%'):  # Dependant tier marker
