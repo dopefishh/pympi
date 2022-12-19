@@ -1436,77 +1436,83 @@ def eaf_from_chat(file_path, codec=None, extension='wav'):
         with open(file_path, 'r', encoding=codec) as chatin:
             if '@UTF8' == chatin.readline().strip():
                 codec = 'utf8'
+    # Read the whole file into memory. Sometimes lines are continued into the
+    # next line which begins with whitespace. In that case, we attempt to concat
+    # the continued line with the previous.
+    lines = []
+    line_prefixes = ('@', '%', '*')
     with open(file_path, 'r', encoding=codec) as chatin:
-        while True:
-            line = chatin.readline().strip()
-            if line == '@UTF8':  # Codec marker
-                codec = 'utf8'
-                continue
-            elif line == '@End':  # End of file marker
-                break
-            elif line.startswith('@') and line != '@Begin':  # Header marker
-                key, value = line.split(':\t')
-                eafob.add_property('{}:\t'.format(key), value)
-                if key == '@Languages':
-                    for language in value.split(','):
-                        eafob.add_language(language)
-                elif key == '@Participants':
-                    for participant in value.split(','):
-                        splits = participant.strip().split(' ')
-                        splits = [part.replace('_', ' ') for part in splits]
-                        if len(splits) == 2:
-                            participantsdb[splits[0]] = (None, splits[1])
-                        elif len(splits) == 3:
-                            participantsdb[splits[0]] = (splits[1], splits[2])
-                elif key == '@ID':
-                    ids = [part.replace('_', '') for part in value.split('|')]
-                    eafob.add_tier(ids[2], part=participantsdb[ids[2]][0],
-                                   language=ids[0])
-                elif key == '@Media':
-                    media = value.split(',')
-                    eafob.add_linked_file(
-                        'file://{}.{}'.format(media[0], extension))
-                elif key == '@Transcriber:':
-                    for tier in eafob.get_tier_names():
-                        eafob.tiers[tier][2]['ANNOTATOR'] = value
-            elif line.startswith('*'):  # Main tier marker
-                # Read lines until we find the the end of the current annotation 
-                # This means either (a) we parse the annotation's time or (b) we
-                # encounter the next annotation. In the case of (b), we will
-                # set the current file read position
-                f_position = chatin.tell()
-                # Check if we have found the time annotation (delimited by \x15)
-                while not (len(line.split('\x15')) == 3):
-                    _line = chatin.readline().strip()
-                    # Check if we have found the beginning of a new annotation
-                    if _line.startswith("*") or _line.startswith("%") or _line.startswith("@End"):
-                        chatin.seek(f_position)
-                        break
-                    line += _line
-                    f_position = chatin.tell()
-                for participant in participantsdb.keys():
-                    if line.startswith('*{}:'.format(participant)):
-                        splits = ''.join(line.split(':')[1:]).strip()
-                        if len(splits.split('\x15')) == 3:
-                            utt, time, _ = splits.split('\x15')
-                            time = [int(part) for part in time.split('_')]
+        for line in chatin:
+            line = line.strip()
+            if line.startswith(line_prefixes):
+                lines.append(line)
+            elif lines:
+                lines[-1] = " ".join((lines[-1], line.strip()))
+            else:
+                lines.append(line)
+    end_flag = False
+    for line in lines:
+        if line == '@UTF8':  # Codec marker
+            continue
+        elif line == '@Begin':
+            continue
+        elif line == '@End':  # End of file marker
+            end_flag = True
+            continue
+        elif line.startswith('@') and line != '@Begin':  # Header marker
+            key, value = line.split(':\t')
+            eafob.add_property('{}:\t'.format(key), value)
+            if key == '@Languages':
+                for language in value.split(','):
+                    eafob.add_language(language)
+            elif key == '@Participants':
+                for participant in value.split(','):
+                    splits = participant.strip().split(' ')
+                    splits = [part.replace('_', ' ') for part in splits]
+                    if len(splits) == 2:
+                        participantsdb[splits[0]] = (None, splits[1])
+                    elif len(splits) == 3:
+                        participantsdb[splits[0]] = (splits[1], splits[2])
+            elif key == '@ID':
+                ids = [part.replace('_', '') for part in value.split('|')]
+                eafob.add_tier(ids[2], part=participantsdb[ids[2]][0],
+                               language=ids[0])
+            elif key == '@Media':
+                media = value.split(',')
+                eafob.add_linked_file(
+                    'file://{}.{}'.format(media[0], extension))
+            elif key == '@Transcriber:':
+                for tier in eafob.get_tier_names():
+                    eafob.tiers[tier][2]['ANNOTATOR'] = value
+        elif line.startswith('*'):  # Main tier marker
+            for participant in participantsdb.keys():
+                if line.startswith('*{}:'.format(participant)):
+                    splits = ''.join(line.split(':')[1:]).strip()
+                    # Check if the main tier contains timestamps. If it does not
+                    # fallback to the previous annotation or insert a dummy time
+                    if len(splits.split('\x15')) == 3:
+                        utt, time, _ = splits.split('\x15')
+                        time = [int(part) for part in time.split('_')]
+                    else:
+                        utt = splits
+                        if last_annotation is not None:
+                            time = last_annotation[1], last_annotation[2]
                         else:
-                            utt = splits
-                            if last_annotation is not None:
-                                # use the last annotation time as a fallback
-                                time = last_annotation[1], last_annotation[2]
-                            else:
-                                time = [0, 1] # fallback annotation
-                        last_annotation = (participant, time[0], time[1], utt)
-                        eafob.add_annotation(*last_annotation)
-            elif line.startswith('%'):  # Dependant tier marker
-                splits = line.split(':')
-                name = '{}_{}'.format(last_annotation[0], splits[0][1:])
-                if name not in eafob.get_tier_names():
-                    eafob.add_tier(name, 'child', last_annotation[0])
-                eafob.add_ref_annotation(
-                    name, last_annotation[0], sum(last_annotation[1:3])/2,
-                    ''.join(splits[1:]).strip())
+                            time = [0, 1] # fallback annotation
+                    last_annotation = (participant, time[0], time[1], utt)
+                    eafob.add_annotation(*last_annotation)
+        elif line.startswith('%'):  # Dependant tier marker
+            splits = line.split(':')
+            name = '{}_{}'.format(last_annotation[0], splits[0][1:])
+            if name not in eafob.get_tier_names():
+                eafob.add_tier(name, 'child', last_annotation[0])
+            eafob.add_ref_annotation(
+                name, last_annotation[0], sum(last_annotation[1:3])/2,
+                ''.join(splits[1:]).strip())
+        else:
+            warnings.warn('Unable to parse line of chat file: {}'.format(line))
+    if not end_flag:
+        raise StopIteration # backward compatibility
     return eafob
 
 
