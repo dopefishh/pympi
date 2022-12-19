@@ -1456,10 +1456,12 @@ def eaf_from_chat(file_path, codec=None, extension='wav'):
             continue
         elif line == '@Begin':
             continue
+        elif line == '@New Episode':
+            continue
         elif line == '@End':  # End of file marker
             end_flag = True
             continue
-        elif line.startswith('@') and line != '@Begin':  # Header marker
+        elif line.startswith('@'):  # Header marker
             key, value = line.split(':\t')
             eafob.add_property('{}:\t'.format(key), value)
             if key == '@Languages':
