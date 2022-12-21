@@ -336,7 +336,7 @@ class Elan(unittest.TestCase):
             [(1000, 2000, 'a2'), (2000, 3000, 'a3')])
         e1 = self.eaf.extract(1000, 2000)
         self.assertEqual(sorted(e1.get_annotation_data_for_tier('tier1')),
-            [(1000, 2000, 'a2'), (2000, 3000, 'a3')])
+            [(0, 1000, 'a1'), (1000, 2000, 'a2'), (2000, 3000, 'a3')])
         e1 = self.eaf.extract(4001, 30000)
         self.assertEqual(sorted(e1.get_annotation_data_for_tier('tier1')), [])
 
