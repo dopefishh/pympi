@@ -68,7 +68,7 @@ class Eaf:
         'Included_In': 'Time alignable annotations within the parent annotatio'
         "n's time interval, gaps are allowed"}
     MIMES = {'wav': 'audio/x-wav', 'mpg': 'video/mpeg', 'mpeg': 'video/mpg',
-             'xml': 'text/xml'}
+             'mp4': 'video/mp4', 'xml': 'text/xml'}
 
     def __init__(self, file_path=None, author='pympi',
                  suppress_version_warning=False):
@@ -284,7 +284,7 @@ class Eaf:
                           extension or an unknown mimetype.
         """
         if mimetype is None:
-            mimetype = self.MIMES[file_path.split('.')[-1]]
+            mimetype = self.MIMES[file_path.split('.')[-1].lower()]
         self.media_descriptors.append({
             'MEDIA_URL': file_path, 'RELATIVE_MEDIA_URL': relpath,
             'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
