@@ -82,14 +82,15 @@ class Eaf:
         """
         ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
             time.daylight else -time.timezone
+        self.eaf_file_path = file_path
         self.maxts = 1
         self.maxaid = 1
         self.adocument = {
             'AUTHOR': author,
             'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
                 ctz // 3600, ctz % 3600),
-            'VERSION': '2.8',
-            'FORMAT': '2.8',
+            'VERSION': '3.0',
+            'FORMAT': '3.0',
             'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:noNamespaceSchemaLocation':
                 'http://www.mpi.nl/tools/elan/EAFv2.8.xsd'}
@@ -352,7 +353,7 @@ class Eaf:
         self.tiers[id_tier][1][aid] = (ann, value, prev, svg)
 
     def add_secondary_linked_file(self, file_path, relpath=None, mimetype=None,
-                                  time_origin=None, assoc_with=None):
+                                  time_origin=None, assoc_with=None, tsconf=None):
         """Add a secondary linked file.
 
         :param str file_path: Path of the file.
@@ -369,6 +370,15 @@ class Eaf:
             mimetype = self.MIMES[file_path.split('.')[-1]]
         self.linked_file_descriptors.append({
             'LINK_URL': file_path, 'RELATIVE_LINK_URL': relpath,
+            'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
+            'ASSOCIATED_WITH': assoc_with})
+        # If this is a TXT file, check if its a timeseries file
+        if file_path.endswith('.txt') and validate_tsconf(file_path):
+            parent = pathlib.Path(file_path).parent
+            tsconf = pathlib.Path(parent, str(pathlib.Path(self.eaf_file_path).stem)\
+                 + '_tsconf.xml') if tsconf is None else tsconf
+            self.linked_file_descriptors.append({
+            'LINK_URL': tsconf, 'RELATIVE_LINK_URL': None,
             'MIME_TYPE': mimetype, 'TIME_ORIGIN': time_origin,
             'ASSOCIATED_WITH': assoc_with})
 
@@ -1784,3 +1794,127 @@ def to_eaf(file_path, eaf_obj, pretty=True):
             file_path.rename(file_path.with_suffix('.bak'))
         etree.ElementTree(ADOCUMENT).write(
             str(file_path), xml_declaration=True, encoding='UTF-8')
+
+
+class TSConf:
+    """Read and write to {Eaf filename}_tsconf.xml.
+    This is the only way to fully utilize timeseries plotting functionality.
+
+    .. note:: All times are in milliseconds and can't have decimals.
+
+    :var dict adocument: Annotation document TAG entries.
+    """
+
+    def __init__(self, file_path):
+        """Construct either a new TSConf file or read on from a file/stream.
+
+        :param str file_path: Path to read from, - for stdin. If ``None`` an
+            empty TSConf file will be created.
+        """
+        self.ts_file_path = file_path
+        ctz = -time.altzone if time.localtime(time.time()).tm_isdst and\
+            time.daylight else -time.timezone
+        self.adocument = {
+            'DATE': time.strftime('%Y-%m-%dT%H:%M:%S{:0=+3d}:{:0=2d}').format(
+                ctz // 3600, ctz % 3600),
+            'VERSION': '1.0'}
+        self.trackpanels = []
+        self.tracks = {}
+
+    def add_track(self, name, track):
+        self.tracks[name] = {
+            'description': track.description,
+            'time_col': track.time_col,
+            'detect_range': track.detect_range,
+            'data_col': track.data_col,
+            'start_row': track.start_row,
+            'track_panel_num': track.track_panel_num,
+            'derivative': track.derivative,
+            'range_start': track.range_start,
+            'range_end': track.range_end,
+            'color': track.color,
+            'continuous': track.continuous
+        }
+
+
+class TSTrack:
+    """Construct a new timeseries track.
+
+    :param str file_path: Path to read from
+    """
+    def __init__(self, name, description=None, time_col=0, detect_range=True,
+                    data_col=0, start_row=0, track_panel_num=0, derivative=0, 
+                    range_start=0, range_end=100, color=(50,50,50), continuous=False):
+        self.name = name
+        self.description = description
+        self.time_col = time_col
+        self.detect_range = detect_range
+        self.data_col = data_col
+        self.start_row = start_row
+        self.track_panel_num = track_panel_num
+        self.derivative = derivative
+        self.range_start = range_start
+        self.range_end = range_end
+        self.color = color
+        self.continuous = continuous
+        
+
+
+def to_tsconf(file_path, tsconf_obj, pretty=True):
+    def rm_none(x):
+        return {k: v if isinstance(v, str) else str(v).lower() for k, v in x.items()
+                if v is not None}
+    # Timeseries
+    ADOCUMENT = etree.Element('timeseries', tsconf_obj.adocument)
+    # Tracksources and tracks
+    for name, track in tsconf_obj.tracks.items():
+        sample_type = 'Continuous Rate' if track['continuous']\
+            else 'Discontinuous Rate'
+        TRACKSOURCE = etree.SubElement(ADOCUMENT, 'tracksource', rm_none(\
+            {
+                'sample_type': sample_type,
+                'source_url': tsconf_obj.ts_file_path,
+                'time_column': track['time_col']
+            }))
+        TRACKSOURCE_PROPERTY = etree.SubElement(TRACKSOURCE, 'property',\
+            {
+                'key': 'provider', 
+                'value':'mpi.eudico.client.annotator.timeseries.csv.CSVServiceProvider'
+            })
+        TRACK = etree.SubElement(TRACKSOURCE, 'track', rm_none({
+            'derivative': track['derivative'],
+            'name': name
+        }))
+        TRACK_PROPERTY = etree.SubElement(TRACK, 'property', rm_none({
+            'key': 'detect-range',
+            'value': track['detect_range']
+        }))
+        SAMPLE_POSITION = etree.SubElement(TRACK, 'sample_position')
+        pos = etree.SubElement(SAMPLE_POSITION, 'pos', rm_none({
+            'col': track['data_col'],
+            'row': track['start_row']
+        }))
+        description = etree.SubElement(TRACK, 'description')
+        description.text = track['description']
+        units = etree.SubElement(TRACK, 'units')
+        range = etree.SubElement(TRACK, 'range', rm_none({
+            'max': track['range_end'],
+            'min': track['range_start']
+        }))
+        color = etree.SubElement(TRACK, 'color')
+        color.text = re.sub(' ()', '', str(track['color'])[1:-1])
+    if pretty:
+        indent(ADOCUMENT)
+    if file_path == '-':
+        try:
+            sys.stdout.write(etree.tostring(ADOCUMENT, encoding='unicode'))
+        except LookupError:
+            sys.stdout.write(etree.tostring(ADOCUMENT, encoding='UTF-8'))
+    else:
+        file_path = pathlib.Path(file_path)
+        etree.ElementTree(ADOCUMENT).write(
+            str(file_path), xml_declaration=True, encoding='UTF-8')
+
+
+def validate_tsconf(file_path):
+    return True
