@@ -1685,12 +1685,12 @@ def indent(el, level=0):
             el.tail = i
 
 
-def to_eaf(file_path, eaf_obj, pretty=True):
-    """Write an Eaf object to file.
+def to_adocument(eaf_obj, pretty=True):
+    """Create an etree Element from an Eaf object
 
-    :param str file_path: Filepath to write to, - for stdout.
     :param pympi.Elan.Eaf eaf_obj: Object to write.
     :param bool pretty: Flag to set pretty printing.
+    :return: etree.Element: the etree Element containing the Annotation Document
     """
     def rm_none(x):
         return {k: v if isinstance(v, str) else str(v) for k, v in x.items()
@@ -1773,6 +1773,17 @@ def to_eaf(file_path, eaf_obj, pretty=True):
 
     if pretty:
         indent(ADOCUMENT)
+
+    return ADOCUMENT
+
+def to_eaf(file_path, eaf_obj, pretty=True):
+    """Write an Eaf object to file.
+
+    :param str file_path: Filepath to write to, - for stdout.
+    :param pympi.Elan.Eaf eaf_obj: Object to write.
+    :param bool pretty: Flag to set pretty printing.
+    """
+    ADOCUMENT = to_adocument(eaf_obj, pretty)
     if file_path == '-':
         try:
             sys.stdout.write(etree.tostring(ADOCUMENT, encoding='unicode'))
@@ -1784,3 +1795,15 @@ def to_eaf(file_path, eaf_obj, pretty=True):
             file_path.rename(file_path.with_suffix('.bak'))
         etree.ElementTree(ADOCUMENT).write(
             str(file_path), xml_declaration=True, encoding='UTF-8')
+
+
+def to_string(eaf_obj, pretty=True, encoding='unicode'):
+    """Serialize a Eaf object to a string
+
+    :param pympi.Elan.Eaf eaf_obj: Object to write.
+    :param bool pretty: Flag to set pretty printing.
+    :param str encoding: the character encoding of the string
+    :return: str: the serialized Annotation Document
+    """
+    ADOCUMENT = to_adocument(eaf_obj, pretty)
+    return etree.tostring(ADOCUMENT, encoding=encoding)
