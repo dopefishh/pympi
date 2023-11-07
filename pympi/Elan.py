@@ -487,8 +487,21 @@ class Eaf:
         """
         from copy import deepcopy
         eaf_out = deepcopy(self)
+
+        align_tier_names = []
+        ref_tier_names = []
         for t in eaf_out.get_tier_names():
-            for ab, ae, value in eaf_out.get_annotation_data_for_tier(t):
+            t_type = eaf_out.tiers[t][2]['LINGUISTIC_TYPE_REF']
+            if eaf_out.linguistic_types[t_type]['TIME_ALIGNABLE'] == 'true':
+                align_tier_names.append(t)
+            else:
+                ref_tier_names.append(t)
+
+        # Make sure that annotations on reference tiers are removed first (so
+        # that it's possible to look up their start and end times from their
+        # time-aligned parent annotations when calling 'remove_annotation').
+        for t in ref_tier_names + align_tier_names:
+            for ab, ae, value, *_ in eaf_out.get_annotation_data_for_tier(t):
                 if ab > end or ae < start:
                     eaf_out.remove_annotation(t, (ae + ab) // 2, False)
         eaf_out.clean_time_slots()
@@ -1126,7 +1139,7 @@ class Eaf:
         :returns: Number of removed annotations.
         """
         if self.tiers[id_tier][1]:
-            return self.remove_ref_annotation(id_tier, time, clean)
+            return self.remove_ref_annotation(id_tier, time)
         removed = 0
         for b in sorted([a for a in self.tiers[id_tier][0].items() if
                   self.timeslots[a[1][0]] <= time and
