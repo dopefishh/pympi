@@ -109,7 +109,7 @@ class TextGrid:
 
             regfloat = re.compile(r'([\d.]+)\s*$', flags = re.UNICODE)
             regint = re.compile(r'([\d]+)\s*$', flags = re.UNICODE)
-            regstr = re.compile(r'"(.*)"\s*$', flags = re.UNICODE | re.DOTALL)
+            regstr = re.compile(r'^[^"]*"((?:""|[^"])*)"\s*$', flags = re.UNICODE | re.DOTALL)
 
             def parse_float():
 
@@ -126,7 +126,7 @@ class TextGrid:
                 while True:
 
                     try:
-                        return regstr.search(line_str).group(1)
+                        return regstr.search(line_str).group(1).replace('""', '"')
                     except AttributeError:
                         pass
 
