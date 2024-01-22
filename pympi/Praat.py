@@ -89,39 +89,75 @@ class TextGrid:
                     else:
                         raise Exception('Tiertype does not exist.')
         else:
-            def nn(ifile, pat):
-                line = next(ifile).decode(codec)
-                return pat.search(line).group(1)
 
-            regfloat = re.compile(r'([\d.]+)\s*$', flags=re.UNICODE)
-            regint = re.compile(r'([\d]+)\s*$', flags=re.UNICODE)
-            regstr = re.compile(r'"(.*)"\s*$', flags=re.UNICODE)
+            ifile.seek(0)
+
+            line_list = ifile.read().decode(codec).splitlines(keepends = True)
+            line_index = 0
+
+            def next_line():
+
+                nonlocal line_index
+
+                if line_index >= len(line_list):
+                    raise StopIteration
+
+                line = line_list[line_index]
+                line_index += 1
+
+                return line
+
+            regfloat = re.compile(r'([\d.]+)\s*$', flags = re.UNICODE)
+            regint = re.compile(r'([\d]+)\s*$', flags = re.UNICODE)
+            regstr = re.compile(r'"(.*)"\s*$', flags = re.UNICODE | re.DOTALL)
+
+            def parse_float():
+
+                return float(regfloat.search(next_line()).group(1))
+
+            def parse_int():
+
+                return int(regint.search(next_line()).group(1))
+
+            def parse_str():
+
+                line_str = next_line()
+
+                while True:
+
+                    try:
+                        return regstr.search(line_str).group(1)
+                    except AttributeError:
+                        pass
+
+                    line_str += next_line()
+
             # Skip the Headers and empty line
-            next(ifile), next(ifile), next(ifile)
-            self.xmin = float(nn(ifile, regfloat))
-            self.xmax = float(nn(ifile, regfloat))
+            next_line(), next_line(), next_line()
+            self.xmin = parse_float()
+            self.xmax = parse_float()
             # Skip <exists>
-            line = next(ifile)
+            line = next_line()
             short = line.strip() == b'<exists>'
-            self.tier_num = int(nn(ifile, regint))
-            not short and next(ifile)
+            self.tier_num = parse_int()
+            not short and next_line()
             for i in range(self.tier_num):
-                not short and next(ifile)  # skip item[]: and item[\d]:
-                tier_type = nn(ifile, regstr)
-                name = nn(ifile, regstr)
+                not short and next_line()  # skip item[]: and item[\d]:
+                tier_type = parse_str()
+                name = parse_str()
                 tier = Tier(0, 0, name=name, tier_type=tier_type)
                 self.tiers.append(tier)
-                tier.xmin = float(nn(ifile, regfloat))
-                tier.xmax = float(nn(ifile, regfloat))
-                for i in range(int(nn(ifile, regint))):
-                    not short and next(ifile)  # skip intervals [\d]
-                    x1 = float(nn(ifile, regfloat))
+                tier.xmin = parse_float()
+                tier.xmax = parse_float()
+                for i in range(parse_int()):
+                    not short and next_line()  # skip intervals [\d]
+                    x1 = parse_float()
                     if tier.tier_type == 'IntervalTier':
-                        x2 = float(nn(ifile, regfloat))
-                        t = nn(ifile, regstr)
+                        x2 = parse_float()
+                        t = parse_str()
                         tier.intervals.append((x1, x2, t))
                     elif tier.tier_type == 'TextTier':
-                        t = nn(ifile, regstr)
+                        t = parse_str()
                         tier.intervals.append((x1, t))
 
     def sort_tiers(self, key=lambda x: x.name):
