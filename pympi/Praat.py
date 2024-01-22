@@ -138,7 +138,7 @@ class TextGrid:
             self.xmax = parse_float()
             # Skip <exists>
             line = next_line()
-            short = line.strip() == b'<exists>'
+            short = line.strip() == '<exists>'
             self.tier_num = parse_int()
             not short and next_line()
             for i in range(self.tier_num):
