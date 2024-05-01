@@ -1727,7 +1727,10 @@ def to_adocument(eaf_obj, pretty=True):
         etree.SubElement(HEADER, 'PROPERTY', {'NAME': k}).text = str(v)
     # Time order
     TIME_ORDER = etree.SubElement(ADOCUMENT, 'TIME_ORDER')
-    for t in sorted(eaf_obj.timeslots.items(), key=lambda x: int(x[0][2:])):
+    for t in sorted(
+        eaf_obj.timeslots.items(),
+        key=lambda x: (int(re.findall(r"ts(\d+)", x[0])[0]), x[0]),
+    ):
         etree.SubElement(TIME_ORDER, 'TIME_SLOT', rm_none(
             {'TIME_SLOT_ID': t[0], 'TIME_VALUE': t[1]}))
     # Tiers
