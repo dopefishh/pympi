@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pympi-ling"
+dynamic = ["version"]
+authors = [
+  {name='Mart Lubbers', email="mart@martlubbers.net"},
+  {name='Francisco Toreirra', email="francisco.torreira@mpi.nl"}
+]
+description = "A python module for processing ELAN and Praat annotation files"
+readme = "README.md"
+requires-python = ">=3.9"
+license-files = ["LICENSE"]
+classifiers = [
+  'Development Status :: 5 - Production/Stable',
+  'Environment :: Console',
+  'Natural Language :: English',
+  'Operating System :: OS Independent',
+  'Topic :: Text Processing :: Linguistic'
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "pympi.__version__"}
+
+[project.urls]
+Repository = 'https://github.com/dopefishh/pympi'
+
+
+[project.optional-dependencies]
+test = [
+  'pytest>=5',
+  'pytest-mock',
+  'pytest-cov',
+  'coverage>=4.2',
+  'lxml'
+]
+
+[tool.pytest.ini_options]
+addopts = ["--cov"]
+testpaths = "test"
