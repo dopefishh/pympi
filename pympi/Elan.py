@@ -240,7 +240,7 @@ class Eaf:
         """
         self.licenses.append((name, url))
 
-def add_linguistic_type(self, lingtype, constraints=None, controlled_vocabulary=None,
+    def add_linguistic_type(self, lingtype, constraints=None, controlled_vocabulary=None,
                             timealignable=True, graphicreferences=False,
                             extref=None, param_dict=None):
         """Add a linguistic type.
