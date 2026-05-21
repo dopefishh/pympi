@@ -242,7 +242,7 @@ class Eaf:
 
     def add_linguistic_type(self, lingtype, constraints=None,
                             timealignable=True, graphicreferences=False,
-                            extref=None, param_dict=None):
+                            extref=None, param_dict=None, controlled_vocabulary=None):
         """Add a linguistic type.
 
         :param str lingtype: Name of the linguistic type.
@@ -254,6 +254,7 @@ class Eaf:
                                  will ignore all other options. Please only use
                                  dictionaries coming from the
                                  :func:`get_parameters_for_linguistic_type`
+        :param str controlled_vocabulary: Controlled vocabulary id.
         :raises KeyError: If a constraint is not defined
         """
         if param_dict:
@@ -268,6 +269,8 @@ class Eaf:
                 'CONSTRAINTS': constraints}
             if extref is not None:
                 self.linguistic_types[lingtype]['EXT_REF'] = extref
+            if controlled_vocabulary is not None:
+                self.linguistic_types[lingtype]['CONTROLLED_VOCABULARY_REF'] = controlled_vocabulary
 
     def add_linked_file(self, file_path, relpath=None, mimetype=None,
                         time_origin=None, ex_from=None):
