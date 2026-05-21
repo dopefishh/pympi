@@ -240,14 +240,13 @@ class Eaf:
         """
         self.licenses.append((name, url))
 
-def add_linguistic_type(self, lingtype, constraints=None, controlled_vocabulary=None,
+    def add_linguistic_type(self, lingtype, constraints=None,
                             timealignable=True, graphicreferences=False,
-                            extref=None, param_dict=None):
+                            extref=None, param_dict=None, controlled_vocabulary=None):
         """Add a linguistic type.
 
         :param str lingtype: Name of the linguistic type.
         :param str constraints: Constraint name.
-        :param str controlled_vocabulary: Controlled vocabulary id.
         :param bool timealignable: Flag for time alignable.
         :param bool graphicreferences: Flag for graphic references.
         :param str extref: External reference.
@@ -255,6 +254,7 @@ def add_linguistic_type(self, lingtype, constraints=None, controlled_vocabulary=
                                  will ignore all other options. Please only use
                                  dictionaries coming from the
                                  :func:`get_parameters_for_linguistic_type`
+        :param str controlled_vocabulary: Controlled vocabulary id.
         :raises KeyError: If a constraint is not defined
         """
         if param_dict:
