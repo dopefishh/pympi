@@ -1032,7 +1032,7 @@ class Eaf:
         :returns: The alignment annotation at the end of the reference chain.
         """
         parentTier = self.tiers[self.annotations[ref_id]]
-        while 'PARENT_REF' in parentTier[2] and parentTier[2]['PARENT_REF'] and len(parentTier[2]) > 0:
+        while ref_id not in parentTier[0]:
             ref_id = parentTier[1][ref_id][0]
             parentTier = self.tiers[self.annotations[ref_id]]
 
@@ -1280,7 +1280,7 @@ class Eaf:
         removed = 0
         bucket = []
         for aid, (ref, value, _, _) in self.tiers[id_tier][1].items():
-            begin, end, rvalue, _ = self.tiers[self.annotations[ref]][0][ref]
+            begin, end, rvalue, _ = self.get_parent_aligned_annotation(ref)
             begin = self.timeslots[begin]
             end = self.timeslots[end]
             if begin <= time and end >= time:

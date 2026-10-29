@@ -5,6 +5,29 @@ from pympi import Eaf
 import unittest
 
 
+@pytest.mark.parametrize('aligned_child', [False, True])
+@pytest.mark.parametrize('method', ['remove_annotation', 'remove_ref_annotation'])
+def test_remove_nested_reference_annotation(aligned_child, method):
+    eaf = Eaf()
+    eaf.add_tier('utterances')
+    eaf.add_annotation('utterances', 0, 2000, 'utterance')
+    parent = 'utterances'
+    if aligned_child:
+        eaf.add_linguistic_type('word', constraints='Time_Subdivision')
+        eaf.add_tier('words', 'word', 'utterances')
+        eaf.add_annotation('words', 0, 1000, 'word')
+        parent = 'words'
+    eaf.add_linguistic_type('tag', constraints='Symbolic_Association',
+                            timealignable=False)
+    eaf.add_tier('glosses', 'tag', parent)
+    eaf.add_ref_annotation('glosses', parent, 500, 'gloss')
+    eaf.add_tier('tags', 'tag', 'glosses')
+    eaf.add_ref_annotation('tags', 'glosses', 500, 'tag')
+    assert getattr(eaf, method)('tags', 500) == 1
+    assert eaf.get_annotation_data_for_tier('tags') == []
+    assert eaf.get_annotation_data_for_tier('glosses')[0][2] == 'gloss'
+
+
 class Elan(unittest.TestCase):
     def setUp(self):
         self.eaf = Eaf()
