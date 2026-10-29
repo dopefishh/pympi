@@ -5,6 +5,26 @@ import pytest
 from pympi.Praat import TextGrid
 
 
+@pytest.mark.parametrize('short', [False, True])
+@pytest.mark.parametrize('start,end', [('-0.25', '+1'), ('1e-5', '2E+1')])
+def test_textgrid_numeric_times(tmp_path, short, start, end):
+    path = tmp_path / 'numeric.TextGrid'
+    header = 'File type = "ooTextFile"\nObject class = "TextGrid"\n\n'
+    if short:
+        body = '{}\n{}\n<exists>\n1\n"TextTier"\n"points"\n{}\n{}\n1\n{}\n"x"\n'
+    else:
+        body = ('xmin = {}\nxmax = {}\ntiers? <exists>\nsize = 1\nitem []:\n'
+                '    item [1]:\n        class = "TextTier"\n        name = "points"\n'
+                '        xmin = {}\n        xmax = {}\n        points: size = 1\n'
+                '        points [1]:\n            number = {}\n            mark = "x"\n')
+    path.write_text(header + body.format(start, end, start, end, start))
+    tg = TextGrid(path)
+    assert (tg.xmin, tg.xmax) == (float(start), float(end))
+    tier = tg.get_tier('points')
+    assert (tier.xmin, tier.xmax) == (float(start), float(end))
+    assert list(tier.get_intervals()) == [(float(start), 'x')]
+
+
 class PraatTest(unittest.TestCase):
     def setUp(self):
         self.tg = TextGrid(xmax=20)

@@ -107,7 +107,7 @@ class TextGrid:
 
                 return line
 
-            regfloat = re.compile(r'([\d.]+)\s*$', flags = re.UNICODE)
+            regfloat = re.compile(r'([+-]?[\d.]+(?:[eE][+-]?\d+)?)\s*$', flags = re.UNICODE)
             regint = re.compile(r'([\d]+)\s*$', flags = re.UNICODE)
             regstr = re.compile(r'^[^"]*"((?:""|[^"])*)"\s*$', flags = re.UNICODE | re.DOTALL)
 
